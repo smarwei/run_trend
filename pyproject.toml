@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "run-trend"
+version = "0.1.0"
+description = "A desktop application for tracking and analyzing running progress from Strava"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT with Commons Clause"}
+authors = [
+    {name = "Arne Weiß", email = "run-trend@arne-weiss.de"}
+]
+keywords = ["running", "strava", "analytics", "training", "progress-tracking"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "License :: Other/Proprietary License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Utilities",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "PySide6>=6.6.0",
+    "requests>=2.31.0",
+    "numpy>=1.24.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/your-username/run-trend"
+Issues = "https://github.com/your-username/run-trend/issues"
+
+[project.scripts]
+run-trend = "app.main:main"
+
+[tool.setuptools]
+packages = ["app", "app.analytics", "app.charts", "app.projection", "app.settings", "app.storage", "app.strava", "app.sync", "app.ui"]
+
+[tool.setuptools.package-data]
+app = ["*.py"]

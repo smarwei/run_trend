@@ -1,0 +1,126 @@
+{
+  "app-id": "de.arne-weiss.RunTrend",
+  "runtime": "org.kde.Platform",
+  "runtime-version": "6.7",
+  "sdk": "org.kde.Sdk",
+  "command": "run-trend",
+  "finish-args": [
+    "--share=ipc",
+    "--socket=x11",
+    "--socket=wayland",
+    "--device=dri",
+    "--share=network",
+    "--filesystem=xdg-data/run_trend:create",
+    "--filesystem=xdg-config/run_trend:create"
+  ],
+  "cleanup": [
+    "/include",
+    "/lib/pkgconfig",
+    "/share/man",
+    "*.a",
+    "*.la"
+  ],
+  "modules": [
+    {
+      "name": "python3-numpy",
+      "buildsystem": "simple",
+      "build-commands": [
+        "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} numpy"
+      ],
+      "sources": [
+        {
+          "type": "file",
+          "url": "https://files.pythonhosted.org/packages/65/6e/09db70a523a96d25e115e71cc56a6f9031e7b8cd166c1ac8438307c14058/numpy-1.26.4.tar.gz",
+          "sha256": "2a02aba9ed12e4ac4eb3ea9421c420301a0c6460d9830d74a9df87efa4912010"
+        }
+      ]
+    },
+    {
+      "name": "python3-requests",
+      "buildsystem": "simple",
+      "build-commands": [
+        "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} --no-build-isolation requests"
+      ],
+      "sources": [
+        {
+          "type": "file",
+          "url": "https://files.pythonhosted.org/packages/63/70/2bf7780ad2d390a8d301ad0b550f1581eadbd9a20f896afe06353c2a2913/requests-2.32.3.tar.gz",
+          "sha256": "55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760"
+        },
+        {
+          "type": "file",
+          "url": "https://files.pythonhosted.org/packages/76/c6/c88e154df9c4e1a2a66ccf0005a88dfb2650c1dffb6f5ce603dfbd452ce3/certifi-2024.2.2.tar.gz",
+          "sha256": "0569859f95fc761b18b45ef421b1290a0f65f147e92a1e5eb3e635f9a5e4e66f"
+        },
+        {
+          "type": "file",
+          "url": "https://files.pythonhosted.org/packages/bf/3e/31d502c25302814a7c2f1d3959d2a3b3f6efb7e1ea01a70eca6f5e98dd77/charset_normalizer-3.3.2.tar.gz",
+          "sha256": "f30c3cb33b24454a82faecaf01b19c18562b1e89558fb6c56de4d9118a032fd5"
+        },
+        {
+          "type": "file",
+          "url": "https://files.pythonhosted.org/packages/c2/e7/a82b05cf63a603df6e68d59ae6a68bf5064484a0718ea5033660af4b54a9/idna-3.6.tar.gz",
+          "sha256": "9ecdbbd083b06798ae1e86adcbfe8ab1479cf864e4ee30fe4e46a003d12491ca"
+        },
+        {
+          "type": "file",
+          "url": "https://files.pythonhosted.org/packages/e2/7d/539e6f0cf2874f526c16d12e46a60f1c3fad2d63fb8b5ff6e20e1f9e3f55/urllib3-2.2.1.tar.gz",
+          "sha256": "d0570876c61ab9e520d776c38acbbb5b05a776d3f9ff98a5c8fd5162a444cf19"
+        }
+      ]
+    },
+    {
+      "name": "PySide6",
+      "buildsystem": "simple",
+      "build-commands": [
+        "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} PySide6"
+      ],
+      "sources": [
+        {
+          "type": "file",
+          "url": "https://files.pythonhosted.org/packages/37/82/e88c6c437fe2f9bc49c83c93c2c8e63bb2899d3e3d11211c5acbec5a8f5d/PySide6-6.7.2-cp39-abi3-manylinux_2_28_x86_64.whl",
+          "sha256": "071aa4d7db2b7bb9b0cee26a2ee1bc2ba703d27cbbd3223d9757e6aa95000aaa",
+          "only-arches": ["x86_64"]
+        },
+        {
+          "type": "file",
+          "url": "https://files.pythonhosted.org/packages/98/73/843de0ba0e7a6f94e461726c3f95c8f4f9ff5f5cc7c977cb149ac4839c46/shiboken6-6.7.2-cp39-abi3-manylinux_2_28_x86_64.whl",
+          "sha256": "4ba7f7159cf6d6d2ac02e69b9e857da5b0d5e2a80791b02d41e7c1e1be985985",
+          "only-arches": ["x86_64"]
+        },
+        {
+          "type": "file",
+          "url": "https://files.pythonhosted.org/packages/3b/79/04dcdb75c05d1ae31e04e15a6661712f93d167fbadeb953b2a2fcc28e857/PySide6_Essentials-6.7.2-cp39-abi3-manylinux_2_28_x86_64.whl",
+          "sha256": "3b9b0e3db3a0b3e4bde3d09b25ad9aa99b8f5643017448ce05be5c5c2b6c07fe",
+          "only-arches": ["x86_64"]
+        },
+        {
+          "type": "file",
+          "url": "https://files.pythonhosted.org/packages/94/76/0c73c8ac8754e9d9e39c1c7a7c5a6f26e29f89f78cd39d7ad7315dd87e1c/PySide6_Addons-6.7.2-cp39-abi3-manylinux_2_28_x86_64.whl",
+          "sha256": "6bb4b9662ae54c0d1dde83d4f7bf887de5fb39c741dd3e85d8e0a6a67a6e5adc",
+          "only-arches": ["x86_64"]
+        }
+      ]
+    },
+    {
+      "name": "run-trend",
+      "buildsystem": "simple",
+      "build-commands": [
+        "pip3 install --verbose --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} --no-build-isolation ."
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/your-username/run-trend.git",
+          "tag": "v0.1.0",
+          "commit": "f9c12f9"
+        }
+      ],
+      "post-install": [
+        "install -Dm644 de.arne-weiss.RunTrend.desktop ${FLATPAK_DEST}/share/applications/de.arne-weiss.RunTrend.desktop",
+        "install -Dm644 de.arne-weiss.RunTrend.metainfo.xml ${FLATPAK_DEST}/share/metainfo/de.arne-weiss.RunTrend.metainfo.xml",
+        "install -Dm644 logo.png ${FLATPAK_DEST}/share/icons/hicolor/512x512/apps/de.arne-weiss.RunTrend.png"
+      ]
+    }
+  ]
+}

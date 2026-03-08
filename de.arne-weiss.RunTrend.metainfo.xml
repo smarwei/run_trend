@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>de.arne-weiss.RunTrend</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>LicenseRef-proprietary=https://github.com/your-username/run-trend/blob/main/LICENSE</project_license>
+  <name>Running Progress Tracker</name>
+  <summary>Track and analyze your running progress from Strava</summary>
+
+  <description>
+    <p>
+      Running Progress Tracker is a desktop application for analyzing your running training from Strava.
+      It synchronizes your activities and provides comprehensive insights into your training development.
+    </p>
+    <p>Features:</p>
+    <ul>
+      <li>Automatic Strava synchronization via OAuth</li>
+      <li>Multiple chart types: Distance, Pace, Speed, Frequency, Training Score</li>
+      <li>Long run tracking and training structure analysis</li>
+      <li>Interactive charts with smoothing (SMA/EMA)</li>
+      <li>Future trend projections and milestone predictions (5K, 10K, Half Marathon, Marathon)</li>
+      <li>Training score based on distance, frequency, and pace</li>
+      <li>Privacy-focused: All data stored locally in SQLite</li>
+    </ul>
+    <p>
+      Perfect for runners preparing for long-distance events who want to track their progress systematically.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">de.arne-weiss.RunTrend.desktop</launchable>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>Main window showing distance progress chart</caption>
+    </screenshot>
+  </screenshots>
+
+  <url type="homepage">https://github.com/your-username/run-trend</url>
+  <url type="bugtracker">https://github.com/your-username/run-trend/issues</url>
+
+  <developer_name>Arne Weiß</developer_name>
+  <update_contact>run-trend@arne-weiss.de</update_contact>
+
+  <provides>
+    <binary>run-trend</binary>
+  </provides>
+
+  <releases>
+    <release version="0.1.0" date="2026-03-08">
+      <description>
+        <p>Initial release</p>
+        <ul>
+          <li>Strava OAuth integration with automatic token refresh</li>
+          <li>Activity synchronization (initial + incremental auto-sync)</li>
+          <li>Multiple chart types for comprehensive analysis</li>
+          <li>Interactive legends and data smoothing</li>
+          <li>Milestone predictions</li>
+          <li>Local SQLite storage</li>
+          <li>Comprehensive German documentation</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+
+  <content_rating type="oars-1.1">
+    <content_attribute id="social-info">moderate</content_attribute>
+  </content_rating>
+
+  <keywords>
+    <keyword>running</keyword>
+    <keyword>strava</keyword>
+    <keyword>analytics</keyword>
+    <keyword>training</keyword>
+    <keyword>fitness</keyword>
+    <keyword>progress</keyword>
+  </keywords>
+
+  <categories>
+    <category>Sports</category>
+    <category>Utility</category>
+  </categories>
+</component>
