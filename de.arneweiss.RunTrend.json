@@ -1,0 +1,44 @@
+{
+  "app-id": "de.arneweiss.RunTrend",
+  "runtime": "org.kde.Platform",
+  "runtime-version": "6.10",
+  "sdk": "org.kde.Sdk",
+  "command": "run-trend",
+  "finish-args": [
+    "--share=ipc",
+    "--socket=x11",
+    "--socket=wayland",
+    "--device=dri",
+    "--share=network",
+    "--filesystem=xdg-data/run_trend:create",
+    "--filesystem=xdg-config/run_trend:create"
+  ],
+  "cleanup": [
+    "/include",
+    "/lib/pkgconfig",
+    "/share/man",
+    "*.a",
+    "*.la"
+  ],
+  "modules": [
+    "python3-requirements.json",
+    {
+      "name": "run-trend",
+      "buildsystem": "simple",
+      "build-commands": [
+        "pip3 install --verbose --prefix=${FLATPAK_DEST} --no-build-isolation ."
+      ],
+      "sources": [
+        {
+          "type": "dir",
+          "path": "."
+        }
+      ],
+      "post-install": [
+        "install -Dm644 de.arneweiss.RunTrend.desktop ${FLATPAK_DEST}/share/applications/de.arneweiss.RunTrend.desktop",
+        "install -Dm644 de.arneweiss.RunTrend.metainfo.xml ${FLATPAK_DEST}/share/metainfo/de.arneweiss.RunTrend.metainfo.xml",
+        "install -Dm644 logo.png ${FLATPAK_DEST}/share/icons/hicolor/512x512/apps/de.arneweiss.RunTrend.png"
+      ]
+    }
+  ]
+}

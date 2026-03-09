@@ -1,6 +1,7 @@
 """
 Application settings and configuration management.
 """
+import os
 from pathlib import Path
 from typing import Any, Optional
 import json
@@ -31,7 +32,9 @@ class AppSettings:
             config_file: Path to configuration file. If None, uses default.
         """
         if config_file is None:
-            config_file = str(Path.home() / ".run_trend" / "config.json")
+            # Use XDG_CONFIG_HOME for Flatpak compatibility
+            config_home = os.environ.get('XDG_CONFIG_HOME', str(Path.home() / ".config"))
+            config_file = str(Path(config_home) / "run_trend" / "config.json")
 
         self.config_file = config_file
         Path(config_file).parent.mkdir(parents=True, exist_ok=True)
@@ -107,8 +110,9 @@ class AppSettings:
             Tuple of (client_id, client_secret) or (None, None)
         """
         if token_file is None:
-            # Try default location
-            token_file = str(Path.home() / ".run_trend" / "strava_credentials.json")
+            # Try default location (use XDG_CONFIG_HOME for Flatpak compatibility)
+            config_home = os.environ.get('XDG_CONFIG_HOME', str(Path.home() / ".config"))
+            token_file = str(Path(config_home) / "run_trend" / "strava_credentials.json")
 
         try:
             if Path(token_file).exists():

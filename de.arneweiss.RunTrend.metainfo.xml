@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>de.arne-weiss.RunTrend</id>
+  <id>de.arneweiss.RunTrend</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>LicenseRef-proprietary=https://github.com/your-username/run-trend/blob/main/LICENSE</project_license>
   <name>Running Progress Tracker</name>
@@ -26,7 +26,7 @@
     </p>
   </description>
 
-  <launchable type="desktop-id">de.arne-weiss.RunTrend.desktop</launchable>
+  <launchable type="desktop-id">de.arneweiss.RunTrend.desktop</launchable>
 
   <screenshots>
     <screenshot type="default">

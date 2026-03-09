@@ -2,6 +2,7 @@
 SQLite database management for Running Progress Tracker.
 """
 import sqlite3
+import os
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 from datetime import datetime
@@ -19,7 +20,9 @@ class Database:
             db_path: Path to SQLite database file. If None, uses default location.
         """
         if db_path is None:
-            db_path = str(Path.home() / ".run_trend" / "activities.db")
+            # Use XDG_DATA_HOME for Flatpak compatibility
+            data_home = os.environ.get('XDG_DATA_HOME', str(Path.home() / ".local" / "share"))
+            db_path = str(Path(data_home) / "run_trend" / "activities.db")
 
         self.db_path = db_path
         Path(db_path).parent.mkdir(parents=True, exist_ok=True)
