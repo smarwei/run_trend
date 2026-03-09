@@ -59,5 +59,7 @@ Thumbs.db
 # Flatpak
 .flatpak-builder/
 flatpak-build/
+build-dir/
 repo/
+flatpak-repo/
 *.flatpak
