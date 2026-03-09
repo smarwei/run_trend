@@ -37,7 +37,10 @@
       "post-install": [
         "install -Dm644 de.arneweiss.RunTrend.desktop ${FLATPAK_DEST}/share/applications/de.arneweiss.RunTrend.desktop",
         "install -Dm644 de.arneweiss.RunTrend.metainfo.xml ${FLATPAK_DEST}/share/metainfo/de.arneweiss.RunTrend.metainfo.xml",
-        "install -Dm644 logo.png ${FLATPAK_DEST}/share/icons/hicolor/512x512/apps/de.arneweiss.RunTrend.png"
+        "install -Dm644 icons/hicolor/64x64/apps/de.arneweiss.RunTrend.png ${FLATPAK_DEST}/share/icons/hicolor/64x64/apps/de.arneweiss.RunTrend.png",
+        "install -Dm644 icons/hicolor/128x128/apps/de.arneweiss.RunTrend.png ${FLATPAK_DEST}/share/icons/hicolor/128x128/apps/de.arneweiss.RunTrend.png",
+        "install -Dm644 icons/hicolor/256x256/apps/de.arneweiss.RunTrend.png ${FLATPAK_DEST}/share/icons/hicolor/256x256/apps/de.arneweiss.RunTrend.png",
+        "install -Dm644 icons/hicolor/512x512/apps/de.arneweiss.RunTrend.png ${FLATPAK_DEST}/share/icons/hicolor/512x512/apps/de.arneweiss.RunTrend.png"
       ]
     }
   ]

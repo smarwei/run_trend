@@ -34,10 +34,33 @@ class ManualDialog(QDialog):
     def _load_manual(self):
         """Load and display the manual."""
         try:
-            # Find MANUAL.md relative to this file
-            manual_path = Path(__file__).parent.parent.parent / "MANUAL.md"
+            # Find MANUAL.md - check multiple locations for packaged apps
+            import sys
 
-            if manual_path.exists():
+            # Try multiple possible locations
+            search_paths = []
+
+            # Briefcase: MANUAL.md is copied as source file alongside app module
+            # It should be in the parent directory of the app module
+            app_module_path = Path(__file__).parent.parent
+            search_paths.append(app_module_path.parent / "MANUAL.md")
+
+            # Development location (same as above for development)
+            search_paths.append(Path(__file__).parent.parent.parent / "MANUAL.md")
+
+            # PyInstaller location (if used)
+            if getattr(sys, '_MEIPASS', None):
+                search_paths.append(Path(sys._MEIPASS) / "MANUAL.md")
+
+            # Find first existing path
+            manual_path = None
+            for path in search_paths:
+                resolved = path.resolve()
+                if resolved.exists():
+                    manual_path = resolved
+                    break
+
+            if manual_path and manual_path.exists():
                 with open(manual_path, 'r', encoding='utf-8') as f:
                     markdown_content = f.read()
 
@@ -98,9 +121,10 @@ class ManualDialog(QDialog):
 
                 self.text_browser.setHtml(styled_html)
             else:
+                searched = "\n".join(f"  - {p}" for p in search_paths)
                 self.text_browser.setPlainText(
                     "MANUAL.md nicht gefunden.\n\n"
-                    f"Erwartet in: {manual_path}"
+                    f"Gesuchte Pfade:\n{searched}"
                 )
         except Exception as e:
             self.text_browser.setPlainText(

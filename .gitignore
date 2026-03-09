@@ -63,3 +63,10 @@ build-dir/
 repo/
 flatpak-repo/
 *.flatpak
+
+# Briefcase
+.venv-briefcase/
+linux/
+macOS/
+windows/
+*.AppImage

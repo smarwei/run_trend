@@ -28,6 +28,7 @@ dependencies = [
     "PySide6>=6.6.0",
     "requests>=2.31.0",
     "numpy>=1.24.0",
+    "markdown>=3.4.0",
 ]
 
 [project.optional-dependencies]
@@ -37,8 +38,8 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/your-username/run-trend"
-Issues = "https://github.com/your-username/run-trend/issues"
+Homepage = "https://github.com/smarwei/run_trend"
+Issues = "https://github.com/smarwei/run_trend/issues"
 
 [project.scripts]
 run-trend = "app.main:main"
@@ -48,3 +49,27 @@ packages = ["app", "app.analytics", "app.charts", "app.projection", "app.setting
 
 [tool.setuptools.package-data]
 app = ["*.py"]
+
+[tool.briefcase]
+project_name = "RunTrend"
+bundle = "de.arneweiss"
+
+[tool.briefcase.app.run-trend]
+formal_name = "RunTrend"
+description = "Track and analyze your running progress from Strava"
+long_description = """RunTrend is a desktop application that helps runners track and analyze their progress over time. Connect your Strava account to import your running activities and visualize your improvement with detailed analytics and trend projections."""
+icon = "icons/hicolor/de.arneweiss.RunTrend"
+sources = ["app", "run_trend", "MANUAL.md"]
+requires = [
+    "PySide6>=6.6.0",
+    "requests>=2.31.0",
+    "numpy>=1.24.0",
+    "markdown>=3.4.0",
+]
+
+[tool.briefcase.app.run-trend.macOS]
+universal_build = true
+signing_identity = "-"
+
+[tool.briefcase.app.run-trend.windows]
+system_installer_resources = []

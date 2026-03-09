@@ -79,10 +79,10 @@ class AboutDialog(QDialog):
         license_info.setWordWrap(True)
         layout.addWidget(license_info)
 
-        # GitHub (placeholder)
+        # GitHub
         github = QLabel(
-            'Repository: <a href="https://github.com/your-username/run-trend">'
-            'https://github.com/your-username/run-trend</a>'
+            'Repository: <a href="https://github.com/smarwei/run_trend">'
+            'github.com/smarwei/run_trend</a>'
         )
         github.setAlignment(Qt.AlignCenter)
         github.setOpenExternalLinks(True)
