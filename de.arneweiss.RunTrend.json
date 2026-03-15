@@ -30,8 +30,10 @@
       ],
       "sources": [
         {
-          "type": "dir",
-          "path": "."
+          "type": "git",
+          "url": "https://github.com/smarwei/run_trend.git",
+          "tag": "v0.1.0",
+          "commit": "e02a677662e66394bbcaaf385395db007bc7aed0"
         }
       ],
       "post-install": [

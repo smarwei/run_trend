@@ -2,7 +2,7 @@
 <component type="desktop-application">
   <id>de.arneweiss.RunTrend</id>
   <metadata_license>CC0-1.0</metadata_license>
-  <project_license>LicenseRef-proprietary=https://github.com/your-username/run-trend/blob/main/LICENSE</project_license>
+  <project_license>LicenseRef-proprietary=https://github.com/smarwei/run_trend/blob/master/LICENSE</project_license>
   <name>Running Progress Tracker</name>
   <summary>Track and analyze your running progress from Strava</summary>
 
@@ -31,11 +31,12 @@
   <screenshots>
     <screenshot type="default">
       <caption>Main window showing distance progress chart</caption>
+      <image>https://raw.githubusercontent.com/smarwei/run_trend/master/screenshots/main-window.png</image>
     </screenshot>
   </screenshots>
 
-  <url type="homepage">https://github.com/your-username/run-trend</url>
-  <url type="bugtracker">https://github.com/your-username/run-trend/issues</url>
+  <url type="homepage">https://github.com/smarwei/run_trend</url>
+  <url type="bugtracker">https://github.com/smarwei/run_trend/issues</url>
 
   <developer_name>Arne Weiß</developer_name>
   <update_contact>run-trend@arne-weiss.de</update_contact>
@@ -52,10 +53,14 @@
           <li>Strava OAuth integration with automatic token refresh</li>
           <li>Activity synchronization (initial + incremental auto-sync)</li>
           <li>Multiple chart types for comprehensive analysis</li>
+          <li>Heart rate analytics and aerobic fitness tracking (Efficiency Factor)</li>
+          <li>Race time predictions based on heart rate zones</li>
           <li>Interactive legends and data smoothing</li>
           <li>Milestone predictions</li>
-          <li>Local SQLite storage</li>
-          <li>Comprehensive German documentation</li>
+          <li>Full internationalization support (German and English)</li>
+          <li>Language auto-detection based on system locale</li>
+          <li>Local SQLite storage for privacy</li>
+          <li>Comprehensive multilingual documentation</li>
         </ul>
       </description>
     </release>
