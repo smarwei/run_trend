@@ -123,3 +123,7 @@ class AppSettings:
             print(f"Error loading credentials: {e}")
 
         return (None, None)
+
+
+# Backward compatibility alias
+SettingsManager = AppSettings

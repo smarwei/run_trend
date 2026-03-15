@@ -23,8 +23,8 @@ class StructureOverviewChart(QWidget):
 
         # Info label
         info_label = QLabel(
-            "This chart shows all structure metrics normalized to 0-100% for comparison. "
-            "It helps understand HOW your training load is composed."
+            self.tr("This chart shows all structure metrics normalized to 0-100% for comparison. "
+            "It helps understand HOW your training load is composed.")
         )
         info_label.setWordWrap(True)
         info_label.setStyleSheet("color: gray; font-size: 10px; padding: 5px;")
@@ -32,7 +32,7 @@ class StructureOverviewChart(QWidget):
 
         # Create chart
         self.chart = QChart()
-        self.chart.setTitle("Training Structure Overview (Normalized)")
+        self.chart.setTitle(self.tr("Training Structure Overview (Normalized)"))
         self.chart.setAnimationOptions(QChart.SeriesAnimations)
 
         # Create chart view
@@ -92,7 +92,7 @@ class StructureOverviewChart(QWidget):
         # Create series for each metric
         # Total Distance
         distance_series = QLineSeries()
-        distance_series.setName("Total Distance")
+        distance_series.setName(self.tr("Total Distance"))
         for i, value in enumerate(norm_distances):
             timestamp_ms = int(period_dates[i].timestamp() * 1000)
             distance_series.append(timestamp_ms, value)
@@ -103,7 +103,7 @@ class StructureOverviewChart(QWidget):
 
         # Number of Runs
         runs_series = QLineSeries()
-        runs_series.setName("Number of Runs")
+        runs_series.setName(self.tr("Number of Runs"))
         for i, value in enumerate(norm_runs):
             timestamp_ms = int(period_dates[i].timestamp() * 1000)
             runs_series.append(timestamp_ms, value)
@@ -114,7 +114,7 @@ class StructureOverviewChart(QWidget):
 
         # Average Distance per Run
         avg_series = QLineSeries()
-        avg_series.setName("Avg Distance/Run")
+        avg_series.setName(self.tr("Avg Distance/Run"))
         for i, value in enumerate(norm_avg_distances):
             timestamp_ms = int(period_dates[i].timestamp() * 1000)
             avg_series.append(timestamp_ms, value)
@@ -125,7 +125,7 @@ class StructureOverviewChart(QWidget):
 
         # Longest Run
         longest_series = QLineSeries()
-        longest_series.setName("Longest Run")
+        longest_series.setName(self.tr("Longest Run"))
         for i, value in enumerate(norm_longest):
             timestamp_ms = int(period_dates[i].timestamp() * 1000)
             longest_series.append(timestamp_ms, value)
@@ -136,7 +136,7 @@ class StructureOverviewChart(QWidget):
 
         # Create axes
         axis_x = QDateTimeAxis()
-        axis_x.setTitleText("Date")
+        axis_x.setTitleText(self.tr("Date"))
         axis_x.setFormat("MMM yyyy")
         if period_dates:
             min_date = QDateTime.fromSecsSinceEpoch(int(period_dates[0].timestamp()))
@@ -144,7 +144,7 @@ class StructureOverviewChart(QWidget):
             axis_x.setRange(min_date, max_date)
 
         axis_y = QValueAxis()
-        axis_y.setTitleText("Normalized Value (%)")
+        axis_y.setTitleText(self.tr("Normalized Value (%)"))
         axis_y.setLabelFormat("%.0f")
         axis_y.setRange(0, 100)
 

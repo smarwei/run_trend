@@ -77,7 +77,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Running Progress Tracker")
+        self.setWindowTitle(self.tr("Running Progress Tracker"))
         self.setGeometry(100, 100, 1400, 900)
 
         # Initialize components
@@ -136,45 +136,45 @@ class MainWindow(QMainWindow):
 
         # Tab 1: Overview - Total Load Metrics
         overview_tab = QTabWidget()
-        overview_tab.addTab(self.distance_chart, "Distance")
-        overview_tab.addTab(self.pace_chart, "Pace/Speed")
-        overview_tab.addTab(self.frequency_chart, "Frequency")
-        self.tab_widget.addTab(overview_tab, "Overview")
+        overview_tab.addTab(self.distance_chart, self.tr("Distance"))
+        overview_tab.addTab(self.pace_chart, self.tr("Pace/Speed"))
+        overview_tab.addTab(self.frequency_chart, self.tr("Frequency"))
+        self.tab_widget.addTab(overview_tab, self.tr("Overview"))
 
         # Tab 2: Heart Rate Analysis
-        self.tab_widget.addTab(self.heartrate_chart, "Heart Rate")
+        self.tab_widget.addTab(self.heartrate_chart, self.tr("Heart Rate"))
 
         # Tab 3: Endurance - Training Structure Metrics
         endurance_tab = QTabWidget()
-        endurance_tab.addTab(self.longest_run_chart, "Longest Run")
-        endurance_tab.addTab(self.avg_distance_chart, "Avg Distance/Run")
-        self.tab_widget.addTab(endurance_tab, "Endurance")
+        endurance_tab.addTab(self.longest_run_chart, self.tr("Longest Run"))
+        endurance_tab.addTab(self.avg_distance_chart, self.tr("Avg Distance/Run"))
+        self.tab_widget.addTab(endurance_tab, self.tr("Endurance"))
 
         # Tab 4: Structure - Comparative Overview
-        self.tab_widget.addTab(self.structure_overview_chart, "Structure")
+        self.tab_widget.addTab(self.structure_overview_chart, self.tr("Structure"))
 
         # Tab 5: Training Score
-        self.tab_widget.addTab(self.score_chart, "Score")
+        self.tab_widget.addTab(self.score_chart, self.tr("Score"))
 
         # Tab 6: Projection
-        self.tab_widget.addTab(self.projection_chart, "Projection")
+        self.tab_widget.addTab(self.projection_chart, self.tr("Projection"))
 
         main_layout.addWidget(self.tab_widget, stretch=3)
 
     def _setup_toolbar(self):
         """Set up the toolbar."""
-        toolbar = QToolBar("Main Toolbar")
+        toolbar = QToolBar(self.tr("Main Toolbar"))
         self.addToolBar(toolbar)
 
         # Settings button (left)
-        settings_action = QAction("Settings", self)
+        settings_action = QAction(self.tr("Settings"), self)
         settings_action.triggered.connect(self._show_settings)
         toolbar.addAction(settings_action)
 
         toolbar.addSeparator()
 
         # Start date selector
-        toolbar.addWidget(QLabel("Start Date:"))
+        toolbar.addWidget(QLabel(self.tr("Start Date:")))
         self.start_date_edit = QDateEdit()
         self.start_date_edit.setCalendarPopup(True)
         # Default to a very early date to capture all activities (Strava founded 2009)
@@ -185,28 +185,28 @@ class MainWindow(QMainWindow):
         toolbar.addSeparator()
 
         # Period selector
-        toolbar.addWidget(QLabel("Period:"))
+        toolbar.addWidget(QLabel(self.tr("Period:")))
         self.period_combo = QComboBox()
-        self.period_combo.addItems(["Week", "Month"])
+        self.period_combo.addItems([self.tr("Week"), self.tr("Month")])
         self.period_combo.currentTextChanged.connect(self._on_period_changed)
         toolbar.addWidget(self.period_combo)
 
         toolbar.addSeparator()
 
         # Metric selector
-        toolbar.addWidget(QLabel("Metric:"))
+        toolbar.addWidget(QLabel(self.tr("Metric:")))
         self.metric_combo = QComboBox()
-        self.metric_combo.addItems(["Pace", "Speed"])
+        self.metric_combo.addItems([self.tr("Pace"), self.tr("Speed")])
         self.metric_combo.currentTextChanged.connect(self._on_metric_changed)
         toolbar.addWidget(self.metric_combo)
 
         toolbar.addSeparator()
 
         # Smoothing selector
-        toolbar.addWidget(QLabel("Smoothing:"))
+        toolbar.addWidget(QLabel(self.tr("Smoothing:")))
         self.smoothing_combo = QComboBox()
-        self.smoothing_combo.addItems(["Off", "Light", "Medium", "Strong"])
-        self.smoothing_combo.setCurrentText("Medium")
+        self.smoothing_combo.addItems([self.tr("Off"), self.tr("Light"), self.tr("Medium"), self.tr("Strong")])
+        self.smoothing_combo.setCurrentText(self.tr("Medium"))
         self.smoothing_combo.currentTextChanged.connect(self._on_smoothing_changed)
         toolbar.addWidget(self.smoothing_combo)
 
@@ -216,12 +216,12 @@ class MainWindow(QMainWindow):
         toolbar.addWidget(spacer)
 
         # Help button (right)
-        help_action = QAction("Help", self)
+        help_action = QAction(self.tr("Help"), self)
         help_action.triggered.connect(self._show_manual)
         toolbar.addAction(help_action)
 
         # About button (far right)
-        about_action = QAction("About", self)
+        about_action = QAction(self.tr("About"), self)
         about_action.triggered.connect(self._show_about)
         toolbar.addAction(about_action)
 
@@ -230,7 +230,7 @@ class MainWindow(QMainWindow):
         """Set up the status bar."""
         self.statusbar = QStatusBar()
         self.setStatusBar(self.statusbar)
-        self.statusbar.showMessage("Ready")
+        self.statusbar.showMessage(self.tr("Ready"))
 
     def _connect_signals(self):
         """Connect signals and slots."""
@@ -243,7 +243,7 @@ class MainWindow(QMainWindow):
 
         if self.auth.is_authenticated():
             self._setup_strava_client()
-            self.statusbar.showMessage("Connected to Strava")
+            self.statusbar.showMessage(self.tr("Connected to Strava"))
             self._load_data()
 
             # Auto-sync on startup (silent incremental sync)
@@ -253,7 +253,7 @@ class MainWindow(QMainWindow):
                 self._run_silent_sync()
         else:
             # Not authenticated - open settings dialog on first start
-            self.statusbar.showMessage("Not connected - Please configure Strava connection")
+            self.statusbar.showMessage(self.tr("Not connected - Please configure Strava connection"))
             # Use QTimer to open settings after main window is shown
             QTimer.singleShot(100, self._show_settings)
 
@@ -300,8 +300,8 @@ class MainWindow(QMainWindow):
         if self.auth and self.auth.is_authenticated():
             # Disconnect
             reply = QMessageBox.question(
-                self, "Disconnect",
-                "Do you want to disconnect from Strava?",
+                self, self.tr("Disconnect"),
+                self.tr("Do you want to disconnect from Strava?"),
                 QMessageBox.Yes | QMessageBox.No
             )
             if reply == QMessageBox.Yes:
@@ -309,7 +309,7 @@ class MainWindow(QMainWindow):
                 self.auth = None
                 self.client = None
                 self.sync_manager = None
-                self.statusbar.showMessage("Disconnected from Strava")
+                self.statusbar.showMessage(self.tr("Disconnected from Strava"))
             return
 
         # Start OAuth flow
@@ -319,13 +319,13 @@ class MainWindow(QMainWindow):
         if not client_id or not client_secret:
             # Ask user to configure API credentials first
             reply = QMessageBox.information(
-                self, "Strava API Configuration Required",
-                "To connect to Strava, you first need to configure your API credentials.\n\n"
+                self, self.tr("Strava API Configuration Required"),
+                self.tr("To connect to Strava, you first need to configure your API credentials.\n\n"
                 "1. Go to Settings\n"
                 "2. Enter your Client ID and Client Secret\n"
                 "3. Click 'Connect to Strava' again\n\n"
                 "Get your credentials from:\n"
-                "https://www.strava.com/settings/api",
+                "https://www.strava.com/settings/api"),
                 QMessageBox.Ok
             )
             return
@@ -335,29 +335,29 @@ class MainWindow(QMainWindow):
             self.auth = SimpleStravaAuth(self.settings)
 
         # Show progress message
-        self.statusbar.showMessage("Opening browser for Strava authorization...")
+        self.statusbar.showMessage(self.tr("Opening browser for Strava authorization..."))
 
         # Start OAuth flow (this will block until complete)
         if self.auth.authorize(client_id, client_secret):
             self._setup_strava_client()
-            self.statusbar.showMessage("Successfully connected to Strava!")
+            self.statusbar.showMessage(self.tr("Successfully connected to Strava!"))
 
             # Auto-sync after successful connection
             reply = QMessageBox.question(
-                self, "Sync Activities",
-                "Successfully connected to Strava!\n\n"
-                "Do you want to sync your activities now?",
+                self, self.tr("Sync Activities"),
+                self.tr("Successfully connected to Strava!\n\n"
+                "Do you want to sync your activities now?"),
                 QMessageBox.Yes | QMessageBox.No
             )
 
             if reply == QMessageBox.Yes:
                 self._sync_activities()
         else:
-            self.statusbar.showMessage("Failed to connect to Strava")
+            self.statusbar.showMessage(self.tr("Failed to connect to Strava"))
             QMessageBox.warning(
-                self, "Authorization Failed",
-                "Failed to authorize with Strava.\n\n"
-                "Please try again or check your API credentials in Settings."
+                self, self.tr("Authorization Failed"),
+                self.tr("Failed to authorize with Strava.\n\n"
+                "Please try again or check your API credentials in Settings.")
             )
 
     def _show_settings(self):
@@ -370,11 +370,13 @@ class MainWindow(QMainWindow):
                 self.auth._load_token()
                 if self.auth.is_authenticated():
                     self._setup_strava_client()
-                    self.statusbar.showMessage("Reconnected to Strava with new settings")
+                    self.statusbar.showMessage(self.tr("Reconnected to Strava with new settings"))
 
     def _show_manual(self):
         """Show manual/help dialog."""
-        dialog = ManualDialog(self)
+        # Get current language, default to 'de' if not set
+        language = getattr(self, 'current_language', 'de')
+        dialog = ManualDialog(self, language=language)
         dialog.exec()
 
     def _show_about(self):
@@ -408,7 +410,7 @@ class MainWindow(QMainWindow):
     def _run_sync(self, sync_type, start_date=None):
         """Run sync in background thread."""
         # Create progress dialog
-        self.progress_dialog = QProgressDialog("Syncing activities...", "Cancel", 0, 100, self)
+        self.progress_dialog = QProgressDialog(self.tr("Syncing activities..."), self.tr("Cancel"), 0, 100, self)
         self.progress_dialog.setWindowModality(Qt.WindowModal)
         self.progress_dialog.setAutoClose(True)
 
@@ -424,7 +426,7 @@ class MainWindow(QMainWindow):
         self.silent_sync_thread = SyncThread(self.db.db_path, self.client, 'incremental', None)
         self.silent_sync_thread.finished.connect(self._on_silent_sync_finished)
         self.silent_sync_thread.start()
-        self.statusbar.showMessage("Checking for new activities...")
+        self.statusbar.showMessage(self.tr("Checking for new activities..."))
 
     def _on_sync_progress(self, current, total, message):
         """Handle sync progress updates."""
@@ -437,14 +439,14 @@ class MainWindow(QMainWindow):
         """Handle sync completion."""
         self.progress_dialog.close()
 
-        message = f"Sync completed:\n"
-        message += f"Fetched: {stats['fetched']}\n"
-        message += f"Imported: {stats['imported']}\n"
-        message += f"Updated: {stats['updated']}\n"
+        message = self.tr("Sync completed:\n")
+        message += self.tr("Fetched: {}\n").format(stats['fetched'])
+        message += self.tr("Imported: {}\n").format(stats['imported'])
+        message += self.tr("Updated: {}\n").format(stats['updated'])
         if stats['errors'] > 0:
-            message += f"Errors: {stats['errors']}\n"
+            message += self.tr("Errors: {}\n").format(stats['errors'])
 
-        QMessageBox.information(self, "Sync Complete", message)
+        QMessageBox.information(self, self.tr("Sync Complete"), message)
 
         # Refresh data
         self._load_data()
@@ -454,16 +456,16 @@ class MainWindow(QMainWindow):
         # Only show message if new activities were found or errors occurred
         if stats['imported'] > 0 or stats['updated'] > 0:
             self.statusbar.showMessage(
-                f"Sync complete: {stats['imported']} new, {stats['updated']} updated"
+                self.tr("Sync complete: {} new, {} updated").format(stats['imported'], stats['updated'])
             )
             # Refresh data to show new activities
             self._load_data()
         elif stats['errors'] > 0:
-            self.statusbar.showMessage(f"Sync completed with {stats['errors']} errors")
+            self.statusbar.showMessage(self.tr("Sync completed with {} errors").format(stats['errors']))
         else:
-            self.statusbar.showMessage("No new activities found")
+            self.statusbar.showMessage(self.tr("No new activities found"))
             # Clear message after 3 seconds
-            QTimer.singleShot(3000, lambda: self.statusbar.showMessage("Connected to Strava"))
+            QTimer.singleShot(3000, lambda: self.statusbar.showMessage(self.tr("Connected to Strava")))
 
     def _load_data(self):
         """Load activities from database and refresh UI."""

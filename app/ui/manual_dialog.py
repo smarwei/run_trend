@@ -14,9 +14,10 @@ import markdown
 class ManualDialog(QDialog):
     """Dialog showing the user manual."""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, language='de'):
         super().__init__(parent)
-        self.setWindowTitle("Benutzerhandbuch")
+        self.language = language
+        self.setWindowTitle(self.tr("Benutzerhandbuch"))
         self.setMinimumSize(900, 700)
         self._setup_ui()
         self._load_manual()
@@ -28,20 +29,20 @@ class ManualDialog(QDialog):
         # Search bar
         search_layout = QHBoxLayout()
 
-        search_label = QLabel("Suchen:")
+        search_label = QLabel(self.tr("Suchen:"))
         search_layout.addWidget(search_label)
 
         self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText("Text suchen... (Ctrl+F)")
+        self.search_input.setPlaceholderText(self.tr("Text suchen... (Ctrl+F)"))
         self.search_input.textChanged.connect(self._on_search)
         self.search_input.returnPressed.connect(self._find_next)
         search_layout.addWidget(self.search_input)
 
-        self.prev_btn = QPushButton("◀ Zurück")
+        self.prev_btn = QPushButton(self.tr("◀ Zurück"))
         self.prev_btn.clicked.connect(self._find_previous)
         search_layout.addWidget(self.prev_btn)
 
-        self.next_btn = QPushButton("Weiter ▶")
+        self.next_btn = QPushButton(self.tr("Weiter ▶"))
         self.next_btn.clicked.connect(self._find_next)
         search_layout.addWidget(self.next_btn)
 
@@ -56,7 +57,7 @@ class ManualDialog(QDialog):
         layout.addWidget(self.text_browser)
 
         # Close button
-        close_btn = QPushButton("Schließen")
+        close_btn = QPushButton(self.tr("Schließen"))
         close_btn.clicked.connect(self.accept)
         layout.addWidget(close_btn)
 
@@ -67,23 +68,26 @@ class ManualDialog(QDialog):
     def _load_manual(self):
         """Load and display the manual."""
         try:
-            # Find MANUAL.md - check multiple locations for packaged apps
+            # Find MANUAL_{language}.md - check multiple locations for packaged apps
             import sys
+
+            # Determine manual filename based on language
+            manual_filename = f"MANUAL_{self.language}.md"
 
             # Try multiple possible locations
             search_paths = []
 
-            # Briefcase: MANUAL.md is copied as source file alongside app module
-            # It should be in the parent directory of the app module
+            # Briefcase: MANUAL files are copied as source files alongside app module
+            # They should be in the parent directory of the app module
             app_module_path = Path(__file__).parent.parent
-            search_paths.append(app_module_path.parent / "MANUAL.md")
+            search_paths.append(app_module_path.parent / manual_filename)
 
             # Development location (same as above for development)
-            search_paths.append(Path(__file__).parent.parent.parent / "MANUAL.md")
+            search_paths.append(Path(__file__).parent.parent.parent / manual_filename)
 
             # PyInstaller location (if used)
             if getattr(sys, '_MEIPASS', None):
-                search_paths.append(Path(sys._MEIPASS) / "MANUAL.md")
+                search_paths.append(Path(sys._MEIPASS) / manual_filename)
 
             # Find first existing path
             manual_path = None
@@ -184,12 +188,12 @@ class ManualDialog(QDialog):
             else:
                 searched = "\n".join(f"  - {p}" for p in search_paths)
                 self.text_browser.setPlainText(
-                    "MANUAL.md nicht gefunden.\n\n"
-                    f"Gesuchte Pfade:\n{searched}"
+                    self.tr("Manual nicht gefunden.\n\n"
+                    "Gesuchte Pfade:\n{0}").format(searched)
                 )
         except Exception as e:
             self.text_browser.setPlainText(
-                f"Fehler beim Laden des Handbuchs:\n{e}"
+                self.tr("Fehler beim Laden des Handbuchs:\n{0}").format(e)
             )
 
     def _focus_search(self):
@@ -216,7 +220,7 @@ class ManualDialog(QDialog):
             self.match_label.setText("✓")
             self.match_label.setStyleSheet("color: green;")
         else:
-            self.match_label.setText("Nicht gefunden")
+            self.match_label.setText(self.tr("Nicht gefunden"))
             self.match_label.setStyleSheet("color: red;")
 
     def _find_next(self):

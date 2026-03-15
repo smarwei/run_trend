@@ -23,7 +23,7 @@ class DistanceChart(QWidget):
 
         # Create chart
         self.chart = QChart()
-        self.chart.setTitle("Distance Progress")
+        self.chart.setTitle(self.tr("Distance Progress"))
         self.chart.setAnimationOptions(QChart.SeriesAnimations)
 
         # Create chart view
@@ -62,7 +62,7 @@ class DistanceChart(QWidget):
 
         # Create primary X axis (DateTime)
         axis_x = QDateTimeAxis()
-        axis_x.setTitleText("Date")
+        axis_x.setTitleText(self.tr("Date"))
         axis_x.setFormat("MMM yyyy")
         if period_dates:
             min_date = QDateTime.fromSecsSinceEpoch(int(period_dates[0].timestamp()))
@@ -72,7 +72,7 @@ class DistanceChart(QWidget):
 
         # Primary Y axis for distance
         axis_y_distance = QValueAxis()
-        axis_y_distance.setTitleText("Distance (km)")
+        axis_y_distance.setTitleText(self.tr("Distance (km)"))
         axis_y_distance.setLabelFormat("%.1f")
         max_distance = max(distances) if distances else 10
         axis_y_distance.setRange(0, max_distance * 1.1)
@@ -80,7 +80,7 @@ class DistanceChart(QWidget):
 
         # Distance series (smoothing already applied if enabled)
         distance_series = QLineSeries()
-        distance_series.setName("Total Distance")
+        distance_series.setName(self.tr("Total Distance"))
         for i, value in enumerate(distances):
             timestamp_ms = int(period_dates[i].timestamp() * 1000)
             distance_series.append(timestamp_ms, value)
@@ -93,7 +93,7 @@ class DistanceChart(QWidget):
 
         # Secondary Y axis for time
         axis_y_time = QValueAxis()
-        axis_y_time.setTitleText("Moving Time (h)")
+        axis_y_time.setTitleText(self.tr("Moving Time (h)"))
         axis_y_time.setLabelFormat("%.1f")
         max_time = max(moving_times) if moving_times else 10
         axis_y_time.setRange(0, max_time * 1.1)
@@ -101,7 +101,7 @@ class DistanceChart(QWidget):
 
         # Moving time series (initially hidden)
         time_series = QLineSeries()
-        time_series.setName("Moving Time")
+        time_series.setName(self.tr("Moving Time"))
         for i, value in enumerate(moving_times):
             timestamp_ms = int(period_dates[i].timestamp() * 1000)
             time_series.append(timestamp_ms, value)
@@ -116,7 +116,7 @@ class DistanceChart(QWidget):
 
         # Run count series (initially hidden, uses distance axis for simplicity)
         count_series = QLineSeries()
-        count_series.setName("Run Count")
+        count_series.setName(self.tr("Run Count"))
         for i, value in enumerate(run_counts):
             timestamp_ms = int(period_dates[i].timestamp() * 1000)
             count_series.append(timestamp_ms, value)

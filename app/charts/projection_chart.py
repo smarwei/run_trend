@@ -36,15 +36,15 @@ class ProjectionChart(QWidget):
 
         # Mode selector and periods ahead control
         mode_layout = QHBoxLayout()
-        mode_layout.addWidget(QLabel("Projection Mode:"))
+        mode_layout.addWidget(QLabel(self.tr("Projection Mode:")))
 
         self.mode_combo = QComboBox()
-        self.mode_combo.addItems(["Volume (Total Distance)", "Long Run"])
+        self.mode_combo.addItems([self.tr("Volume (Total Distance)"), self.tr("Long Run")])
         self.mode_combo.currentIndexChanged.connect(self._on_mode_changed)
         mode_layout.addWidget(self.mode_combo)
 
         mode_layout.addSpacing(20)
-        mode_layout.addWidget(QLabel("Periods Ahead:"))
+        mode_layout.addWidget(QLabel(self.tr("Periods Ahead:")))
 
         self.periods_spinbox = QSpinBox()
         self.periods_spinbox.setMinimum(1)
@@ -59,7 +59,7 @@ class ProjectionChart(QWidget):
 
         # Create chart
         self.chart = QChart()
-        self.chart.setTitle("Volume Projection")
+        self.chart.setTitle(self.tr("Volume Projection"))
         self.chart.setAnimationOptions(QChart.SeriesAnimations)
 
         # Create chart view
@@ -124,13 +124,13 @@ class ProjectionChart(QWidget):
         # Choose metric and milestones based on mode
         if self.projection_mode == 'volume':
             metric_key = 'total_distance_km'
-            chart_title = "Volume Projection"
-            historical_label = "Historical Volume"
+            chart_title = self.tr("Volume Projection")
+            historical_label = self.tr("Historical Volume")
             milestones = Forecaster.MILESTONES
         else:  # long_run
             metric_key = 'longest_run_km'
-            chart_title = "Long Run Projection"
-            historical_label = "Historical Long Run"
+            chart_title = self.tr("Long Run Projection")
+            historical_label = self.tr("Historical Long Run")
             milestones = self.LONG_RUN_MILESTONES
 
         self.chart.setTitle(chart_title)
@@ -164,7 +164,7 @@ class ProjectionChart(QWidget):
         if projection.get('has_projection'):
             # Create projection series
             projection_series = QLineSeries()
-            projection_series.setName("Projected Trend")
+            projection_series.setName(self.tr("Projected Trend"))
 
             # Start from last historical point
             last_timestamp_ms = int(period_dates[-1].timestamp() * 1000)
@@ -194,7 +194,7 @@ class ProjectionChart(QWidget):
                 for proj_point in projection['projected_periods']:
                     if abs(proj_point['projected_value'] - milestone_value) < 2.0:
                         milestone_series = QScatterSeries()
-                        milestone_series.setName(milestone_name)
+                        milestone_series.setName(self.tr(milestone_name))
                         milestone_series.setMarkerSize(12)
                         milestone_series.setColor(QColor("#f39c12"))
 
@@ -210,7 +210,7 @@ class ProjectionChart(QWidget):
 
         # Create axes
         axis_x = QDateTimeAxis()
-        axis_x.setTitleText("Date")
+        axis_x.setTitleText(self.tr("Date"))
         axis_x.setFormat("MMM yyyy")
         if period_dates:
             min_date = QDateTime.fromSecsSinceEpoch(int(period_dates[0].timestamp()))
@@ -223,7 +223,7 @@ class ProjectionChart(QWidget):
             axis_x.setRange(min_date, max_date)
 
         axis_y = QValueAxis()
-        axis_y.setTitleText("Distance (km)")
+        axis_y.setTitleText(self.tr("Distance (km)"))
         axis_y.setLabelFormat("%.1f")
 
         max_distance = max(historical_data) if historical_data else 10

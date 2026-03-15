@@ -23,7 +23,7 @@ class PaceChart(QWidget):
 
         # Create chart
         self.chart = QChart()
-        self.chart.setTitle("Pace/Speed Progress")
+        self.chart.setTitle(self.tr("Pace/Speed Progress"))
         self.chart.setAnimationOptions(QChart.SeriesAnimations)
 
         # Create chart view
@@ -60,14 +60,14 @@ class PaceChart(QWidget):
         # Extract data based on metric
         if metric == 'pace':
             data = [agg['weighted_avg_pace_min_per_km'] for agg in aggregates]
-            title = "Pace Progress"
-            y_label = "Pace (min/km)"
-            series_name = "Pace"
+            title = self.tr("Pace Progress")
+            y_label = self.tr("Pace (min/km)")
+            series_name = self.tr("Pace")
         else:  # speed
             data = [agg['avg_speed_kmh'] for agg in aggregates]
-            title = "Speed Progress"
-            y_label = "Speed (km/h)"
-            series_name = "Speed"
+            title = self.tr("Speed Progress")
+            y_label = self.tr("Speed (km/h)")
+            series_name = self.tr("Speed")
 
         self.chart.setTitle(title)
 
@@ -92,7 +92,7 @@ class PaceChart(QWidget):
 
         # Create axes
         axis_x = QDateTimeAxis()
-        axis_x.setTitleText("Date")
+        axis_x.setTitleText(self.tr("Date"))
         axis_x.setFormat("MMM yyyy")
         if period_dates:
             min_date = QDateTime.fromSecsSinceEpoch(int(period_dates[0].timestamp()))

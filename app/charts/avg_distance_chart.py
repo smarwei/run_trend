@@ -23,7 +23,7 @@ class AvgDistanceChart(QWidget):
 
         # Create chart
         self.chart = QChart()
-        self.chart.setTitle("Average Distance per Run")
+        self.chart.setTitle(self.tr("Average Distance per Run"))
         self.chart.setAnimationOptions(QChart.SeriesAnimations)
 
         # Create chart view
@@ -60,7 +60,7 @@ class AvgDistanceChart(QWidget):
 
         # Create series (smoothing already applied if enabled)
         series = QLineSeries()
-        series.setName("Avg Distance per Run")
+        series.setName(self.tr("Avg Distance per Run"))
 
         for i, value in enumerate(avg_distances):
             timestamp_ms = int(period_dates[i].timestamp() * 1000)
@@ -75,7 +75,7 @@ class AvgDistanceChart(QWidget):
 
         # Create axes
         axis_x = QDateTimeAxis()
-        axis_x.setTitleText("Date")
+        axis_x.setTitleText(self.tr("Date"))
         axis_x.setFormat("MMM yyyy")
         if period_dates:
             min_date = QDateTime.fromSecsSinceEpoch(int(period_dates[0].timestamp()))
@@ -83,7 +83,7 @@ class AvgDistanceChart(QWidget):
             axis_x.setRange(min_date, max_date)
 
         axis_y = QValueAxis()
-        axis_y.setTitleText("Distance (km)")
+        axis_y.setTitleText(self.tr("Distance (km)"))
         axis_y.setLabelFormat("%.1f")
 
         max_distance = max(avg_distances) if avg_distances else 10

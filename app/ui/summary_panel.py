@@ -19,16 +19,16 @@ class SummaryPanel(QWidget):
         layout.setAlignment(Qt.AlignTop)
 
         # Title
-        title = QLabel("Training Summary")
+        title = QLabel(self.tr("Training Summary"))
         title.setStyleSheet("font-size: 18px; font-weight: bold; margin: 10px;")
         layout.addWidget(title)
 
         # Overall stats group
-        overall_group = QGroupBox("Overall Statistics")
+        overall_group = QGroupBox(self.tr("Overall Statistics"))
         overall_layout = QVBoxLayout()
 
-        self.total_runs_label = QLabel("Total Runs: -")
-        self.total_distance_label = QLabel("Total Distance: -")
+        self.total_runs_label = QLabel(self.tr("Total Runs: -"))
+        self.total_distance_label = QLabel(self.tr("Total Distance: -"))
 
         overall_layout.addWidget(self.total_runs_label)
         overall_layout.addWidget(self.total_distance_label)
@@ -36,11 +36,11 @@ class SummaryPanel(QWidget):
         layout.addWidget(overall_group)
 
         # Current period group
-        current_group = QGroupBox("Current Period")
+        current_group = QGroupBox(self.tr("Current Period"))
         current_layout = QVBoxLayout()
 
-        self.current_distance_label = QLabel("Avg Distance: -")
-        self.current_pace_label = QLabel("Avg Pace: -")
+        self.current_distance_label = QLabel(self.tr("Avg Distance: -"))
+        self.current_pace_label = QLabel(self.tr("Avg Pace: -"))
 
         current_layout.addWidget(self.current_distance_label)
         current_layout.addWidget(self.current_pace_label)
@@ -48,12 +48,12 @@ class SummaryPanel(QWidget):
         layout.addWidget(current_group)
 
         # Heart rate group
-        hr_group = QGroupBox("Heart Rate")
+        hr_group = QGroupBox(self.tr("Heart Rate"))
         hr_layout = QVBoxLayout()
 
-        self.avg_hr_label = QLabel("Avg HR: -")
-        self.max_hr_label = QLabel("Max HR: -")
-        self.efficiency_label = QLabel("Efficiency: -")
+        self.avg_hr_label = QLabel(self.tr("Avg HR: -"))
+        self.max_hr_label = QLabel(self.tr("Max HR: -"))
+        self.efficiency_label = QLabel(self.tr("Efficiency: -"))
 
         # HRmax suggestion (hidden by default)
         self.hrmax_suggestion_label = QLabel("")
@@ -69,10 +69,10 @@ class SummaryPanel(QWidget):
         layout.addWidget(hr_group)
 
         # Training score group
-        score_group = QGroupBox("Training Status")
+        score_group = QGroupBox(self.tr("Training Status"))
         score_layout = QVBoxLayout()
 
-        self.score_label = QLabel("Score: -")
+        self.score_label = QLabel(self.tr("Score: -"))
         self.score_label.setStyleSheet("font-size: 24px; font-weight: bold;")
 
         score_layout.addWidget(self.score_label)
@@ -80,25 +80,25 @@ class SummaryPanel(QWidget):
         layout.addWidget(score_group)
 
         # Projection group
-        projection_group = QGroupBox("Marathon Milestone")
+        projection_group = QGroupBox(self.tr("Marathon Milestone"))
         projection_layout = QVBoxLayout()
 
-        self.milestone_label = QLabel("Estimated Date: -")
+        self.milestone_label = QLabel(self.tr("Estimated Date: -"))
 
         projection_layout.addWidget(self.milestone_label)
         projection_group.setLayout(projection_layout)
         layout.addWidget(projection_group)
 
         # Race predictions group
-        race_group = QGroupBox("Race Time Predictions ⚠️")
+        race_group = QGroupBox(self.tr("Race Time Predictions ⚠️"))
         race_layout = QVBoxLayout()
 
-        self.race_5k_label = QLabel("5K: -")
-        self.race_10k_label = QLabel("10K: -")
-        self.race_half_label = QLabel("Half: -")
-        self.race_marathon_label = QLabel("Marathon: -")
+        self.race_5k_label = QLabel(self.tr("5K: -"))
+        self.race_10k_label = QLabel(self.tr("10K: -"))
+        self.race_half_label = QLabel(self.tr("Half: -"))
+        self.race_marathon_label = QLabel(self.tr("Marathon: -"))
 
-        self.race_info_label = QLabel("Based on Easy Run pace (HR zones)")
+        self.race_info_label = QLabel(self.tr("Based on Easy Run pace (HR zones)"))
         self.race_info_label.setStyleSheet("color: gray; font-size: 9px;")
         self.race_info_label.setWordWrap(True)
 
@@ -124,21 +124,21 @@ class SummaryPanel(QWidget):
         total_runs = data.get('total_runs', 0)
         total_distance = data.get('total_distance', 0)
 
-        self.total_runs_label.setText(f"Total Runs: {total_runs}")
-        self.total_distance_label.setText(f"Total Distance: {total_distance:.1f} km")
+        self.total_runs_label.setText(self.tr("Total Runs: {}").format(total_runs))
+        self.total_distance_label.setText(self.tr("Total Distance: {:.1f} km").format(total_distance))
 
         # Current period
         current_distance = data.get('current_avg_distance', 0)
         current_pace = data.get('current_avg_pace', 0)
 
-        self.current_distance_label.setText(f"Period Distance: {current_distance:.1f} km")
+        self.current_distance_label.setText(self.tr("Period Distance: {:.1f} km").format(current_distance))
 
         if current_pace > 0:
             pace_min = int(current_pace)
             pace_sec = int((current_pace - pace_min) * 60)
-            self.current_pace_label.setText(f"Avg Pace: {pace_min}:{pace_sec:02d} min/km")
+            self.current_pace_label.setText(self.tr("Avg Pace: {}:{:02d} min/km").format(pace_min, pace_sec))
         else:
-            self.current_pace_label.setText("Avg Pace: -")
+            self.current_pace_label.setText(self.tr("Avg Pace: -"))
 
         # Heart rate metrics
         avg_hr = data.get('current_avg_hr', 0)
@@ -146,20 +146,20 @@ class SummaryPanel(QWidget):
         efficiency = data.get('current_efficiency', 0)
 
         if avg_hr > 0:
-            self.avg_hr_label.setText(f"Avg HR: {avg_hr:.0f} bpm")
+            self.avg_hr_label.setText(self.tr("Avg HR: {:.0f} bpm").format(avg_hr))
         else:
-            self.avg_hr_label.setText("Avg HR: No data")
+            self.avg_hr_label.setText(self.tr("Avg HR: No data"))
 
         if max_hr > 0:
-            self.max_hr_label.setText(f"Max HR: {max_hr:.0f} bpm")
+            self.max_hr_label.setText(self.tr("Max HR: {:.0f} bpm").format(max_hr))
         else:
-            self.max_hr_label.setText("Max HR: No data")
+            self.max_hr_label.setText(self.tr("Max HR: No data"))
 
         if efficiency > 0:
             # Display efficiency factor in a readable format
-            self.efficiency_label.setText(f"Efficiency: {efficiency*1000:.2f}")
+            self.efficiency_label.setText(self.tr("Efficiency: {:.2f}").format(efficiency*1000))
         else:
-            self.efficiency_label.setText("Efficiency: No data")
+            self.efficiency_label.setText(self.tr("Efficiency: No data"))
 
         # HRmax plausibility check
         hrmax_check = data.get('hrmax_check')
@@ -167,8 +167,8 @@ class SummaryPanel(QWidget):
             suggested = hrmax_check.get('suggested_hrmax', 0)
             detected = hrmax_check.get('detected_hrmax', 0)
             self.hrmax_suggestion_label.setText(
-                f"⚠ Detected HRmax ({detected:.0f} bpm) may be too low. "
-                f"Consider setting manual HRmax to ~{suggested} bpm in Settings."
+                self.tr("⚠ Detected HRmax ({:.0f} bpm) may be too low. "
+                        "Consider setting manual HRmax to ~{} bpm in Settings.").format(detected, suggested)
             )
             self.hrmax_suggestion_label.setVisible(True)
         else:
@@ -176,7 +176,7 @@ class SummaryPanel(QWidget):
 
         # Training score
         score = data.get('current_score', 0)
-        self.score_label.setText(f"Score: {score:.1f}")
+        self.score_label.setText(self.tr("Score: {:.1f}").format(score))
 
         # Set color based on score
         if score < 30:
@@ -194,16 +194,16 @@ class SummaryPanel(QWidget):
         marathon_estimate = data.get('marathon_estimate')
         if marathon_estimate and marathon_estimate.get('reachable'):
             if marathon_estimate.get('reached'):
-                self.milestone_label.setText("Milestone Reached!")
+                self.milestone_label.setText(self.tr("Milestone Reached!"))
             else:
                 est_date = marathon_estimate.get('estimated_date')
                 if est_date:
                     date_obj = datetime.fromisoformat(est_date)
-                    self.milestone_label.setText(f"Estimated: {date_obj.strftime('%Y-%m-%d')}")
+                    self.milestone_label.setText(self.tr("Estimated: {}").format(date_obj.strftime('%Y-%m-%d')))
                 else:
-                    self.milestone_label.setText("Calculating...")
+                    self.milestone_label.setText(self.tr("Calculating..."))
         else:
-            self.milestone_label.setText("Keep training!")
+            self.milestone_label.setText(self.tr("Keep training!"))
 
         # Race predictions
         race_predictions = data.get('race_predictions')
@@ -217,9 +217,9 @@ class SummaryPanel(QWidget):
             if pace_5k > 0:
                 pace_min = int(pace_5k)
                 pace_sec = int((pace_5k - pace_min) * 60)
-                self.race_5k_label.setText(f"5K: {time_5k} ({pace_min}:{pace_sec:02d}/km)")
+                self.race_5k_label.setText(self.tr("5K: {} ({}:{:02d}/km)").format(time_5k, pace_min, pace_sec))
             else:
-                self.race_5k_label.setText(f"5K: {time_5k}")
+                self.race_5k_label.setText(self.tr("5K: {}").format(time_5k))
 
             # 10K
             pred_10k = predictions.get('10K', {})
@@ -228,9 +228,9 @@ class SummaryPanel(QWidget):
             if pace_10k > 0:
                 pace_min = int(pace_10k)
                 pace_sec = int((pace_10k - pace_min) * 60)
-                self.race_10k_label.setText(f"10K: {time_10k} ({pace_min}:{pace_sec:02d}/km)")
+                self.race_10k_label.setText(self.tr("10K: {} ({}:{:02d}/km)").format(time_10k, pace_min, pace_sec))
             else:
-                self.race_10k_label.setText(f"10K: {time_10k}")
+                self.race_10k_label.setText(self.tr("10K: {}").format(time_10k))
 
             # Half Marathon
             pred_half = predictions.get('Half Marathon', {})
@@ -239,9 +239,9 @@ class SummaryPanel(QWidget):
             if pace_half > 0:
                 pace_min = int(pace_half)
                 pace_sec = int((pace_half - pace_min) * 60)
-                self.race_half_label.setText(f"Half: {time_half} ({pace_min}:{pace_sec:02d}/km)")
+                self.race_half_label.setText(self.tr("Half: {} ({}:{:02d}/km)").format(time_half, pace_min, pace_sec))
             else:
-                self.race_half_label.setText(f"Half: {time_half}")
+                self.race_half_label.setText(self.tr("Half: {}").format(time_half))
 
             # Marathon
             pred_marathon = predictions.get('Marathon', {})
@@ -250,23 +250,23 @@ class SummaryPanel(QWidget):
             if pace_marathon > 0:
                 pace_min = int(pace_marathon)
                 pace_sec = int((pace_marathon - pace_min) * 60)
-                self.race_marathon_label.setText(f"Marathon: {time_marathon} ({pace_min}:{pace_sec:02d}/km)")
+                self.race_marathon_label.setText(self.tr("Marathon: {} ({}:{:02d}/km)").format(time_marathon, pace_min, pace_sec))
             else:
-                self.race_marathon_label.setText(f"Marathon: {time_marathon}")
+                self.race_marathon_label.setText(self.tr("Marathon: {}").format(time_marathon))
 
             # Update info text
             easy_runs = race_predictions.get('easy_runs_count', 0)
             easy_pace = race_predictions.get('median_easy_pace_formatted', '-')
             self.race_info_label.setText(
-                f"Based on {easy_runs} easy runs (pace: {easy_pace}/km). "
-                f"McMillan formula with HR zones."
+                self.tr("Based on {} easy runs (pace: {}/km). "
+                        "McMillan formula with HR zones.").format(easy_runs, easy_pace)
             )
         else:
             # No predictions available
-            self.race_5k_label.setText("5K: Need HR data")
-            self.race_10k_label.setText("10K: Need HR data")
-            self.race_half_label.setText("Half: Need HR data")
-            self.race_marathon_label.setText("Marathon: Need HR data")
+            self.race_5k_label.setText(self.tr("5K: Need HR data"))
+            self.race_10k_label.setText(self.tr("10K: Need HR data"))
+            self.race_half_label.setText(self.tr("Half: Need HR data"))
+            self.race_marathon_label.setText(self.tr("Marathon: Need HR data"))
 
-            reason = race_predictions.get('message', 'Insufficient data') if race_predictions else 'No data'
-            self.race_info_label.setText(f"⚠️ {reason}")
+            reason = race_predictions.get('message', self.tr('Insufficient data')) if race_predictions else self.tr('No data')
+            self.race_info_label.setText(self.tr("⚠️ {}").format(reason))

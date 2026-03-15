@@ -23,7 +23,7 @@ class ScoreChart(QWidget):
 
         # Create chart
         self.chart = QChart()
-        self.chart.setTitle("Training Status Score")
+        self.chart.setTitle(self.tr("Training Status Score"))
         self.chart.setAnimationOptions(QChart.SeriesAnimations)
 
         # Create chart view
@@ -60,7 +60,7 @@ class ScoreChart(QWidget):
 
         # Create series (smoothing already applied if enabled)
         series = QLineSeries()
-        series.setName("Training Score")
+        series.setName(self.tr("Training Score"))
 
         for i, value in enumerate(scores):
             timestamp_ms = int(period_dates[i].timestamp() * 1000)
@@ -75,7 +75,7 @@ class ScoreChart(QWidget):
 
         # Create axes
         axis_x = QDateTimeAxis()
-        axis_x.setTitleText("Date")
+        axis_x.setTitleText(self.tr("Date"))
         axis_x.setFormat("MMM yyyy")
         if period_dates:
             min_date = QDateTime.fromSecsSinceEpoch(int(period_dates[0].timestamp()))
@@ -83,7 +83,7 @@ class ScoreChart(QWidget):
             axis_x.setRange(min_date, max_date)
 
         axis_y = QValueAxis()
-        axis_y.setTitleText("Score (0-100)")
+        axis_y.setTitleText(self.tr("Score (0-100)"))
         axis_y.setLabelFormat("%.1f")
         axis_y.setRange(0, 100)
 

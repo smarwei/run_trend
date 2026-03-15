@@ -23,7 +23,7 @@ class HeartRateChart(QWidget):
 
         # Create chart
         self.chart = QChart()
-        self.chart.setTitle("Heart Rate Analysis")
+        self.chart.setTitle(self.tr("Heart Rate Analysis"))
         self.chart.setAnimationOptions(QChart.SeriesAnimations)
 
         # Create chart view
@@ -56,7 +56,7 @@ class HeartRateChart(QWidget):
         hr_aggregates = [agg for agg in aggregates if agg.get('num_hr_activities', 0) > 0]
 
         if not hr_aggregates:
-            self.chart.setTitle("Heart Rate Analysis (No HR data available)")
+            self.chart.setTitle(self.tr("Heart Rate Analysis (No HR data available)"))
             return
 
         # Extract period dates
@@ -98,7 +98,7 @@ class HeartRateChart(QWidget):
 
             # Create area series - keep reference as instance variable
             self._hr_area = QAreaSeries(self._hr_upper_series, self._hr_lower_series)
-            self._hr_area.setName("HR Range (Min-Max)")
+            self._hr_area.setName(self.tr("HR Range (Min-Max)"))
 
             # Style the area with semi-transparent blue
             area_color = QColor(52, 152, 219, 60)  # Blue with alpha
@@ -113,7 +113,7 @@ class HeartRateChart(QWidget):
 
         # Create average HR series
         avg_hr_series = QLineSeries()
-        avg_hr_series.setName("Average HR")
+        avg_hr_series.setName(self.tr("Average HR"))
 
         for i, value in enumerate(avg_hr_data):
             if value is not None and value > 0:
@@ -128,7 +128,7 @@ class HeartRateChart(QWidget):
 
         # Create efficiency factor series
         ef_series = QLineSeries()
-        ef_series.setName("Efficiency Factor (×1000)")
+        ef_series.setName(self.tr("Efficiency Factor (×1000)"))
 
         for i, value in enumerate(ef_data):
             if value is not None and value > 0:
@@ -143,7 +143,7 @@ class HeartRateChart(QWidget):
 
         # Create axes
         axis_x = QDateTimeAxis()
-        axis_x.setTitleText("Date")
+        axis_x.setTitleText(self.tr("Date"))
         axis_x.setFormat("MMM yyyy")
         if period_dates:
             min_date = QDateTime.fromSecsSinceEpoch(int(period_dates[0].timestamp()))
@@ -152,7 +152,7 @@ class HeartRateChart(QWidget):
 
         # Y-axis for heart rate
         axis_y_hr = QValueAxis()
-        axis_y_hr.setTitleText("Heart Rate (bpm)")
+        axis_y_hr.setTitleText(self.tr("Heart Rate (bpm)"))
         axis_y_hr.setLabelFormat("%d")
 
         # Calculate range for HR axis
@@ -165,7 +165,7 @@ class HeartRateChart(QWidget):
 
         # Y-axis for efficiency factor
         axis_y_ef = QValueAxis()
-        axis_y_ef.setTitleText("Efficiency Factor (m/s per bpm ×1000)")
+        axis_y_ef.setTitleText(self.tr("Efficiency Factor (m/s per bpm ×1000)"))
         axis_y_ef.setLabelFormat("%.2f")
 
         valid_ef_data = [v for v in ef_data if v is not None and v > 0]
