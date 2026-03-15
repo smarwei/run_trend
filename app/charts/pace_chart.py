@@ -62,45 +62,33 @@ class PaceChart(QWidget):
             data = [agg['weighted_avg_pace_min_per_km'] for agg in aggregates]
             title = "Pace Progress"
             y_label = "Pace (min/km)"
+            series_name = "Pace"
         else:  # speed
             data = [agg['avg_speed_kmh'] for agg in aggregates]
             title = "Speed Progress"
             y_label = "Speed (km/h)"
+            series_name = "Speed"
 
         self.chart.setTitle(title)
 
-        # Create raw series
-        raw_series = QLineSeries()
-        raw_series.setName(f"Raw {metric.capitalize()}")
+        # Apply smoothing if enabled
+        if smoothing != 'off':
+            data = Smoother.smooth_series(data, 'sma', smoothing)
+
+        # Create series (smoothing already applied if enabled)
+        series = QLineSeries()
+        series.setName(series_name)
 
         for i, value in enumerate(data):
             timestamp_ms = int(period_dates[i].timestamp() * 1000)
-            raw_series.append(timestamp_ms, value)
+            series.append(timestamp_ms, value)
 
-        # Set pen for raw series
+        # Set pen
         pen = QPen(QColor("#3498db"))
         pen.setWidth(2)
-        raw_series.setPen(pen)
+        series.setPen(pen)
 
-        self.chart.addSeries(raw_series)
-
-        # Add smoothed series if enabled
-        if smoothing != 'off':
-            smoothed_data = Smoother.smooth_series(data, 'sma', smoothing)
-
-            smoothed_series = QLineSeries()
-            smoothed_series.setName("Smoothed")
-
-            for i, value in enumerate(smoothed_data):
-                timestamp_ms = int(period_dates[i].timestamp() * 1000)
-                smoothed_series.append(timestamp_ms, value)
-
-            # Set pen for smoothed series
-            smooth_pen = QPen(QColor("#e74c3c"))
-            smooth_pen.setWidth(3)
-            smoothed_series.setPen(smooth_pen)
-
-            self.chart.addSeries(smoothed_series)
+        self.chart.addSeries(series)
 
         # Create axes
         axis_x = QDateTimeAxis()

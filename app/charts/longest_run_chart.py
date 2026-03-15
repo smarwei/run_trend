@@ -54,38 +54,24 @@ class LongestRunChart(QWidget):
         # Extract longest run data
         longest_runs = [agg['longest_run_km'] for agg in aggregates]
 
-        # Create raw series
-        raw_series = QLineSeries()
-        raw_series.setName("Longest Run")
+        # Apply smoothing if enabled
+        if smoothing != 'off':
+            longest_runs = Smoother.smooth_series(longest_runs, 'sma', smoothing)
 
-        for i, agg in enumerate(aggregates):
+        # Create series (smoothing already applied if enabled)
+        series = QLineSeries()
+        series.setName("Longest Run")
+
+        for i, value in enumerate(longest_runs):
             timestamp_ms = int(period_dates[i].timestamp() * 1000)
-            raw_series.append(timestamp_ms, agg['longest_run_km'])
+            series.append(timestamp_ms, value)
 
-        # Set pen for raw series
+        # Set pen
         pen = QPen(QColor("#e67e22"))
         pen.setWidth(2)
-        raw_series.setPen(pen)
+        series.setPen(pen)
 
-        self.chart.addSeries(raw_series)
-
-        # Add smoothed series if enabled
-        if smoothing != 'off':
-            smoothed_runs = Smoother.smooth_series(longest_runs, 'sma', smoothing)
-
-            smoothed_series = QLineSeries()
-            smoothed_series.setName("Smoothed")
-
-            for i, value in enumerate(smoothed_runs):
-                timestamp_ms = int(period_dates[i].timestamp() * 1000)
-                smoothed_series.append(timestamp_ms, value)
-
-            # Set pen for smoothed series
-            smooth_pen = QPen(QColor("#e74c3c"))
-            smooth_pen.setWidth(3)
-            smoothed_series.setPen(smooth_pen)
-
-            self.chart.addSeries(smoothed_series)
+        self.chart.addSeries(series)
 
         # Create axes
         axis_x = QDateTimeAxis()

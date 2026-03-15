@@ -173,6 +173,37 @@ class ActivityAggregator:
         # Find longest run
         longest_run_km = max((a.get('distance', 0.0) / 1000.0 for a in activities), default=0.0)
 
+        # Heart rate metrics
+        hr_activities = [a for a in activities if a.get('average_heartrate') and a.get('average_heartrate') > 0]
+
+        if hr_activities:
+            avg_heartrate = sum(a.get('average_heartrate', 0) for a in hr_activities) / len(hr_activities)
+            min_avg_heartrate = min(a.get('average_heartrate', 0) for a in hr_activities)
+
+            # Max heartrate: use the highest max_heartrate if available, otherwise highest avg
+            max_hr_values = [a.get('max_heartrate', 0) for a in hr_activities if a.get('max_heartrate')]
+            if max_hr_values:
+                max_heartrate = max(max_hr_values)
+            else:
+                max_heartrate = max(a.get('average_heartrate', 0) for a in hr_activities)
+
+            # Efficiency Factor: Speed (m/s) / Average HR
+            # Calculate for each activity and then average
+            efficiency_factors = []
+            for activity in hr_activities:
+                avg_speed = activity.get('average_speed')
+                avg_hr = activity.get('average_heartrate')
+                if avg_speed and avg_hr and avg_hr > 0:
+                    ef = avg_speed / avg_hr
+                    efficiency_factors.append(ef)
+
+            efficiency_factor = sum(efficiency_factors) / len(efficiency_factors) if efficiency_factors else 0.0
+        else:
+            avg_heartrate = 0.0
+            min_avg_heartrate = 0.0
+            max_heartrate = 0.0
+            efficiency_factor = 0.0
+
         # Calculate active days (unique dates)
         active_dates = set()
         for activity in activities:
@@ -219,5 +250,10 @@ class ActivityAggregator:
             'total_moving_time_min': total_moving_time_min,
             'longest_run_km': longest_run_km,
             'active_days': num_active_days,
-            'consistency_ratio': consistency_ratio
+            'consistency_ratio': consistency_ratio,
+            'avg_heartrate': avg_heartrate,
+            'min_avg_heartrate': min_avg_heartrate,
+            'max_heartrate': max_heartrate,
+            'efficiency_factor': efficiency_factor,
+            'num_hr_activities': len(hr_activities)
         }

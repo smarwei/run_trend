@@ -14,7 +14,7 @@ class Forecaster:
         '5K': 5.0,
         '10K': 10.0,
         'Half Marathon': 21.0975,
-        'Marathon': 42.195
+        'Marathon Ready': 32.0  # Standard marathon preparation long run (20 miles)
     }
 
     @staticmethod
@@ -113,7 +113,8 @@ class Forecaster:
     def estimate_milestone_date(
         historical_data: List[Dict[str, Any]],
         milestone_distance: float,
-        period_type: str = 'week'
+        period_type: str = 'week',
+        metric_key: str = 'total_distance_km'
     ) -> Optional[Dict[str, Any]]:
         """
         Estimate when a milestone distance will be reached.
@@ -122,6 +123,7 @@ class Forecaster:
             historical_data: List of period aggregates
             milestone_distance: Target distance in km
             period_type: 'week' or 'month'
+            metric_key: Metric to use ('total_distance_km' or 'longest_run_km')
 
         Returns:
             Dictionary with milestone estimate or None
@@ -133,7 +135,7 @@ class Forecaster:
         use_recent = min(12, len(historical_data))
         projection = Forecaster.project_trend(
             historical_data,
-            'total_distance_km',
+            metric_key,
             periods_ahead=52,  # Look up to a year ahead
             use_recent_periods=use_recent
         )
@@ -189,7 +191,8 @@ class Forecaster:
     @staticmethod
     def get_milestone_estimates(
         historical_data: List[Dict[str, Any]],
-        period_type: str = 'week'
+        period_type: str = 'week',
+        metric_key: str = 'total_distance_km'
     ) -> Dict[str, Any]:
         """
         Get estimates for all standard milestones.
@@ -197,6 +200,7 @@ class Forecaster:
         Args:
             historical_data: List of period aggregates
             period_type: 'week' or 'month'
+            metric_key: Metric to use ('total_distance_km' for volume, 'longest_run_km' for long run)
 
         Returns:
             Dictionary mapping milestone names to estimates
@@ -207,7 +211,8 @@ class Forecaster:
             estimate = Forecaster.estimate_milestone_date(
                 historical_data,
                 distance_km,
-                period_type
+                period_type,
+                metric_key
             )
             estimates[milestone_name] = estimate
 

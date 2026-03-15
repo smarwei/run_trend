@@ -20,7 +20,7 @@ class ProjectionChart(QWidget):
         '15K Run': 15.0,
         'Half Marathon': 21.1,
         '30K Run': 30.0,
-        'Marathon': 42.195
+        'Marathon Ready': 32.0  # Standard marathon preparation (20 miles)
     }
 
     def __init__(self):

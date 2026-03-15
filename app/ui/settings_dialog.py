@@ -3,7 +3,7 @@ Settings dialog for application configuration.
 """
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QFormLayout,
-    QLineEdit, QPushButton, QLabel, QGroupBox, QMessageBox
+    QLineEdit, QPushButton, QLabel, QGroupBox, QMessageBox, QSpinBox
 )
 from PySide6.QtCore import Qt
 
@@ -61,6 +61,34 @@ class SettingsDialog(QDialog):
         strava_group.setLayout(strava_layout)
         layout.addWidget(strava_group)
 
+        # Heart Rate Settings Group
+        hr_group = QGroupBox("Heart Rate Configuration")
+        hr_layout = QFormLayout()
+
+        # Manual HRmax input
+        self.hrmax_input = QSpinBox()
+        self.hrmax_input.setRange(0, 220)  # 0 = auto-detect
+        self.hrmax_input.setSuffix(" bpm")
+        self.hrmax_input.setSpecialValueText("Auto-detect from activities")
+        self.hrmax_input.setToolTip(
+            "Set your maximum heart rate manually if known.\n"
+            "Set to 0 to auto-detect from your activity data.\n"
+            "Typical values: 180-200 bpm for younger athletes, 160-180 for older."
+        )
+        hr_layout.addRow("Max Heart Rate:", self.hrmax_input)
+
+        # Info label
+        hr_info_label = QLabel(
+            "Manual HRmax improves race time predictions.\n"
+            "If unsure, leave at 'Auto-detect'."
+        )
+        hr_info_label.setWordWrap(True)
+        hr_info_label.setStyleSheet("color: gray; font-size: 10px;")
+        hr_layout.addRow("", hr_info_label)
+
+        hr_group.setLayout(hr_layout)
+        layout.addWidget(hr_group)
+
         # Strava Actions Group
         actions_group = QGroupBox("Strava Actions")
         actions_layout = QVBoxLayout()
@@ -112,14 +140,25 @@ class SettingsDialog(QDialog):
         """Load current settings into form."""
         client_id = self.settings.get('strava_client_id', '')
         client_secret = self.settings.get('strava_client_secret', '')
+        manual_hrmax = self.settings.get('manual_hrmax', 0)
 
         self.client_id_input.setText(client_id)
         self.client_secret_input.setText(client_secret)
+        self.hrmax_input.setValue(manual_hrmax)
 
     def _save_settings(self):
         """Save settings and close dialog."""
+        # Check what changed
+        old_client_id = self.settings.get('strava_client_id', '')
+        old_client_secret = self.settings.get('strava_client_secret', '')
+        old_hrmax = self.settings.get('manual_hrmax', 0)
+
         client_id = self.client_id_input.text().strip()
         client_secret = self.client_secret_input.text().strip()
+        manual_hrmax = self.hrmax_input.value()
+
+        strava_changed = (client_id != old_client_id or client_secret != old_client_secret)
+        hrmax_changed = (manual_hrmax != old_hrmax)
 
         if not client_id or not client_secret:
             reply = QMessageBox.question(
@@ -134,11 +173,41 @@ class SettingsDialog(QDialog):
         self.settings.set('strava_client_id', client_id)
         self.settings.set('strava_client_secret', client_secret)
 
-        QMessageBox.information(
-            self, "Settings Saved",
-            "API credentials saved successfully!\n\n"
-            "Now click 'Connect to Strava' to authorize the application."
-        )
+        # Save manual HRmax
+        self.settings.set('manual_hrmax', manual_hrmax)
+
+        # Build appropriate success message
+        if strava_changed and hrmax_changed:
+            if manual_hrmax > 0:
+                message = (
+                    "Settings saved successfully!\n\n"
+                    "API credentials updated. Click 'Connect to Strava' to authorize.\n"
+                    f"Manual HRmax set to {manual_hrmax} bpm."
+                )
+            else:
+                message = (
+                    "Settings saved successfully!\n\n"
+                    "API credentials updated. Click 'Connect to Strava' to authorize.\n"
+                    "Manual HRmax set to auto-detect."
+                )
+        elif strava_changed:
+            message = (
+                "API credentials saved successfully!\n\n"
+                "Now click 'Connect to Strava' to authorize the application."
+            )
+        elif hrmax_changed:
+            if manual_hrmax > 0:
+                message = f"Manual HRmax set to {manual_hrmax} bpm.\n\nRace predictions will be updated."
+            else:
+                message = "Manual HRmax set to auto-detect.\n\nRace predictions will be updated."
+        else:
+            message = "Settings saved successfully!"
+
+        QMessageBox.information(self, "Settings Saved", message)
+
+        # Trigger data refresh in main window if HRmax changed
+        if hrmax_changed and self.main_window:
+            self.main_window._refresh_data()
 
         self.accept()
 

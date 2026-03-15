@@ -19,6 +19,7 @@ from ..settings.config import AppSettings
 from ..analytics.aggregator import ActivityAggregator
 from ..analytics.training_score import TrainingScoreCalculator
 from ..analytics.smoothing import Smoother
+from ..analytics.race_predictor import RacePredictor
 from ..projection.forecaster import Forecaster
 
 from .summary_panel import SummaryPanel
@@ -33,6 +34,7 @@ from ..charts.projection_chart import ProjectionChart
 from ..charts.longest_run_chart import LongestRunChart
 from ..charts.avg_distance_chart import AvgDistanceChart
 from ..charts.structure_overview_chart import StructureOverviewChart
+from ..charts.heartrate_chart import HeartRateChart
 
 
 class SyncThread(QThread):
@@ -130,6 +132,7 @@ class MainWindow(QMainWindow):
         self.longest_run_chart = LongestRunChart()
         self.avg_distance_chart = AvgDistanceChart()
         self.structure_overview_chart = StructureOverviewChart()
+        self.heartrate_chart = HeartRateChart()
 
         # Tab 1: Overview - Total Load Metrics
         overview_tab = QTabWidget()
@@ -138,19 +141,22 @@ class MainWindow(QMainWindow):
         overview_tab.addTab(self.frequency_chart, "Frequency")
         self.tab_widget.addTab(overview_tab, "Overview")
 
-        # Tab 2: Endurance - Training Structure Metrics
+        # Tab 2: Heart Rate Analysis
+        self.tab_widget.addTab(self.heartrate_chart, "Heart Rate")
+
+        # Tab 3: Endurance - Training Structure Metrics
         endurance_tab = QTabWidget()
         endurance_tab.addTab(self.longest_run_chart, "Longest Run")
         endurance_tab.addTab(self.avg_distance_chart, "Avg Distance/Run")
         self.tab_widget.addTab(endurance_tab, "Endurance")
 
-        # Tab 3: Structure - Comparative Overview
+        # Tab 4: Structure - Comparative Overview
         self.tab_widget.addTab(self.structure_overview_chart, "Structure")
 
-        # Tab 4: Training Score
+        # Tab 5: Training Score
         self.tab_widget.addTab(self.score_chart, "Score")
 
-        # Tab 5: Projection
+        # Tab 6: Projection
         self.tab_widget.addTab(self.projection_chart, "Projection")
 
         main_layout.addWidget(self.tab_widget, stretch=3)
@@ -504,9 +510,67 @@ class MainWindow(QMainWindow):
         current_avg_pace = latest_agg['weighted_avg_pace_min_per_km']
         current_score = latest_agg.get('training_score', 0)
 
-        # Get milestone estimate
-        milestone_estimates = Forecaster.get_milestone_estimates(self.aggregates, self.current_period)
-        marathon_estimate = milestone_estimates.get('Marathon')
+        # Heart rate metrics
+        current_avg_hr = latest_agg.get('avg_heartrate', 0)
+        current_efficiency = latest_agg.get('efficiency_factor', 0)
+
+        # Lifetime max HR across all aggregates
+        max_hr_values = [a.get('max_heartrate', 0) for a in self.aggregates if a.get('max_heartrate', 0) > 0]
+        lifetime_max_hr = max(max_hr_values) if max_hr_values else 0
+
+        # Get milestone estimate (Long Run based, not volume based)
+        milestone_estimates = Forecaster.get_milestone_estimates(
+            self.aggregates,
+            self.current_period,
+            metric_key='longest_run_km'  # Use Long Run progression, not volume
+        )
+        marathon_estimate = milestone_estimates.get('Marathon Ready')
+
+        # Get manual HRmax from settings (if configured)
+        manual_hrmax = self.settings.get('manual_hrmax', 0)
+
+        # Determine which HRmax to display (manual takes priority)
+        display_max_hr = manual_hrmax if manual_hrmax > 0 else lifetime_max_hr
+
+        # Convert activities to format expected by RacePredictor
+        converted_activities = []
+        if self.activities:
+            for activity in self.activities:
+                distance_m = activity.get('distance', 0)
+                moving_time_s = activity.get('moving_time', 0)
+
+                if distance_m > 0 and moving_time_s > 0:
+                    distance_km = distance_m / 1000
+                    pace_s_per_m = moving_time_s / distance_m
+                    pace_min_per_km = pace_s_per_m * 1000 / 60
+
+                    converted_activities.append({
+                        'distance_km': distance_km,
+                        'pace_min_per_km': pace_min_per_km,
+                        'average_heartrate': activity.get('average_heartrate'),
+                        'start_date': activity.get('start_date')
+                    })
+
+        # Check HRmax plausibility (only if manual HRmax not set)
+        hrmax_check = None
+        if manual_hrmax == 0 and lifetime_max_hr > 0 and self.activities:
+            # Only check plausibility if using auto-detected HRmax
+            hrmax_check = RacePredictor.check_hrmax_plausibility(
+                lifetime_max_hr,
+                self.activities,
+                converted_activities
+            )
+
+        # Estimate race times based on HR zones and training pace
+        race_predictions = None
+        if lifetime_max_hr > 0 and converted_activities:
+
+            race_predictions = RacePredictor.estimate_race_times(
+                converted_activities,
+                lifetime_max_hr,
+                current_efficiency,
+                manual_hrmax=manual_hrmax
+            )
 
         self.summary_panel.update_summary({
             'total_runs': total_runs,
@@ -514,7 +578,12 @@ class MainWindow(QMainWindow):
             'current_avg_distance': current_avg_distance,
             'current_avg_pace': current_avg_pace,
             'current_score': current_score,
-            'marathon_estimate': marathon_estimate
+            'current_avg_hr': current_avg_hr,
+            'lifetime_max_hr': display_max_hr,  # Use manual if set, else detected
+            'current_efficiency': current_efficiency,
+            'marathon_estimate': marathon_estimate,
+            'race_predictions': race_predictions,
+            'hrmax_check': hrmax_check
         })
 
     def _update_charts(self):
@@ -525,9 +594,10 @@ class MainWindow(QMainWindow):
         self.pace_chart.update_chart(self.aggregates, smoothing_strength,
                                      self.metric_combo.currentText().lower())
         self.frequency_chart.update_chart(self.aggregates, smoothing_strength)
+        self.heartrate_chart.update_chart(self.aggregates, smoothing_strength)
         self.longest_run_chart.update_chart(self.aggregates, smoothing_strength)
         self.avg_distance_chart.update_chart(self.aggregates, smoothing_strength)
-        self.structure_overview_chart.update_chart(self.aggregates)
+        self.structure_overview_chart.update_chart(self.aggregates, smoothing_strength)
         self.score_chart.update_chart(self.aggregates, smoothing_strength)
         self.projection_chart.update_chart(self.aggregates, self.current_period)
 

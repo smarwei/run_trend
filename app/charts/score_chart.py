@@ -54,38 +54,24 @@ class ScoreChart(QWidget):
         # Extract score data
         scores = [agg.get('training_score', 0) for agg in aggregates]
 
-        # Create raw series
-        raw_series = QLineSeries()
-        raw_series.setName("Training Score")
+        # Apply smoothing if enabled
+        if smoothing != 'off':
+            scores = Smoother.smooth_series(scores, 'sma', smoothing)
+
+        # Create series (smoothing already applied if enabled)
+        series = QLineSeries()
+        series.setName("Training Score")
 
         for i, value in enumerate(scores):
             timestamp_ms = int(period_dates[i].timestamp() * 1000)
-            raw_series.append(timestamp_ms, value)
+            series.append(timestamp_ms, value)
 
-        # Set pen for raw series
+        # Set pen
         pen = QPen(QColor("#16a085"))
         pen.setWidth(2)
-        raw_series.setPen(pen)
+        series.setPen(pen)
 
-        self.chart.addSeries(raw_series)
-
-        # Add smoothed series if enabled
-        if smoothing != 'off':
-            smoothed_scores = Smoother.smooth_series(scores, 'sma', smoothing)
-
-            smoothed_series = QLineSeries()
-            smoothed_series.setName("Smoothed")
-
-            for i, value in enumerate(smoothed_scores):
-                timestamp_ms = int(period_dates[i].timestamp() * 1000)
-                smoothed_series.append(timestamp_ms, value)
-
-            # Set pen for smoothed series
-            smooth_pen = QPen(QColor("#e74c3c"))
-            smooth_pen.setWidth(3)
-            smoothed_series.setPen(smooth_pen)
-
-            self.chart.addSeries(smoothed_series)
+        self.chart.addSeries(series)
 
         # Create axes
         axis_x = QDateTimeAxis()

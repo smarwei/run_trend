@@ -202,5 +202,7 @@ class StravaClient:
             'average_speed': activity.get('average_speed'),
             'max_speed': activity.get('max_speed'),
             'elevation_gain': activity.get('total_elevation_gain'),
-            'average_heartrate': activity.get('average_heartrate')
+            'average_heartrate': activity.get('average_heartrate'),
+            'max_heartrate': activity.get('max_heartrate'),
+            'has_heartrate': activity.get('has_heartrate', False)
         }

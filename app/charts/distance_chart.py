@@ -54,6 +54,12 @@ class DistanceChart(QWidget):
         run_counts = [agg['num_runs'] for agg in aggregates]
         period_dates = [agg['period_date'] for agg in aggregates]
 
+        # Apply smoothing to all data
+        if smoothing != 'off':
+            distances = Smoother.smooth_series(distances, 'sma', smoothing)
+            moving_times = Smoother.smooth_series(moving_times, 'sma', smoothing)
+            run_counts = Smoother.smooth_series(run_counts, 'sma', smoothing)
+
         # Create primary X axis (DateTime)
         axis_x = QDateTimeAxis()
         axis_x.setTitleText("Date")
@@ -72,33 +78,18 @@ class DistanceChart(QWidget):
         axis_y_distance.setRange(0, max_distance * 1.1)
         self.chart.addAxis(axis_y_distance, Qt.AlignLeft)
 
-        # Distance series
-        raw_series = QLineSeries()
-        raw_series.setName("Distance")
+        # Distance series (smoothing already applied if enabled)
+        distance_series = QLineSeries()
+        distance_series.setName("Total Distance")
         for i, value in enumerate(distances):
             timestamp_ms = int(period_dates[i].timestamp() * 1000)
-            raw_series.append(timestamp_ms, value)
+            distance_series.append(timestamp_ms, value)
         pen = QPen(QColor("#3498db"))
         pen.setWidth(2)
-        raw_series.setPen(pen)
-        self.chart.addSeries(raw_series)
-        raw_series.attachAxis(axis_x)
-        raw_series.attachAxis(axis_y_distance)
-
-        # Smoothed distance series if enabled
-        if smoothing != 'off':
-            smoothed_distances = Smoother.smooth_series(distances, 'sma', smoothing)
-            smoothed_series = QLineSeries()
-            smoothed_series.setName("Smoothed Distance")
-            for i, value in enumerate(smoothed_distances):
-                timestamp_ms = int(period_dates[i].timestamp() * 1000)
-                smoothed_series.append(timestamp_ms, value)
-            smooth_pen = QPen(QColor("#e74c3c"))
-            smooth_pen.setWidth(3)
-            smoothed_series.setPen(smooth_pen)
-            self.chart.addSeries(smoothed_series)
-            smoothed_series.attachAxis(axis_x)
-            smoothed_series.attachAxis(axis_y_distance)
+        distance_series.setPen(pen)
+        self.chart.addSeries(distance_series)
+        distance_series.attachAxis(axis_x)
+        distance_series.attachAxis(axis_y_distance)
 
         # Secondary Y axis for time
         axis_y_time = QValueAxis()

@@ -150,6 +150,7 @@ class TestTrainingScoreCalculator(unittest.TestCase):
                 'num_runs': 3,
                 'weighted_avg_pace_min_per_km': 6.0 - (week * 0.05),  # Improving pace
                 'avg_speed_kmh': 10.0,
+                'efficiency_factor': 0.018 + (week * 0.001),  # Improving efficiency
             })
 
     def test_calculate_scores(self):
@@ -174,6 +175,8 @@ class TestTrainingScoreCalculator(unittest.TestCase):
             self.assertIn('normalized_distance', components)
             self.assertIn('normalized_frequency', components)
             self.assertIn('normalized_pace', components)
+            self.assertIn('normalized_efficiency', components)
+            self.assertIn('has_hr_data', components)
 
     def test_empty_aggregates(self):
         """Test with empty aggregates."""
@@ -192,6 +195,38 @@ class TestTrainingScoreCalculator(unittest.TestCase):
         self.assertIsInstance(explanation, str)
         self.assertGreater(len(explanation), 0)
         self.assertIn('training', explanation.lower())
+
+    def test_fallback_without_hr_data(self):
+        """Test that score calculation works without HR data."""
+        # Create aggregates without efficiency_factor
+        aggregates_no_hr = []
+        base_date = datetime(2024, 1, 1)
+
+        for week in range(5):
+            period_date = base_date + timedelta(weeks=week)
+            aggregates_no_hr.append({
+                'period': f'2024-W{week + 1:02d}',
+                'period_start': period_date.isoformat(),
+                'total_distance_km': 20.0 + week,
+                'num_runs': 3,
+                'weighted_avg_pace_min_per_km': 6.0 - (week * 0.05),
+                'avg_speed_kmh': 10.0,
+                'efficiency_factor': 0,  # No HR data
+            })
+
+        scored = TrainingScoreCalculator.calculate_scores(aggregates_no_hr)
+
+        # Should still calculate scores
+        self.assertEqual(len(scored), len(aggregates_no_hr))
+
+        for agg in scored:
+            self.assertIn('training_score', agg)
+            self.assertGreaterEqual(agg['training_score'], 0)
+            self.assertLessEqual(agg['training_score'], 100)
+            # Should mark as no HR data
+            self.assertFalse(agg['score_components']['has_hr_data'])
+            # Efficiency should be 0
+            self.assertEqual(agg['score_components']['normalized_efficiency'], 0.0)
 
 
 if __name__ == '__main__':

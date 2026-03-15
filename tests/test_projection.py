@@ -119,14 +119,14 @@ class TestForecaster(unittest.TestCase):
         self.assertIn('5K', estimates)
         self.assertIn('10K', estimates)
         self.assertIn('Half Marathon', estimates)
-        self.assertIn('Marathon', estimates)
+        self.assertIn('Marathon Ready', estimates)
 
     def test_milestone_distances(self):
         """Test that milestone distances are correct."""
         self.assertEqual(Forecaster.MILESTONES['5K'], 5.0)
         self.assertEqual(Forecaster.MILESTONES['10K'], 10.0)
         self.assertAlmostEqual(Forecaster.MILESTONES['Half Marathon'], 21.0975, places=4)
-        self.assertAlmostEqual(Forecaster.MILESTONES['Marathon'], 42.195, places=3)
+        self.assertEqual(Forecaster.MILESTONES['Marathon Ready'], 32.0)
 
 
 class TestProjectionEdgeCases(unittest.TestCase):

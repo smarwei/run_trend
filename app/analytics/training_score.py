@@ -26,11 +26,13 @@ class TrainingScoreCalculator:
         distances = [a['total_distance_km'] for a in aggregates]
         frequencies = [a['num_runs'] for a in aggregates]
         paces = [a['weighted_avg_pace_min_per_km'] for a in aggregates if a['weighted_avg_pace_min_per_km'] > 0]
+        efficiencies = [a['efficiency_factor'] for a in aggregates if a.get('efficiency_factor', 0) > 0]
 
         # Calculate baseline values (rolling average approach)
         baseline_distance = np.mean(distances) if distances else 0
         baseline_frequency = np.mean(frequencies) if frequencies else 0
         baseline_pace = np.mean(paces) if paces else 0
+        baseline_efficiency = np.mean(efficiencies) if efficiencies else 0
 
         # Avoid division by zero
         if baseline_distance == 0:
@@ -39,6 +41,8 @@ class TrainingScoreCalculator:
             baseline_frequency = 1.0
         if baseline_pace == 0:
             baseline_pace = 6.0  # Default ~6 min/km
+        if baseline_efficiency == 0:
+            baseline_efficiency = 0.018  # Default ~0.018 (corresponds to ~2.78 m/s at 155 bpm)
 
         # Calculate scores for each period
         scored_aggregates = []
@@ -52,10 +56,15 @@ class TrainingScoreCalculator:
                                for j in range(i)
                                if aggregates[j]['weighted_avg_pace_min_per_km'] > 0]
                 rolling_baseline_pace = np.mean(rolling_paces) if rolling_paces else baseline_pace
+                rolling_efficiencies = [aggregates[j]['efficiency_factor']
+                                       for j in range(i)
+                                       if aggregates[j].get('efficiency_factor', 0) > 0]
+                rolling_baseline_efficiency = np.mean(rolling_efficiencies) if rolling_efficiencies else baseline_efficiency
             else:
                 rolling_baseline_distance = baseline_distance
                 rolling_baseline_frequency = baseline_frequency
                 rolling_baseline_pace = baseline_pace
+                rolling_baseline_efficiency = baseline_efficiency
 
             # Normalize distance (higher is better)
             normalized_distance = aggregate['total_distance_km'] / rolling_baseline_distance
@@ -74,12 +83,35 @@ class TrainingScoreCalculator:
             else:
                 normalized_pace = 0.0
 
-            # Compute composite score with weights from spec
-            training_score = (
-                0.50 * normalized_distance +
-                0.25 * normalized_frequency +
-                0.25 * normalized_pace
-            )
+            # Normalize efficiency factor (higher is better)
+            current_efficiency = aggregate.get('efficiency_factor', 0)
+            has_hr_data = current_efficiency > 0
+
+            if has_hr_data:
+                # Efficiency improvement: current / baseline (>1 means better)
+                normalized_efficiency = current_efficiency / rolling_baseline_efficiency
+                normalized_efficiency = min(normalized_efficiency, 1.5)  # Cap at 1.5x improvement
+            else:
+                normalized_efficiency = 0.0
+
+            # Compute composite score with new balanced weights
+            # If no HR data available, adjust weights proportionally
+            if has_hr_data:
+                # New weights: Distance 30%, Frequency 20%, Pace 30%, Efficiency 20%
+                training_score = (
+                    0.30 * normalized_distance +
+                    0.20 * normalized_frequency +
+                    0.30 * normalized_pace +
+                    0.20 * normalized_efficiency
+                )
+            else:
+                # Fallback without HR: Distance 37.5%, Frequency 25%, Pace 37.5%
+                # (proportionally adjusted: 30/80 = 37.5%, 20/80 = 25%, 30/80 = 37.5%)
+                training_score = (
+                    0.375 * normalized_distance +
+                    0.250 * normalized_frequency +
+                    0.375 * normalized_pace
+                )
 
             # Scale to 0-100 range (assuming normalized values average around 1.0)
             training_score = min(max(training_score * 50, 0), 100)
@@ -90,7 +122,9 @@ class TrainingScoreCalculator:
             scored_aggregate['score_components'] = {
                 'normalized_distance': normalized_distance,
                 'normalized_frequency': normalized_frequency,
-                'normalized_pace': normalized_pace
+                'normalized_pace': normalized_pace,
+                'normalized_efficiency': normalized_efficiency,
+                'has_hr_data': has_hr_data
             }
 
             scored_aggregates.append(scored_aggregate)
@@ -110,17 +144,25 @@ Training Score Calculation:
 
 The training score is a composite metric (0-100) reflecting your training progress.
 
-Components:
-• Distance (50%): Total distance compared to your baseline
+Components (when HR data available):
+• Distance (30%): Total distance compared to your baseline
+• Pace (30%): Pace improvement compared to your baseline
+• Efficiency Factor (20%): Aerobic fitness (pace-normalized HR)
+• Frequency (20%): Number of runs compared to your baseline
+
+Components (when HR data NOT available):
+• Distance (37.5%): Total distance compared to your baseline
+• Pace (37.5%): Pace improvement compared to your baseline
 • Frequency (25%): Number of runs compared to your baseline
-• Pace (25%): Pace improvement compared to your baseline
 
 How it works:
 - Score increases when you run more consistently
 - Score increases when you increase distance sustainably
 - Score increases when your pace improves (becomes faster)
-- Baseline is computed from your historical average
+- Score increases when your Efficiency Factor improves (better aerobic fitness)
+- Baseline is computed from your historical rolling average
 - Score is designed to not overreact to single workouts
+- Weights adjust automatically when HR data is unavailable
 
 Interpretation:
 • 0-30: Below baseline, consider increasing volume/consistency

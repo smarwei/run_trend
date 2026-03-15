@@ -7,6 +7,8 @@ from PySide6.QtCore import Qt, QDateTime
 from PySide6.QtGui import QPainter, QPen, QColor, QBrush
 from typing import List, Dict, Any
 
+from ..analytics.smoothing import Smoother
+
 
 class StructureOverviewChart(QWidget):
     """Chart displaying comparative view of training structure metrics."""
@@ -39,12 +41,13 @@ class StructureOverviewChart(QWidget):
 
         layout.addWidget(self.chart_view)
 
-    def update_chart(self, aggregates: List[Dict[str, Any]]):
+    def update_chart(self, aggregates: List[Dict[str, Any]], smoothing: str = 'off'):
         """
         Update chart with new data.
 
         Args:
             aggregates: List of period aggregates
+            smoothing: Smoothing level ('off', 'light', 'medium', 'strong')
         """
         # Remove all series and axes
         self.chart.removeAllSeries()
@@ -78,6 +81,13 @@ class StructureOverviewChart(QWidget):
         norm_runs = normalize(num_runs)
         norm_avg_distances = normalize(avg_distances)
         norm_longest = normalize(longest_runs)
+
+        # Apply smoothing if enabled
+        if smoothing != 'off':
+            norm_distances = Smoother.smooth_series(norm_distances, 'sma', smoothing)
+            norm_runs = Smoother.smooth_series(norm_runs, 'sma', smoothing)
+            norm_avg_distances = Smoother.smooth_series(norm_avg_distances, 'sma', smoothing)
+            norm_longest = Smoother.smooth_series(norm_longest, 'sma', smoothing)
 
         # Create series for each metric
         # Total Distance

@@ -50,6 +50,8 @@ class Database:
                 max_speed REAL,
                 elevation_gain REAL,
                 average_heartrate REAL,
+                max_heartrate REAL,
+                has_heartrate INTEGER DEFAULT 0,
                 last_synced TEXT NOT NULL,
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL
@@ -97,8 +99,10 @@ class Database:
                     strava_id, name, type, start_date, timezone,
                     distance, moving_time, elapsed_time, average_speed,
                     max_speed, elevation_gain, average_heartrate,
+                    max_heartrate, has_heartrate,
                     last_synced, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                         ?,
                          COALESCE((SELECT created_at FROM activities WHERE strava_id = ?), ?),
                          ?)
             ''', (
@@ -114,6 +118,8 @@ class Database:
                 activity_data.get('max_speed'),
                 activity_data.get('elevation_gain'),
                 activity_data.get('average_heartrate'),
+                activity_data.get('max_heartrate'),
+                1 if activity_data.get('has_heartrate') else 0,
                 now,
                 activity_data['strava_id'],
                 now,
