@@ -43,14 +43,14 @@ Repository = "https://github.com/smarwei/run_trend"
 Issues = "https://github.com/smarwei/run_trend/issues"
 
 [project.scripts]
-run-trend = "app.main:main"
+run-trend = "run_trend.main:main"
 
 [tool.setuptools]
-packages = ["app", "app.analytics", "app.charts", "app.projection", "app.settings", "app.storage", "app.strava", "app.sync", "app.ui", "app.translations", "run_trend"]
+packages = ["run_trend", "run_trend.analytics", "run_trend.charts", "run_trend.projection", "run_trend.settings", "run_trend.storage", "run_trend.strava", "run_trend.sync", "run_trend.ui", "run_trend.translations"]
 include-package-data = true
 
 [tool.setuptools.package-data]
-app = ["translations/*.qm", "translations/*.ts"]
+run_trend = ["translations/*.qm", "translations/*.ts"]
 
 [tool.briefcase]
 project_name = "RunTrend"
@@ -61,7 +61,7 @@ formal_name = "RunTrend"
 description = "Track and analyze your running progress from Strava"
 long_description = """RunTrend is a desktop application that helps runners track and analyze their progress over time. Connect your Strava account to import your running activities and visualize your improvement with detailed analytics and trend projections."""
 icon = "icons/hicolor/512x512/apps/de.arneweiss.RunTrend"
-sources = ["app", "run_trend"]
+sources = ["run_trend"]
 requires = [
     "PySide6>=6.6.0",
     "requests>=2.31.0",

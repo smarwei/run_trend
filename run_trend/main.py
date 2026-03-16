@@ -8,8 +8,8 @@ import sys
 import os
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import QTranslator, QLocale
-from app.ui.main_window import MainWindow
-from app.settings.config import SettingsManager
+from run_trend.ui.main_window import MainWindow
+from run_trend.settings.config import SettingsManager
 
 
 def load_translations(app, settings):
