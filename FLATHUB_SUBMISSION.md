@@ -190,10 +190,9 @@ Der Workflow `.github/workflows/release.yml` baut automatisch bei jedem Tag-Push
 - Universal Binary (Intel + Apple Silicon)
 - Upload als Release Asset
 
-**Linux Build:**
-- Erstellt AppImage via Briefcase
-- Portable, keine Installation nötig
-- Upload als Release Asset
+**Linux:**
+- Kein separater Build in GitHub Actions
+- Linux-Nutzer verwenden Flatpak über Flathub
 
 **Release:**
 - Erstellt automatisch GitHub Release

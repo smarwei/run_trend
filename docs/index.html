@@ -234,7 +234,7 @@
                     <div class="platform-icon">🪟</div>
                     <h3>Windows</h3>
                     <p>Windows 10/11</p>
-                    <a href="#" id="windows-download" class="download-btn disabled">Download .exe</a>
+                    <a href="#" id="windows-download" class="download-btn disabled">Download .msi</a>
                 </div>
 
                 <div class="download-card">
@@ -247,14 +247,7 @@
                 <div class="download-card">
                     <div class="platform-icon">🐧</div>
                     <h3>Linux</h3>
-                    <p>AppImage</p>
-                    <a href="#" id="linux-download" class="download-btn disabled">Download</a>
-                </div>
-
-                <div class="download-card">
-                    <div class="platform-icon">📦</div>
-                    <h3>Flatpak</h3>
-                    <p>Universal Linux</p>
+                    <p>Via Flatpak</p>
                     <a href="https://flathub.org/apps/de.arneweiss.RunTrend"
                        class="download-btn"
                        target="_blank">Get on Flathub</a>
@@ -296,7 +289,7 @@
                     const assets = release.assets || [];
 
                     // Windows
-                    const windowsAsset = assets.find(a => a.name.includes('.exe') || a.name.includes('windows'));
+                    const windowsAsset = assets.find(a => a.name.includes('.msi') || a.name.includes('windows'));
                     if (windowsAsset) {
                         const btn = document.getElementById('windows-download');
                         btn.href = windowsAsset.browser_download_url;
@@ -308,14 +301,6 @@
                     if (macosAsset) {
                         const btn = document.getElementById('macos-download');
                         btn.href = macosAsset.browser_download_url;
-                        btn.classList.remove('disabled');
-                    }
-
-                    // Linux
-                    const linuxAsset = assets.find(a => a.name.includes('AppImage') || a.name.includes('linux'));
-                    if (linuxAsset) {
-                        const btn = document.getElementById('linux-download');
-                        btn.href = linuxAsset.browser_download_url;
                         btn.classList.remove('disabled');
                     }
                 } else {
