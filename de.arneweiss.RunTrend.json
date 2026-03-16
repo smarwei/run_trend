@@ -30,10 +30,8 @@
       ],
       "sources": [
         {
-          "type": "git",
-          "url": "https://github.com/smarwei/run_trend.git",
-          "tag": "v0.1.0",
-          "commit": "e02a677662e66394bbcaaf385395db007bc7aed0"
+          "type": "dir",
+          "path": "."
         }
       ],
       "post-install": [
@@ -42,7 +40,9 @@
         "install -Dm644 icons/hicolor/64x64/apps/de.arneweiss.RunTrend.png ${FLATPAK_DEST}/share/icons/hicolor/64x64/apps/de.arneweiss.RunTrend.png",
         "install -Dm644 icons/hicolor/128x128/apps/de.arneweiss.RunTrend.png ${FLATPAK_DEST}/share/icons/hicolor/128x128/apps/de.arneweiss.RunTrend.png",
         "install -Dm644 icons/hicolor/256x256/apps/de.arneweiss.RunTrend.png ${FLATPAK_DEST}/share/icons/hicolor/256x256/apps/de.arneweiss.RunTrend.png",
-        "install -Dm644 icons/hicolor/512x512/apps/de.arneweiss.RunTrend.png ${FLATPAK_DEST}/share/icons/hicolor/512x512/apps/de.arneweiss.RunTrend.png"
+        "install -Dm644 icons/hicolor/512x512/apps/de.arneweiss.RunTrend.png ${FLATPAK_DEST}/share/icons/hicolor/512x512/apps/de.arneweiss.RunTrend.png",
+        "install -Dm644 MANUAL_de.md ${FLATPAK_DEST}/lib/python3.13/site-packages/MANUAL_de.md",
+        "install -Dm644 MANUAL_en.md ${FLATPAK_DEST}/lib/python3.13/site-packages/MANUAL_en.md"
       ]
     }
   ]
