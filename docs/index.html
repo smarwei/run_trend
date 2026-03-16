@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RunTrend - Track Your Running Progress</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .tagline {
+            font-size: 1.5rem;
+            opacity: 0.95;
+            margin-bottom: 40px;
+        }
+
+        .hero {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 40px;
+            margin: 40px 0;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .feature {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .feature h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .downloads {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 40px;
+            margin: 40px 0;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .downloads h2 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+        }
+
+        .download-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .download-card {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .download-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+        }
+
+        .download-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .download-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .download-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .download-btn.disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .download-btn.disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .platform-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .version-info {
+            text-align: center;
+            color: #666;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: white;
+            opacity: 0.9;
+        }
+
+        footer a {
+            color: white;
+            text-decoration: underline;
+        }
+
+        .screenshot {
+            width: 100%;
+            max-width: 800px;
+            margin: 40px auto;
+            display: block;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🏃 RunTrend</h1>
+            <p class="tagline">Track and analyze your running progress from Strava</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="hero">
+            <h2 style="text-align: center; color: #667eea; margin-bottom: 40px;">Turn Your Runs Into Insights</h2>
+
+            <div class="features">
+                <div class="feature">
+                    <h3>📊 Strava Integration</h3>
+                    <p>Connect your Strava account with OAuth and automatically sync your running activities.</p>
+                </div>
+                <div class="feature">
+                    <h3>❤️ Heart Rate Analytics</h3>
+                    <p>Track your aerobic fitness development with detailed heart rate zone analysis.</p>
+                </div>
+                <div class="feature">
+                    <h3>🎯 Race Predictions</h3>
+                    <p>Get accurate race time predictions for 5K, 10K, half marathon, and marathon distances.</p>
+                </div>
+                <div class="feature">
+                    <h3>🌍 Internationalization</h3>
+                    <p>Full support for German and English with automatic language detection.</p>
+                </div>
+                <div class="feature">
+                    <h3>🔒 Privacy-Focused</h3>
+                    <p>All your data is stored locally on your device. No cloud storage, no tracking.</p>
+                </div>
+                <div class="feature">
+                    <h3>📈 Trend Analysis</h3>
+                    <p>Visualize your progress over time with interactive charts and projections.</p>
+                </div>
+            </div>
+
+            <img src="https://raw.githubusercontent.com/smarwei/run_trend/v0.1.0/screenshots/main-window.png"
+                 alt="RunTrend Screenshot"
+                 class="screenshot"
+                 onerror="this.style.display='none'">
+        </div>
+
+        <div class="downloads">
+            <h2>Download RunTrend</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 30px;">Choose your platform below</p>
+
+            <div class="download-grid">
+                <div class="download-card">
+                    <div class="platform-icon">🪟</div>
+                    <h3>Windows</h3>
+                    <p>Windows 10/11</p>
+                    <a href="#" id="windows-download" class="download-btn disabled">Download .exe</a>
+                </div>
+
+                <div class="download-card">
+                    <div class="platform-icon">🍎</div>
+                    <h3>macOS</h3>
+                    <p>macOS 11+</p>
+                    <a href="#" id="macos-download" class="download-btn disabled">Download .dmg</a>
+                </div>
+
+                <div class="download-card">
+                    <div class="platform-icon">🐧</div>
+                    <h3>Linux</h3>
+                    <p>AppImage</p>
+                    <a href="#" id="linux-download" class="download-btn disabled">Download</a>
+                </div>
+
+                <div class="download-card">
+                    <div class="platform-icon">📦</div>
+                    <h3>Flatpak</h3>
+                    <p>Universal Linux</p>
+                    <a href="https://flathub.org/apps/de.arneweiss.RunTrend"
+                       class="download-btn"
+                       target="_blank">Get on Flathub</a>
+                </div>
+            </div>
+
+            <div class="version-info" id="version-info">
+                <div class="loading">Loading latest version...</div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>RunTrend is open source software licensed under MIT with Commons Clause</p>
+            <p style="margin-top: 10px;">
+                <a href="https://github.com/smarwei/run_trend" target="_blank">GitHub</a> •
+                <a href="https://github.com/smarwei/run_trend/issues" target="_blank">Report Issues</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Fetch latest release info from GitHub
+        async function loadLatestRelease() {
+            try {
+                const response = await fetch('https://api.github.com/repos/smarwei/run_trend/releases/latest');
+                const release = await response.json();
+
+                if (release.tag_name) {
+                    // Update version info
+                    document.getElementById('version-info').innerHTML = `
+                        <strong>Latest Version:</strong> ${release.tag_name}
+                        <span style="margin: 0 10px;">•</span>
+                        <strong>Released:</strong> ${new Date(release.published_at).toLocaleDateString()}
+                    `;
+
+                    // Find and link download assets
+                    const assets = release.assets || [];
+
+                    // Windows
+                    const windowsAsset = assets.find(a => a.name.includes('.exe') || a.name.includes('windows'));
+                    if (windowsAsset) {
+                        const btn = document.getElementById('windows-download');
+                        btn.href = windowsAsset.browser_download_url;
+                        btn.classList.remove('disabled');
+                    }
+
+                    // macOS
+                    const macosAsset = assets.find(a => a.name.includes('.dmg') || a.name.includes('macos'));
+                    if (macosAsset) {
+                        const btn = document.getElementById('macos-download');
+                        btn.href = macosAsset.browser_download_url;
+                        btn.classList.remove('disabled');
+                    }
+
+                    // Linux
+                    const linuxAsset = assets.find(a => a.name.includes('AppImage') || a.name.includes('linux'));
+                    if (linuxAsset) {
+                        const btn = document.getElementById('linux-download');
+                        btn.href = linuxAsset.browser_download_url;
+                        btn.classList.remove('disabled');
+                    }
+                } else {
+                    document.getElementById('version-info').innerHTML =
+                        '<p>No releases available yet. Binaries will be available soon!</p>';
+                }
+            } catch (error) {
+                console.error('Failed to load release info:', error);
+                document.getElementById('version-info').innerHTML =
+                    '<p>Unable to load release information. Please visit <a href="https://github.com/smarwei/run_trend/releases" target="_blank">GitHub Releases</a> directly.</p>';
+            }
+        }
+
+        // Load release info when page loads
+        loadLatestRelease();
+    </script>
+</body>
+</html>
