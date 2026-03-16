@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Track and analyze your running progress from Strava. Get insights, predictions, and detailed analytics for your training.">
     <title>RunTrend - Your Personal Running Analytics Dashboard</title>
+    <meta name="description-de" content="Verfolgen und analysieren Sie Ihren Lauffortschritt von Strava. Erhalten Sie Einblicke, Vorhersagen und detaillierte Analysen für Ihr Training.">
+    <meta name="title-de" content="RunTrend - Ihr persönliches Lauf-Analytics Dashboard">
     <style>
         :root {
             --primary: #667eea;
@@ -16,6 +18,7 @@
             --bg-light: #f7fafc;
             --bg-white: #ffffff;
             --border: #e2e8f0;
+            --success: #48bb78;
         }
 
         * {
@@ -80,11 +83,42 @@
             color: var(--primary);
         }
 
+        .lang-switcher {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background: var(--bg-light);
+            padding: 6px 8px;
+            border-radius: 20px;
+        }
+
+        .lang-btn {
+            padding: 4px 12px;
+            border: none;
+            background: transparent;
+            color: var(--text-light);
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .lang-btn:hover {
+            background: var(--bg-white);
+            color: var(--text-dark);
+        }
+
+        .lang-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
         /* Hero Section */
         .hero {
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
-            padding: 120px 0 80px;
+            padding: 100px 0 60px;
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -107,19 +141,29 @@
         }
 
         .hero h1 {
-            font-size: 4rem;
+            font-size: 3.5rem;
             font-weight: 800;
             margin-bottom: 24px;
             line-height: 1.1;
         }
 
-        .hero p {
+        .hero .subtitle {
             font-size: 1.5rem;
-            margin-bottom: 40px;
+            margin-bottom: 16px;
             opacity: 0.95;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero .problem {
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+            opacity: 0.85;
             max-width: 700px;
             margin-left: auto;
             margin-right: auto;
+            font-style: italic;
         }
 
         .cta-buttons {
@@ -187,7 +231,56 @@
             font-size: 24px;
         }
 
-        /* Features Section */
+        /* Problem/Solution */
+        .problem-solution {
+            padding: 80px 0;
+        }
+
+        .split-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .content-block h2 {
+            font-size: 2.5rem;
+            margin-bottom: 24px;
+            color: var(--text-dark);
+        }
+
+        .content-block h3 {
+            font-size: 1.8rem;
+            margin-bottom: 16px;
+            color: var(--primary);
+        }
+
+        .content-block ul {
+            list-style: none;
+            margin: 24px 0;
+        }
+
+        .content-block li {
+            padding: 12px 0;
+            padding-left: 32px;
+            position: relative;
+            color: var(--text-dark);
+        }
+
+        .content-block li::before {
+            content: '✗';
+            position: absolute;
+            left: 0;
+            color: #e53e3e;
+            font-weight: bold;
+        }
+
+        .content-block.solution li::before {
+            content: '✓';
+            color: var(--success);
+        }
+
+        /* Section */
         .section {
             padding: 80px 0;
         }
@@ -207,18 +300,19 @@
         .section-subtitle {
             font-size: 1.25rem;
             color: var(--text-light);
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto;
         }
 
+        /* Features Grid */
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 40px;
         }
 
         .feature-card {
-            padding: 32px;
+            padding: 40px;
             background: var(--bg-white);
             border: 1px solid var(--border);
             border-radius: 16px;
@@ -232,19 +326,104 @@
         }
 
         .feature-icon {
-            font-size: 3rem;
-            margin-bottom: 20px;
+            font-size: 3.5rem;
+            margin-bottom: 24px;
         }
 
         .feature-card h3 {
             font-size: 1.5rem;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
             color: var(--text-dark);
         }
 
         .feature-card p {
             color: var(--text-light);
-            line-height: 1.7;
+            line-height: 1.8;
+            margin-bottom: 16px;
+        }
+
+        .feature-card .feature-details {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .feature-card .feature-details strong {
+            color: var(--primary);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        /* Use Cases */
+        .use-cases {
+            background: var(--bg-light);
+        }
+
+        .use-case-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 32px;
+        }
+
+        .use-case {
+            background: white;
+            padding: 32px;
+            border-radius: 16px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .use-case h4 {
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+            color: var(--text-dark);
+        }
+
+        .use-case .persona {
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        /* Why Section */
+        .why-runtrend {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 80px 0;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 48px;
+        }
+
+        .comparison-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 32px;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .comparison-card h3 {
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .comparison-card ul {
+            list-style: none;
+        }
+
+        .comparison-card li {
+            padding: 8px 0;
+            padding-left: 28px;
+            position: relative;
+        }
+
+        .comparison-card li::before {
+            content: '•';
+            position: absolute;
+            left: 8px;
         }
 
         /* How It Works */
@@ -283,6 +462,35 @@
         .step h3 {
             font-size: 1.25rem;
             margin-bottom: 12px;
+        }
+
+        /* FAQ */
+        .faq {
+            padding: 80px 0;
+        }
+
+        .faq-list {
+            max-width: 800px;
+            margin: 48px auto 0;
+        }
+
+        .faq-item {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            padding: 24px;
+        }
+
+        .faq-item h4 {
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            color: var(--primary);
+        }
+
+        .faq-item p {
+            color: var(--text-light);
+            line-height: 1.7;
         }
 
         /* Screenshot */
@@ -442,7 +650,7 @@
                 font-size: 2.5rem;
             }
 
-            .hero p {
+            .hero .subtitle {
                 font-size: 1.25rem;
             }
 
@@ -453,12 +661,25 @@
             .nav-links {
                 display: none;
             }
+
+            .split-content {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .loading {
             text-align: center;
             padding: 20px;
             color: var(--text-light);
+        }
+
+        .highlight {
+            color: var(--primary);
+            font-weight: 600;
         }
     </style>
 </head>
@@ -468,22 +689,27 @@
         <div class="container">
             <div class="logo">🏃 RunTrend</div>
             <ul class="nav-links">
-                <li><a href="#features">Features</a></li>
-                <li><a href="#how-it-works">How It Works</a></li>
-                <li><a href="#download">Download</a></li>
+                <li><a href="#why" data-i18n="nav.why">Why RunTrend</a></li>
+                <li><a href="#features" data-i18n="nav.features">Features</a></li>
+                <li><a href="#download" data-i18n="nav.download">Download</a></li>
                 <li><a href="https://github.com/smarwei/run_trend" target="_blank">GitHub</a></li>
             </ul>
+            <div class="lang-switcher">
+                <button class="lang-btn" data-lang="en" onclick="setLanguage('en')">EN</button>
+                <button class="lang-btn" data-lang="de" onclick="setLanguage('de')">DE</button>
+            </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
     <section class="hero">
         <div class="container hero-content">
-            <h1>Your Personal Running<br>Analytics Dashboard</h1>
-            <p>Turn your Strava data into actionable insights. Track progress, predict race times, and optimize your training with powerful analytics.</p>
+            <h1 data-i18n="hero.title">Stop Guessing.<br>Start Improving.</h1>
+            <p class="subtitle" data-i18n="hero.subtitle">Turn your Strava data into actionable insights with powerful analytics built for serious runners.</p>
+            <p class="problem" data-i18n="hero.problem">"I run regularly, but am I actually getting faster? What's holding me back?"</p>
             <div class="cta-buttons">
-                <a href="#download" class="btn btn-primary">Download Free</a>
-                <a href="https://github.com/smarwei/run_trend" target="_blank" class="btn btn-secondary">View on GitHub</a>
+                <a href="#download" class="btn btn-primary" data-i18n="hero.cta.download">Download Free</a>
+                <a href="#why" class="btn btn-secondary" data-i18n="hero.cta.learn">Learn More</a>
             </div>
         </div>
     </section>
@@ -494,19 +720,87 @@
             <div class="badges">
                 <div class="badge">
                     <span class="badge-icon">✅</span>
-                    <span>100% Free & Open Source</span>
+                    <span data-i18n="trust.free">100% Free & Open Source</span>
                 </div>
                 <div class="badge">
                     <span class="badge-icon">🔒</span>
-                    <span>Privacy-Focused</span>
+                    <span data-i18n="trust.privacy">Privacy-First (Local Storage)</span>
                 </div>
                 <div class="badge">
                     <span class="badge-icon">🚀</span>
-                    <span>Cross-Platform</span>
+                    <span data-i18n="trust.platform">Cross-Platform Desktop App</span>
                 </div>
                 <div class="badge">
                     <span class="badge-icon">📊</span>
-                    <span>Strava Integration</span>
+                    <span data-i18n="trust.sync">Auto-Sync with Strava</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem/Solution -->
+    <section class="problem-solution">
+        <div class="container">
+            <div class="split-content">
+                <div class="content-block">
+                    <h2 data-i18n="problem.title">The Problem</h2>
+                    <p data-i18n="problem.text">Strava shows you <strong>what</strong> you did, but not <strong>why</strong> it matters or <strong>how</strong> to improve.</p>
+                    <ul>
+                        <li data-i18n="problem.1">No trend analysis over time</li>
+                        <li data-i18n="problem.2">Limited heart rate insights</li>
+                        <li data-i18n="problem.3">No race time predictions</li>
+                        <li data-i18n="problem.4">Can't track aerobic development</li>
+                        <li data-i18n="problem.5">Missing training load analysis</li>
+                        <li data-i18n="problem.6">No long-term progress visualization</li>
+                    </ul>
+                </div>
+
+                <div class="content-block solution">
+                    <h2 data-i18n="solution.title">The Solution</h2>
+                    <p data-i18n="solution.text">RunTrend analyzes your Strava data and gives you <strong>insights that actually help you improve</strong>.</p>
+                    <ul>
+                        <li data-i18n="solution.1">See your progress over weeks and months</li>
+                        <li data-i18n="solution.2">Deep heart rate zone analysis</li>
+                        <li data-i18n="solution.3">Accurate race time predictions</li>
+                        <li data-i18n="solution.4">Track your aerobic fitness development</li>
+                        <li data-i18n="solution.5">Understand your training structure</li>
+                        <li data-i18n="solution.6">Interactive charts with trend projections</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why RunTrend -->
+    <section id="why" class="why-runtrend">
+        <div class="container">
+            <div class="section-header" style="color: white;">
+                <h2 class="section-title" style="color: white;" data-i18n="why.title">Why RunTrend vs Just Strava?</h2>
+                <p class="section-subtitle" style="color: rgba(255,255,255,0.9);" data-i18n="why.subtitle">We're not trying to replace Strava – we make it better by giving you deeper insights into your training.</p>
+            </div>
+
+            <div class="comparison-grid">
+                <div class="comparison-card">
+                    <h3 data-i18n="why.strava.title">Strava Shows You</h3>
+                    <ul>
+                        <li data-i18n="why.strava.1">Individual run statistics</li>
+                        <li data-i18n="why.strava.2">Basic weekly totals</li>
+                        <li data-i18n="why.strava.3">Segment leaderboards</li>
+                        <li data-i18n="why.strava.4">Social feed and kudos</li>
+                        <li data-i18n="why.strava.5">Route mapping</li>
+                    </ul>
+                </div>
+
+                <div class="comparison-card">
+                    <h3 data-i18n="why.runtrend.title">RunTrend Shows You</h3>
+                    <ul>
+                        <li data-i18n="why.runtrend.1"><strong>Trends</strong> across weeks/months</li>
+                        <li data-i18n="why.runtrend.2"><strong>Predictions</strong> for race times</li>
+                        <li data-i18n="why.runtrend.3"><strong>Heart rate zones</strong> analysis</li>
+                        <li data-i18n="why.runtrend.4"><strong>Aerobic development</strong> tracking</li>
+                        <li data-i18n="why.runtrend.5"><strong>Training structure</strong> insights</li>
+                        <li data-i18n="why.runtrend.6"><strong>Progress projections</strong> with charts</li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -516,45 +810,105 @@
     <section id="features" class="section">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">Everything You Need to Improve</h2>
-                <p class="section-subtitle">Powerful analytics tools designed for serious runners who want to track and optimize their performance.</p>
+                <h2 class="section-title" data-i18n="features.title">Powerful Analytics for Serious Runners</h2>
+                <p class="section-subtitle" data-i18n="features.subtitle">Every feature is designed to answer one question: "Am I improving, and what should I do next?"</p>
             </div>
 
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">📊</div>
-                    <h3>Seamless Strava Integration</h3>
-                    <p>Connect with OAuth, automatically sync your activities, and keep your data up-to-date without manual imports.</p>
+                    <h3 data-i18n="feature.sync.title">Automatic Strava Sync</h3>
+                    <p data-i18n="feature.sync.text">Connect once with OAuth, and all your runs sync automatically. No manual imports, no CSV files, no hassle.</p>
+                    <div class="feature-details">
+                        <strong>What you get:</strong>
+                        <p data-i18n="feature.sync.details">Every run, every heart rate data point, every split – instantly analyzed and visualized. Just connect and go.</p>
+                    </div>
                 </div>
 
                 <div class="feature-card">
                     <div class="feature-icon">❤️</div>
-                    <h3>Heart Rate Analytics</h3>
-                    <p>Monitor your aerobic fitness development with detailed heart rate zone analysis and trends over time.</p>
+                    <h3 data-i18n="feature.hr.title">Heart Rate Zone Analytics</h3>
+                    <p data-i18n="feature.hr.text">See exactly how much time you spend in each zone, track your aerobic development, and understand if you're training in the right zones.</p>
+                    <div class="feature-details">
+                        <strong>What you get:</strong>
+                        <p data-i18n="feature.hr.details">Charts showing your average heart rate trends, zone distribution over time, and whether your aerobic base is improving.</p>
+                    </div>
                 </div>
 
                 <div class="feature-card">
                     <div class="feature-icon">🎯</div>
-                    <h3>Race Time Predictions</h3>
-                    <p>Get accurate predictions for 5K, 10K, half marathon, and marathon based on your current fitness level.</p>
+                    <h3 data-i18n="feature.race.title">Race Time Predictions</h3>
+                    <p data-i18n="feature.race.text">Based on your recent training, get accurate predictions for 5K, 10K, half marathon, and marathon times.</p>
+                    <div class="feature-details">
+                        <strong>What you get:</strong>
+                        <p data-i18n="feature.race.details">Know what pace to target in your next race. See how your predicted times improve as you train.</p>
+                    </div>
                 </div>
 
                 <div class="feature-card">
                     <div class="feature-icon">📈</div>
-                    <h3>Progress Tracking</h3>
-                    <p>Visualize your improvement with interactive charts showing distance, pace, frequency, and training load.</p>
+                    <h3 data-i18n="feature.progress.title">Progress Tracking & Trends</h3>
+                    <p data-i18n="feature.progress.text">Interactive charts showing your distance, pace, frequency, longest runs, and training structure over time – with trend lines and projections.</p>
+                    <div class="feature-details">
+                        <strong>What you get:</strong>
+                        <p data-i18n="feature.progress.details">See if you're running more, faster, or more consistently. Spot patterns in your training that lead to improvement.</p>
+                    </div>
                 </div>
 
                 <div class="feature-card">
                     <div class="feature-icon">🔒</div>
-                    <h3>Privacy First</h3>
-                    <p>All data stays on your device. No cloud storage, no tracking, complete control over your information.</p>
+                    <h3 data-i18n="feature.privacy.title">Privacy-First Design</h3>
+                    <p data-i18n="feature.privacy.text">All your data stays on YOUR device. No cloud uploads, no tracking, no selling your data. Full control, complete privacy.</p>
+                    <div class="feature-details">
+                        <strong>What you get:</strong>
+                        <p data-i18n="feature.privacy.details">Peace of mind knowing your training data is yours and yours alone. Works completely offline after initial sync.</p>
+                    </div>
                 </div>
 
                 <div class="feature-card">
                     <div class="feature-icon">🌍</div>
-                    <h3>Multilingual Support</h3>
-                    <p>Full support for German and English with automatic language detection based on your system settings.</p>
+                    <h3 data-i18n="feature.lang.title">Multilingual Support</h3>
+                    <p data-i18n="feature.lang.text">Full German and English support with automatic language detection. UI automatically adapts to your system language.</p>
+                    <div class="feature-details">
+                        <strong>What you get:</strong>
+                        <p data-i18n="feature.lang.details">RunTrend in your language, no configuration needed. Perfect for international runners.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Use Cases -->
+    <section class="use-cases">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title" data-i18n="usecase.title">Who Is RunTrend For?</h2>
+                <p class="section-subtitle" data-i18n="usecase.subtitle">Whether you're training for your first 5K or your tenth marathon, RunTrend helps you understand your progress.</p>
+            </div>
+
+            <div class="use-case-grid">
+                <div class="use-case">
+                    <p class="persona" data-i18n="usecase.marathon.persona">🏃‍♀️ Marathon Trainees</p>
+                    <h4 data-i18n="usecase.marathon.title">"Am I building enough aerobic base?"</h4>
+                    <p data-i18n="usecase.marathon.text">Track your long run progression, monitor heart rate zones during base building, and get realistic marathon time predictions based on your current fitness.</p>
+                </div>
+
+                <div class="use-case">
+                    <p class="persona" data-i18n="usecase.speed.persona">⚡ Speed Seekers</p>
+                    <h4 data-i18n="usecase.speed.title">"Am I actually getting faster?"</h4>
+                    <p data-i18n="usecase.speed.text">See pace trends over time, track improvements in your average speed, and understand if your training is moving you in the right direction.</p>
+                </div>
+
+                <div class="use-case">
+                    <p class="persona" data-i18n="usecase.data.persona">📊 Data-Driven Athletes</p>
+                    <h4 data-i18n="usecase.data.title">"What do my numbers really mean?"</h4>
+                    <p data-i18n="usecase.data.text">Dive deep into heart rate analytics, training structure, and long-term trends. Make informed decisions based on your actual data, not guesswork.</p>
+                </div>
+
+                <div class="use-case">
+                    <p class="persona" data-i18n="usecase.goal.persona">🎯 Goal-Oriented Runners</p>
+                    <h4 data-i18n="usecase.goal.title">"Will I hit my target time?"</h4>
+                    <p data-i18n="usecase.goal.text">Get race predictions that update as you train. Know if you're on track for your goal, or if you need to adjust your training plan.</p>
                 </div>
             </div>
         </div>
@@ -564,27 +918,27 @@
     <section id="how-it-works" class="section how-it-works">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">Get Started in Minutes</h2>
-                <p class="section-subtitle">Three simple steps to unlock your running insights</p>
+                <h2 class="section-title" data-i18n="how.title">Get Started in 3 Minutes</h2>
+                <p class="section-subtitle" data-i18n="how.subtitle">From download to insights, faster than your warm-up run</p>
             </div>
 
             <div class="steps">
                 <div class="step">
                     <div class="step-number">1</div>
-                    <h3>Download & Install</h3>
-                    <p>Choose your platform and install RunTrend on your computer. No complicated setup required.</p>
+                    <h3 data-i18n="how.step1.title">Download & Install</h3>
+                    <p data-i18n="how.step1.text">Choose your platform (Windows, macOS, or Linux) and install. No signup required, no payment info, completely free.</p>
                 </div>
 
                 <div class="step">
                     <div class="step-number">2</div>
-                    <h3>Connect Strava</h3>
-                    <p>Securely link your Strava account with OAuth. Your credentials never leave Strava's servers.</p>
+                    <h3 data-i18n="how.step2.title">Connect Strava</h3>
+                    <p data-i18n="how.step2.text">Click "Connect Strava" and authorize RunTrend. Your credentials stay with Strava – we never see your password.</p>
                 </div>
 
                 <div class="step">
                     <div class="step-number">3</div>
-                    <h3>Explore Insights</h3>
-                    <p>View your analytics, track progress, get race predictions, and optimize your training.</p>
+                    <h3 data-i18n="how.step3.title">Explore Your Data</h3>
+                    <p data-i18n="how.step3.text">Your runs sync automatically. View charts, get predictions, track trends, and understand your progress like never before.</p>
                 </div>
             </div>
         </div>
@@ -594,8 +948,8 @@
     <section class="section screenshot-section">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">Beautiful & Intuitive Interface</h2>
-                <p class="section-subtitle">Designed for clarity and ease of use</p>
+                <h2 class="section-title" data-i18n="screenshot.title">Clean, Intuitive Interface</h2>
+                <p class="section-subtitle" data-i18n="screenshot.subtitle">All your running data, beautifully visualized</p>
             </div>
             <img src="https://raw.githubusercontent.com/smarwei/run_trend/v0.1.0/screenshots/main-window.png"
                  alt="RunTrend Interface"
@@ -604,41 +958,83 @@
         </div>
     </section>
 
+    <!-- FAQ -->
+    <section class="faq">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title" data-i18n="faq.title">Frequently Asked Questions</h2>
+            </div>
+
+            <div class="faq-list">
+                <div class="faq-item">
+                    <h4 data-i18n="faq.free.q">Is RunTrend really free?</h4>
+                    <p data-i18n="faq.free.a">Yes, completely free. RunTrend is open source software. There are no premium features, no subscriptions, no hidden costs. Download and use all features forever.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4 data-i18n="faq.offline.q">Does it work without internet?</h4>
+                    <p data-i18n="faq.offline.a">Yes. After the initial sync with Strava, RunTrend works completely offline. All your data is stored locally on your device.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4 data-i18n="faq.data.q">Will you sell my data?</h4>
+                    <p data-i18n="faq.data.a">Never. Your data never leaves your device. We don't have cloud servers, we don't collect analytics, and we don't track you. Your training data is yours alone.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4 data-i18n="faq.subscription.q">Do I need a Strava subscription?</h4>
+                    <p data-i18n="faq.subscription.a">No. RunTrend works with free Strava accounts. If you have Strava Premium, great – but it's not required.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4 data-i18n="faq.history.q">What about my old runs?</h4>
+                    <p data-i18n="faq.history.a">RunTrend syncs all your historical Strava runs. The more data you have, the better the trends and predictions.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4 data-i18n="faq.other.q">Can I use it for cycling/swimming?</h4>
+                    <p data-i18n="faq.other.a">RunTrend is specifically designed for running analytics. It filters for running activities and optimizes all charts and predictions for runners.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Downloads -->
     <section id="download" class="section downloads-section">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">Download RunTrend</h2>
-                <p class="section-subtitle">Available for Windows, macOS, and Linux</p>
+                <h2 class="section-title" data-i18n="download.title">Download RunTrend</h2>
+                <p class="section-subtitle" data-i18n="download.subtitle">Available for Windows, macOS, and Linux – Choose your platform and start analyzing your runs today.</p>
             </div>
 
             <div class="download-grid">
                 <div class="download-card">
                     <div class="platform-icon">🪟</div>
-                    <h3>Windows</h3>
-                    <p>Windows 10 & 11</p>
-                    <a href="#" id="windows-download" class="download-btn disabled">Download .msi</a>
+                    <h3 data-i18n="download.windows">Windows</h3>
+                    <p data-i18n="download.windows.desc">Windows 10 & 11</p>
+                    <a href="#" id="windows-download" class="download-btn disabled" data-i18n="download.windows.btn">Download .msi</a>
                 </div>
 
                 <div class="download-card">
                     <div class="platform-icon">🍎</div>
-                    <h3>macOS</h3>
-                    <p>macOS 11+</p>
-                    <a href="#" id="macos-download" class="download-btn disabled">Download .dmg</a>
+                    <h3 data-i18n="download.macos">macOS</h3>
+                    <p data-i18n="download.macos.desc">macOS 11+</p>
+                    <a href="#" id="macos-download" class="download-btn disabled" data-i18n="download.macos.btn">Download .dmg</a>
                 </div>
 
                 <div class="download-card">
                     <div class="platform-icon">🐧</div>
-                    <h3>Linux</h3>
-                    <p>Via Flatpak</p>
+                    <h3 data-i18n="download.linux">Linux</h3>
+                    <p data-i18n="download.linux.desc">Via Flatpak</p>
                     <a href="https://flathub.org/apps/de.arneweiss.RunTrend"
                        class="download-btn"
-                       target="_blank">Get on Flathub</a>
+                       target="_blank"
+                       data-i18n="download.linux.btn">Get on Flathub</a>
                 </div>
             </div>
 
             <div class="version-info" id="version-info">
-                <div class="loading">Loading latest version...</div>
+                <div class="loading" data-i18n="download.version">Loading latest version...</div>
             </div>
         </div>
     </section>
@@ -646,9 +1042,9 @@
     <!-- CTA Section -->
     <section class="cta-section">
         <div class="container">
-            <h2>Ready to Elevate Your Training?</h2>
-            <p>Join runners who are using data to run smarter, not just harder.</p>
-            <a href="#download" class="btn btn-primary">Download Now - It's Free</a>
+            <h2 data-i18n="cta.title">Ready to Turn Data Into Progress?</h2>
+            <p data-i18n="cta.subtitle">Join runners who are using RunTrend to train smarter, not just harder.</p>
+            <a href="#download" class="btn btn-primary" data-i18n="cta.button">Download Now - 100% Free</a>
         </div>
     </section>
 
@@ -658,20 +1054,20 @@
             <div class="footer-content">
                 <div class="footer-section">
                     <h4>RunTrend</h4>
-                    <p style="color: rgba(255,255,255,0.7); margin-top: 12px;">Your personal running analytics dashboard. Track, analyze, and improve your performance.</p>
+                    <p style="color: rgba(255,255,255,0.7); margin-top: 12px;" data-i18n="footer.tagline">Your personal running analytics dashboard. Free, open source, and privacy-focused.</p>
                 </div>
 
                 <div class="footer-section">
-                    <h4>Product</h4>
+                    <h4 data-i18n="footer.product">Product</h4>
                     <ul class="footer-links">
-                        <li><a href="#features">Features</a></li>
-                        <li><a href="#how-it-works">How It Works</a></li>
-                        <li><a href="#download">Download</a></li>
+                        <li><a href="#why" data-i18n="nav.why">Why RunTrend</a></li>
+                        <li><a href="#features" data-i18n="nav.features">Features</a></li>
+                        <li><a href="#download" data-i18n="nav.download">Download</a></li>
                     </ul>
                 </div>
 
                 <div class="footer-section">
-                    <h4>Resources</h4>
+                    <h4 data-i18n="footer.resources">Resources</h4>
                     <ul class="footer-links">
                         <li><a href="https://github.com/smarwei/run_trend" target="_blank">GitHub</a></li>
                         <li><a href="https://github.com/smarwei/run_trend/issues" target="_blank">Report Issues</a></li>
@@ -680,7 +1076,7 @@
                 </div>
 
                 <div class="footer-section">
-                    <h4>Legal</h4>
+                    <h4 data-i18n="footer.legal">Legal</h4>
                     <ul class="footer-links">
                         <li><a href="https://github.com/smarwei/run_trend/blob/master/LICENSE" target="_blank">License</a></li>
                         <li><span style="color: rgba(255,255,255,0.7);">MIT with Commons Clause</span></li>
@@ -689,12 +1085,326 @@
             </div>
 
             <div class="footer-bottom">
-                <p>&copy; 2026 RunTrend. Open source software licensed under MIT with Commons Clause.</p>
+                <p data-i18n="footer.copyright">&copy; 2026 RunTrend. Open source software licensed under MIT with Commons Clause.</p>
             </div>
         </div>
     </footer>
 
     <script>
+        // Translations
+        const translations = {
+            en: {
+                'nav.why': 'Why RunTrend',
+                'nav.features': 'Features',
+                'nav.download': 'Download',
+                'hero.title': 'Stop Guessing.<br>Start Improving.',
+                'hero.subtitle': 'Turn your Strava data into actionable insights with powerful analytics built for serious runners.',
+                'hero.problem': '"I run regularly, but am I actually getting faster? What\'s holding me back?"',
+                'hero.cta.download': 'Download Free',
+                'hero.cta.learn': 'Learn More',
+                'trust.free': '100% Free & Open Source',
+                'trust.privacy': 'Privacy-First (Local Storage)',
+                'trust.platform': 'Cross-Platform Desktop App',
+                'trust.sync': 'Auto-Sync with Strava',
+                'problem.title': 'The Problem',
+                'problem.text': 'Strava shows you <strong>what</strong> you did, but not <strong>why</strong> it matters or <strong>how</strong> to improve.',
+                'problem.1': 'No trend analysis over time',
+                'problem.2': 'Limited heart rate insights',
+                'problem.3': 'No race time predictions',
+                'problem.4': 'Can\'t track aerobic development',
+                'problem.5': 'Missing training load analysis',
+                'problem.6': 'No long-term progress visualization',
+                'solution.title': 'The Solution',
+                'solution.text': 'RunTrend analyzes your Strava data and gives you <strong>insights that actually help you improve</strong>.',
+                'solution.1': 'See your progress over weeks and months',
+                'solution.2': 'Deep heart rate zone analysis',
+                'solution.3': 'Accurate race time predictions',
+                'solution.4': 'Track your aerobic fitness development',
+                'solution.5': 'Understand your training structure',
+                'solution.6': 'Interactive charts with trend projections',
+                'why.title': 'Why RunTrend vs Just Strava?',
+                'why.subtitle': 'We\'re not trying to replace Strava – we make it better by giving you deeper insights into your training.',
+                'why.strava.title': 'Strava Shows You',
+                'why.strava.1': 'Individual run statistics',
+                'why.strava.2': 'Basic weekly totals',
+                'why.strava.3': 'Segment leaderboards',
+                'why.strava.4': 'Social feed and kudos',
+                'why.strava.5': 'Route mapping',
+                'why.runtrend.title': 'RunTrend Shows You',
+                'why.runtrend.1': '<strong>Trends</strong> across weeks/months',
+                'why.runtrend.2': '<strong>Predictions</strong> for race times',
+                'why.runtrend.3': '<strong>Heart rate zones</strong> analysis',
+                'why.runtrend.4': '<strong>Aerobic development</strong> tracking',
+                'why.runtrend.5': '<strong>Training structure</strong> insights',
+                'why.runtrend.6': '<strong>Progress projections</strong> with charts',
+                'features.title': 'Powerful Analytics for Serious Runners',
+                'features.subtitle': 'Every feature is designed to answer one question: "Am I improving, and what should I do next?"',
+                'feature.sync.title': 'Automatic Strava Sync',
+                'feature.sync.text': 'Connect once with OAuth, and all your runs sync automatically. No manual imports, no CSV files, no hassle.',
+                'feature.sync.details': 'Every run, every heart rate data point, every split – instantly analyzed and visualized. Just connect and go.',
+                'feature.hr.title': 'Heart Rate Zone Analytics',
+                'feature.hr.text': 'See exactly how much time you spend in each zone, track your aerobic development, and understand if you\'re training in the right zones.',
+                'feature.hr.details': 'Charts showing your average heart rate trends, zone distribution over time, and whether your aerobic base is improving.',
+                'feature.race.title': 'Race Time Predictions',
+                'feature.race.text': 'Based on your recent training, get accurate predictions for 5K, 10K, half marathon, and marathon times.',
+                'feature.race.details': 'Know what pace to target in your next race. See how your predicted times improve as you train.',
+                'feature.progress.title': 'Progress Tracking & Trends',
+                'feature.progress.text': 'Interactive charts showing your distance, pace, frequency, longest runs, and training structure over time – with trend lines and projections.',
+                'feature.progress.details': 'See if you\'re running more, faster, or more consistently. Spot patterns in your training that lead to improvement.',
+                'feature.privacy.title': 'Privacy-First Design',
+                'feature.privacy.text': 'All your data stays on YOUR device. No cloud uploads, no tracking, no selling your data. Full control, complete privacy.',
+                'feature.privacy.details': 'Peace of mind knowing your training data is yours and yours alone. Works completely offline after initial sync.',
+                'feature.lang.title': 'Multilingual Support',
+                'feature.lang.text': 'Full German and English support with automatic language detection. UI automatically adapts to your system language.',
+                'feature.lang.details': 'RunTrend in your language, no configuration needed. Perfect for international runners.',
+                'usecase.title': 'Who Is RunTrend For?',
+                'usecase.subtitle': 'Whether you\'re training for your first 5K or your tenth marathon, RunTrend helps you understand your progress.',
+                'usecase.marathon.persona': '🏃‍♀️ Marathon Trainees',
+                'usecase.marathon.title': '"Am I building enough aerobic base?"',
+                'usecase.marathon.text': 'Track your long run progression, monitor heart rate zones during base building, and get realistic marathon time predictions based on your current fitness.',
+                'usecase.speed.persona': '⚡ Speed Seekers',
+                'usecase.speed.title': '"Am I actually getting faster?"',
+                'usecase.speed.text': 'See pace trends over time, track improvements in your average speed, and understand if your training is moving you in the right direction.',
+                'usecase.data.persona': '📊 Data-Driven Athletes',
+                'usecase.data.title': '"What do my numbers really mean?"',
+                'usecase.data.text': 'Dive deep into heart rate analytics, training structure, and long-term trends. Make informed decisions based on your actual data, not guesswork.',
+                'usecase.goal.persona': '🎯 Goal-Oriented Runners',
+                'usecase.goal.title': '"Will I hit my target time?"',
+                'usecase.goal.text': 'Get race predictions that update as you train. Know if you\'re on track for your goal, or if you need to adjust your training plan.',
+                'how.title': 'Get Started in 3 Minutes',
+                'how.subtitle': 'From download to insights, faster than your warm-up run',
+                'how.step1.title': 'Download & Install',
+                'how.step1.text': 'Choose your platform (Windows, macOS, or Linux) and install. No signup required, no payment info, completely free.',
+                'how.step2.title': 'Connect Strava',
+                'how.step2.text': 'Click "Connect Strava" and authorize RunTrend. Your credentials stay with Strava – we never see your password.',
+                'how.step3.title': 'Explore Your Data',
+                'how.step3.text': 'Your runs sync automatically. View charts, get predictions, track trends, and understand your progress like never before.',
+                'screenshot.title': 'Clean, Intuitive Interface',
+                'screenshot.subtitle': 'All your running data, beautifully visualized',
+                'faq.title': 'Frequently Asked Questions',
+                'faq.free.q': 'Is RunTrend really free?',
+                'faq.free.a': 'Yes, completely free. RunTrend is open source software. There are no premium features, no subscriptions, no hidden costs. Download and use all features forever.',
+                'faq.offline.q': 'Does it work without internet?',
+                'faq.offline.a': 'Yes. After the initial sync with Strava, RunTrend works completely offline. All your data is stored locally on your device.',
+                'faq.data.q': 'Will you sell my data?',
+                'faq.data.a': 'Never. Your data never leaves your device. We don\'t have cloud servers, we don\'t collect analytics, and we don\'t track you. Your training data is yours alone.',
+                'faq.subscription.q': 'Do I need a Strava subscription?',
+                'faq.subscription.a': 'No. RunTrend works with free Strava accounts. If you have Strava Premium, great – but it\'s not required.',
+                'faq.history.q': 'What about my old runs?',
+                'faq.history.a': 'RunTrend syncs all your historical Strava runs. The more data you have, the better the trends and predictions.',
+                'faq.other.q': 'Can I use it for cycling/swimming?',
+                'faq.other.a': 'RunTrend is specifically designed for running analytics. It filters for running activities and optimizes all charts and predictions for runners.',
+                'download.title': 'Download RunTrend',
+                'download.subtitle': 'Available for Windows, macOS, and Linux – Choose your platform and start analyzing your runs today.',
+                'download.windows': 'Windows',
+                'download.windows.desc': 'Windows 10 & 11',
+                'download.windows.btn': 'Download .msi',
+                'download.macos': 'macOS',
+                'download.macos.desc': 'macOS 11+',
+                'download.macos.btn': 'Download .dmg',
+                'download.linux': 'Linux',
+                'download.linux.desc': 'Via Flatpak',
+                'download.linux.btn': 'Get on Flathub',
+                'download.version': 'Loading latest version...',
+                'download.version.error': 'Visit <a href="https://github.com/smarwei/run_trend/releases" target="_blank" style="color: var(--primary);">GitHub Releases</a> for downloads.',
+                'cta.title': 'Ready to Turn Data Into Progress?',
+                'cta.subtitle': 'Join runners who are using RunTrend to train smarter, not just harder.',
+                'cta.button': 'Download Now - 100% Free',
+                'footer.tagline': 'Your personal running analytics dashboard. Free, open source, and privacy-focused.',
+                'footer.product': 'Product',
+                'footer.resources': 'Resources',
+                'footer.legal': 'Legal',
+                'footer.copyright': '© 2026 RunTrend. Open source software licensed under MIT with Commons Clause.'
+            },
+            de: {
+                'nav.why': 'Warum RunTrend',
+                'nav.features': 'Funktionen',
+                'nav.download': 'Download',
+                'hero.title': 'Schluss mit Raten.<br>Zeit zum Verbessern.',
+                'hero.subtitle': 'Verwandeln Sie Ihre Strava-Daten in umsetzbare Erkenntnisse mit leistungsstarken Analysen für ambitionierte Läufer.',
+                'hero.problem': '"Ich laufe regelmäßig, aber werde ich tatsächlich schneller? Was hält mich zurück?"',
+                'hero.cta.download': 'Kostenlos Herunterladen',
+                'hero.cta.learn': 'Mehr Erfahren',
+                'trust.free': '100% Kostenlos & Open Source',
+                'trust.privacy': 'Datenschutz-Fokus (Lokale Speicherung)',
+                'trust.platform': 'Plattformübergreifende Desktop-App',
+                'trust.sync': 'Auto-Sync mit Strava',
+                'problem.title': 'Das Problem',
+                'problem.text': 'Strava zeigt Ihnen <strong>was</strong> Sie getan haben, aber nicht <strong>warum</strong> es wichtig ist oder <strong>wie</strong> Sie sich verbessern können.',
+                'problem.1': 'Keine Trendanalyse über die Zeit',
+                'problem.2': 'Begrenzte Herzfrequenz-Einblicke',
+                'problem.3': 'Keine Wettkampfzeit-Vorhersagen',
+                'problem.4': 'Keine Verfolgung der aeroben Entwicklung',
+                'problem.5': 'Fehlende Trainingsbelastungsanalyse',
+                'problem.6': 'Keine langfristige Fortschrittsvisualisierung',
+                'solution.title': 'Die Lösung',
+                'solution.text': 'RunTrend analysiert Ihre Strava-Daten und gibt Ihnen <strong>Einblicke, die Ihnen wirklich helfen, sich zu verbessern</strong>.',
+                'solution.1': 'Sehen Sie Ihren Fortschritt über Wochen und Monate',
+                'solution.2': 'Tiefgehende Herzfrequenzzonen-Analyse',
+                'solution.3': 'Präzise Wettkampfzeit-Vorhersagen',
+                'solution.4': 'Verfolgen Sie Ihre aerobe Fitness-Entwicklung',
+                'solution.5': 'Verstehen Sie Ihre Trainingsstruktur',
+                'solution.6': 'Interaktive Diagramme mit Trendprojektionen',
+                'why.title': 'Warum RunTrend statt nur Strava?',
+                'why.subtitle': 'Wir wollen Strava nicht ersetzen – wir machen es besser, indem wir Ihnen tiefere Einblicke in Ihr Training geben.',
+                'why.strava.title': 'Strava zeigt Ihnen',
+                'why.strava.1': 'Einzelne Laufstatistiken',
+                'why.strava.2': 'Einfache Wochensummen',
+                'why.strava.3': 'Segment-Bestenlisten',
+                'why.strava.4': 'Social Feed und Kudos',
+                'why.strava.5': 'Routenplanung',
+                'why.runtrend.title': 'RunTrend zeigt Ihnen',
+                'why.runtrend.1': '<strong>Trends</strong> über Wochen/Monate',
+                'why.runtrend.2': '<strong>Vorhersagen</strong> für Wettkampfzeiten',
+                'why.runtrend.3': '<strong>Herzfrequenzzonen</strong>-Analyse',
+                'why.runtrend.4': '<strong>Aerobe Entwicklung</strong> verfolgen',
+                'why.runtrend.5': '<strong>Trainingsstruktur</strong>-Einblicke',
+                'why.runtrend.6': '<strong>Fortschrittsprojektionen</strong> mit Diagrammen',
+                'features.title': 'Leistungsstarke Analysen für ambitionierte Läufer',
+                'features.subtitle': 'Jede Funktion ist darauf ausgelegt, eine Frage zu beantworten: "Verbessere ich mich, und was soll ich als Nächstes tun?"',
+                'feature.sync.title': 'Automatische Strava-Synchronisation',
+                'feature.sync.text': 'Einmal mit OAuth verbinden, und alle Ihre Läufe werden automatisch synchronisiert. Keine manuellen Importe, keine CSV-Dateien, kein Aufwand.',
+                'feature.sync.details': 'Jeder Lauf, jeder Herzfrequenz-Datenpunkt, jeder Split – sofort analysiert und visualisiert. Einfach verbinden und loslegen.',
+                'feature.hr.title': 'Herzfrequenzzonen-Analyse',
+                'feature.hr.text': 'Sehen Sie genau, wie viel Zeit Sie in jeder Zone verbringen, verfolgen Sie Ihre aerobe Entwicklung und verstehen Sie, ob Sie in den richtigen Zonen trainieren.',
+                'feature.hr.details': 'Diagramme zeigen Ihre durchschnittlichen Herzfrequenz-Trends, Zonenverteilung über die Zeit und ob sich Ihre aerobe Basis verbessert.',
+                'feature.race.title': 'Wettkampfzeit-Vorhersagen',
+                'feature.race.text': 'Basierend auf Ihrem letzten Training erhalten Sie genaue Vorhersagen für 5K, 10K, Halbmarathon und Marathon-Zeiten.',
+                'feature.race.details': 'Wissen Sie, welches Tempo Sie bei Ihrem nächsten Wettkampf anstreben sollten. Sehen Sie, wie sich Ihre vorhergesagten Zeiten mit dem Training verbessern.',
+                'feature.progress.title': 'Fortschrittsverfolgung & Trends',
+                'feature.progress.text': 'Interaktive Diagramme zeigen Ihre Distanz, Tempo, Häufigkeit, längste Läufe und Trainingsstruktur über die Zeit – mit Trendlinien und Projektionen.',
+                'feature.progress.details': 'Sehen Sie, ob Sie mehr, schneller oder konstanter laufen. Erkennen Sie Muster in Ihrem Training, die zu Verbesserungen führen.',
+                'feature.privacy.title': 'Datenschutz-Fokussiertes Design',
+                'feature.privacy.text': 'Alle Ihre Daten bleiben auf IHREM Gerät. Keine Cloud-Uploads, kein Tracking, kein Verkauf Ihrer Daten. Volle Kontrolle, vollständiger Datenschutz.',
+                'feature.privacy.details': 'Beruhigt wissen, dass Ihre Trainingsdaten Ihnen und nur Ihnen gehören. Funktioniert nach der ersten Synchronisation vollständig offline.',
+                'feature.lang.title': 'Mehrsprachige Unterstützung',
+                'feature.lang.text': 'Volle Deutsch- und Englisch-Unterstützung mit automatischer Spracherkennung. Die Benutzeroberfläche passt sich automatisch an Ihre Systemsprache an.',
+                'feature.lang.details': 'RunTrend in Ihrer Sprache, keine Konfiguration erforderlich. Perfekt für internationale Läufer.',
+                'usecase.title': 'Für wen ist RunTrend?',
+                'usecase.subtitle': 'Egal, ob Sie für Ihren ersten 5K oder Ihren zehnten Marathon trainieren, RunTrend hilft Ihnen, Ihren Fortschritt zu verstehen.',
+                'usecase.marathon.persona': '🏃‍♀️ Marathon-Trainierende',
+                'usecase.marathon.title': '"Baue ich genug aerobe Basis auf?"',
+                'usecase.marathon.text': 'Verfolgen Sie Ihre Longjog-Progression, überwachen Sie Herzfrequenzzonen während des Grundlagentrainings und erhalten Sie realistische Marathon-Zeit-Vorhersagen basierend auf Ihrer aktuellen Fitness.',
+                'usecase.speed.persona': '⚡ Geschwindigkeits-Sucher',
+                'usecase.speed.title': '"Werde ich tatsächlich schneller?"',
+                'usecase.speed.text': 'Sehen Sie Tempo-Trends über die Zeit, verfolgen Sie Verbesserungen Ihrer Durchschnittsgeschwindigkeit und verstehen Sie, ob Ihr Training Sie in die richtige Richtung bewegt.',
+                'usecase.data.persona': '📊 Datengetriebene Athleten',
+                'usecase.data.title': '"Was bedeuten meine Zahlen wirklich?"',
+                'usecase.data.text': 'Tauchen Sie tief in Herzfrequenz-Analysen, Trainingsstruktur und langfristige Trends ein. Treffen Sie fundierte Entscheidungen basierend auf Ihren tatsächlichen Daten, nicht auf Vermutungen.',
+                'usecase.goal.persona': '🎯 Zielorientierte Läufer',
+                'usecase.goal.title': '"Werde ich meine Zielzeit erreichen?"',
+                'usecase.goal.text': 'Erhalten Sie Wettkampf-Vorhersagen, die sich mit Ihrem Training aktualisieren. Wissen Sie, ob Sie auf Kurs für Ihr Ziel sind oder ob Sie Ihren Trainingsplan anpassen müssen.',
+                'how.title': 'In 3 Minuten Loslegen',
+                'how.subtitle': 'Vom Download zu Einblicken, schneller als Ihr Aufwärmlauf',
+                'how.step1.title': 'Herunterladen & Installieren',
+                'how.step1.text': 'Wählen Sie Ihre Plattform (Windows, macOS oder Linux) und installieren Sie. Keine Registrierung erforderlich, keine Zahlungsinformationen, völlig kostenlos.',
+                'how.step2.title': 'Mit Strava Verbinden',
+                'how.step2.text': 'Klicken Sie auf "Mit Strava verbinden" und autorisieren Sie RunTrend. Ihre Anmeldedaten bleiben bei Strava – wir sehen niemals Ihr Passwort.',
+                'how.step3.title': 'Ihre Daten Erkunden',
+                'how.step3.text': 'Ihre Läufe werden automatisch synchronisiert. Sehen Sie Diagramme, erhalten Sie Vorhersagen, verfolgen Sie Trends und verstehen Sie Ihren Fortschritt wie nie zuvor.',
+                'screenshot.title': 'Klare, Intuitive Oberfläche',
+                'screenshot.subtitle': 'Alle Ihre Laufdaten, wunderschön visualisiert',
+                'faq.title': 'Häufig Gestellte Fragen',
+                'faq.free.q': 'Ist RunTrend wirklich kostenlos?',
+                'faq.free.a': 'Ja, völlig kostenlos. RunTrend ist Open-Source-Software. Es gibt keine Premium-Funktionen, keine Abonnements, keine versteckten Kosten. Herunterladen und alle Funktionen für immer nutzen.',
+                'faq.offline.q': 'Funktioniert es ohne Internet?',
+                'faq.offline.a': 'Ja. Nach der ersten Synchronisation mit Strava funktioniert RunTrend vollständig offline. Alle Ihre Daten werden lokal auf Ihrem Gerät gespeichert.',
+                'faq.data.q': 'Werden Sie meine Daten verkaufen?',
+                'faq.data.a': 'Niemals. Ihre Daten verlassen niemals Ihr Gerät. Wir haben keine Cloud-Server, wir sammeln keine Analysen und wir verfolgen Sie nicht. Ihre Trainingsdaten gehören nur Ihnen.',
+                'faq.subscription.q': 'Benötige ich ein Strava-Abonnement?',
+                'faq.subscription.a': 'Nein. RunTrend funktioniert mit kostenlosen Strava-Konten. Wenn Sie Strava Premium haben, großartig – aber es ist nicht erforderlich.',
+                'faq.history.q': 'Was ist mit meinen alten Läufen?',
+                'faq.history.a': 'RunTrend synchronisiert alle Ihre historischen Strava-Läufe. Je mehr Daten Sie haben, desto besser die Trends und Vorhersagen.',
+                'faq.other.q': 'Kann ich es für Radfahren/Schwimmen verwenden?',
+                'faq.other.a': 'RunTrend ist speziell für Lauf-Analysen entwickelt. Es filtert nach Laufaktivitäten und optimiert alle Diagramme und Vorhersagen für Läufer.',
+                'download.title': 'RunTrend Herunterladen',
+                'download.subtitle': 'Verfügbar für Windows, macOS und Linux – Wählen Sie Ihre Plattform und starten Sie noch heute mit der Analyse Ihrer Läufe.',
+                'download.windows': 'Windows',
+                'download.windows.desc': 'Windows 10 & 11',
+                'download.windows.btn': '.msi Herunterladen',
+                'download.macos': 'macOS',
+                'download.macos.desc': 'macOS 11+',
+                'download.macos.btn': '.dmg Herunterladen',
+                'download.linux': 'Linux',
+                'download.linux.desc': 'Via Flatpak',
+                'download.linux.btn': 'Auf Flathub Holen',
+                'download.version': 'Lade neueste Version...',
+                'download.version.error': 'Besuchen Sie <a href="https://github.com/smarwei/run_trend/releases" target="_blank" style="color: var(--primary);">GitHub Releases</a> für Downloads.',
+                'cta.title': 'Bereit, Daten in Fortschritt zu Verwandeln?',
+                'cta.subtitle': 'Schließen Sie sich Läufern an, die RunTrend nutzen, um intelligenter zu trainieren, nicht nur härter.',
+                'cta.button': 'Jetzt Herunterladen - 100% Kostenlos',
+                'footer.tagline': 'Ihr persönliches Lauf-Analytics-Dashboard. Kostenlos, Open Source und datenschutzorientiert.',
+                'footer.product': 'Produkt',
+                'footer.resources': 'Ressourcen',
+                'footer.legal': 'Rechtliches',
+                'footer.copyright': '© 2026 RunTrend. Open-Source-Software lizenziert unter MIT with Commons Clause.'
+            }
+        };
+
+        // Language detection and switching
+        function detectLanguage() {
+            // Check localStorage first
+            const saved = localStorage.getItem('runtrend-lang');
+            if (saved && translations[saved]) {
+                return saved;
+            }
+
+            // Detect from browser
+            const browserLang = navigator.language || navigator.userLanguage;
+            if (browserLang.startsWith('de')) {
+                return 'de';
+            }
+            return 'en';
+        }
+
+        function setLanguage(lang) {
+            if (!translations[lang]) lang = 'en';
+
+            // Save preference
+            localStorage.setItem('runtrend-lang', lang);
+
+            // Update HTML lang attribute
+            document.documentElement.lang = lang;
+
+            // Update title and description
+            if (lang === 'de') {
+                document.title = document.querySelector('meta[name="title-de"]').content;
+                document.querySelector('meta[name="description"]').content =
+                    document.querySelector('meta[name="description-de"]').content;
+            } else {
+                document.title = 'RunTrend - Your Personal Running Analytics Dashboard';
+                document.querySelector('meta[name="description"]').content =
+                    'Track and analyze your running progress from Strava. Get insights, predictions, and detailed analytics for your training.';
+            }
+
+            // Update all translatable elements
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    el.innerHTML = translations[lang][key];
+                }
+            });
+
+            // Update language buttons
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+            });
+
+            // Update version info if needed
+            updateVersionInfo(lang);
+        }
+
+        function updateVersionInfo(lang) {
+            const versionEl = document.getElementById('version-info');
+            if (versionEl && versionEl.textContent.includes('Loading')) {
+                versionEl.innerHTML = `<div class="loading">${translations[lang]['download.version']}</div>`;
+            }
+        }
+
+        // Initialize language on page load
+        const initialLang = detectLanguage();
+        setLanguage(initialLang);
+
         // Smooth scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
@@ -708,15 +1418,17 @@
 
         // Fetch latest release info
         async function loadLatestRelease() {
+            const currentLang = localStorage.getItem('runtrend-lang') || 'en';
             try {
                 const response = await fetch('https://api.github.com/repos/smarwei/run_trend/releases/latest');
                 const release = await response.json();
 
                 if (release.tag_name) {
+                    const dateStr = new Date(release.published_at).toLocaleDateString(currentLang === 'de' ? 'de-DE' : 'en-US');
                     document.getElementById('version-info').innerHTML = `
-                        <strong>Latest Version:</strong> ${release.tag_name}
+                        <strong>${currentLang === 'de' ? 'Neueste Version' : 'Latest Version'}:</strong> ${release.tag_name}
                         <span style="margin: 0 10px;">•</span>
-                        <strong>Released:</strong> ${new Date(release.published_at).toLocaleDateString()}
+                        <strong>${currentLang === 'de' ? 'Veröffentlicht' : 'Released'}:</strong> ${dateStr}
                     `;
 
                     const assets = release.assets || [];
@@ -737,13 +1449,13 @@
                         btn.classList.remove('disabled');
                     }
                 } else {
-                    document.getElementById('version-info').innerHTML =
+                    document.getElementById('version-info').innerHTML = currentLang === 'de' ?
+                        '<p>Binärdateien werden bald verfügbar sein!</p>' :
                         '<p>Binaries will be available soon!</p>';
                 }
             } catch (error) {
                 console.error('Failed to load release info:', error);
-                document.getElementById('version-info').innerHTML =
-                    '<p>Visit <a href="https://github.com/smarwei/run_trend/releases" target="_blank" style="color: var(--primary);">GitHub Releases</a> for downloads.</p>';
+                document.getElementById('version-info').innerHTML = translations[currentLang]['download.version.error'];
             }
         }
 
