@@ -3,8 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RunTrend - Track Your Running Progress</title>
+    <meta name="description" content="Track and analyze your running progress from Strava. Get insights, predictions, and detailed analytics for your training.">
+    <title>RunTrend - Your Personal Running Analytics Dashboard</title>
     <style>
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5568d3;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --bg-light: #f7fafc;
+            --bg-white: #ffffff;
+            --border: #e2e8f0;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,125 +25,339 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.7;
+            color: var(--text-dark);
+            background: var(--bg-white);
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 0 24px;
         }
 
-        header {
-            text-align: center;
-            padding: 60px 20px;
-            color: white;
+        /* Navigation */
+        nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border);
         }
 
-        h1 {
-            font-size: 3.5rem;
-            margin-bottom: 20px;
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+        }
+
+        .logo {
+            font-size: 24px;
             font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .tagline {
-            font-size: 1.5rem;
-            opacity: 0.95;
-            margin-bottom: 40px;
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
         }
 
+        .nav-links a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        /* Hero Section */
         .hero {
-            background: white;
-            border-radius: 20px;
-            padding: 60px 40px;
-            margin: 40px 0;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-            margin: 40px 0;
-        }
-
-        .feature {
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border-left: 4px solid #667eea;
-        }
-
-        .feature h3 {
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-
-        .downloads {
-            background: white;
-            border-radius: 20px;
-            padding: 60px 40px;
-            margin: 40px 0;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-
-        .downloads h2 {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 120px 0 80px;
             text-align: center;
-            color: #667eea;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M0,0 Q300,60 600,30 T1200,0 L1200,120 L0,120 Z" fill="rgba(255,255,255,0.05)"/></svg>') bottom;
+            background-size: cover;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 24px;
+            line-height: 1.1;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
             margin-bottom: 40px;
+            opacity: 0.95;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 16px 40px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-block;
+            font-size: 1.1rem;
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: var(--primary);
+        }
+
+        /* Trust Badges */
+        .trust-badges {
+            background: var(--bg-light);
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .badges {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .badge-icon {
+            font-size: 24px;
+        }
+
+        /* Features Section */
+        .section {
+            padding: 80px 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title {
             font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-dark);
+        }
+
+        .section-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 40px;
+        }
+
+        .feature-card {
+            padding: 32px;
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+            color: var(--text-dark);
+        }
+
+        .feature-card p {
+            color: var(--text-light);
+            line-height: 1.7;
+        }
+
+        /* How It Works */
+        .how-it-works {
+            background: var(--bg-light);
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 32px;
+            margin-top: 48px;
+        }
+
+        .step {
+            text-align: center;
+            padding: 32px;
+            background: white;
+            border-radius: 16px;
+        }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0 auto 20px;
+        }
+
+        .step h3 {
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+        }
+
+        /* Screenshot */
+        .screenshot-section {
+            text-align: center;
+        }
+
+        .screenshot {
+            max-width: 900px;
+            width: 100%;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            margin: 0 auto;
+        }
+
+        /* Downloads */
+        .downloads-section {
+            background: var(--bg-light);
         }
 
         .download-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-top: 48px;
         }
 
         .download-card {
-            background: #f8f9fa;
-            padding: 30px;
-            border-radius: 15px;
+            background: white;
+            padding: 40px 32px;
+            border-radius: 16px;
             text-align: center;
-            transition: transform 0.3s, box-shadow 0.3s;
-            border: 2px solid transparent;
+            border: 2px solid var(--border);
+            transition: all 0.3s;
         }
 
         .download-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-            border-color: #667eea;
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.15);
+        }
+
+        .platform-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
         }
 
         .download-card h3 {
-            color: #667eea;
-            margin-bottom: 15px;
             font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .download-card p {
+            color: var(--text-light);
+            margin-bottom: 24px;
         }
 
         .download-btn {
             display: inline-block;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
-            padding: 15px 30px;
+            padding: 14px 32px;
             border-radius: 50px;
             text-decoration: none;
             font-weight: 600;
-            margin-top: 15px;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.3s;
         }
 
         .download-btn:hover {
             transform: scale(1.05);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
         }
 
         .download-btn.disabled {
-            background: #ccc;
+            background: #cbd5e0;
             cursor: not-allowed;
             opacity: 0.6;
         }
@@ -140,100 +367,256 @@
             box-shadow: none;
         }
 
-        .platform-icon {
-            font-size: 3rem;
-            margin-bottom: 10px;
-        }
-
         .version-info {
             text-align: center;
-            color: #666;
-            margin-top: 20px;
-            font-size: 0.9rem;
+            margin-top: 32px;
+            color: var(--text-light);
         }
 
-        footer {
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 80px 0;
             text-align: center;
-            padding: 40px 20px;
-            color: white;
-            opacity: 0.9;
         }
 
-        footer a {
-            color: white;
-            text-decoration: underline;
+        .cta-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 24px;
         }
 
-        .screenshot {
-            width: 100%;
-            max-width: 800px;
-            margin: 40px auto;
-            display: block;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        .cta-section p {
+            font-size: 1.25rem;
+            margin-bottom: 32px;
+            opacity: 0.95;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--text-dark);
+            color: white;
+            padding: 60px 0 32px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 48px;
+            margin-bottom: 48px;
+        }
+
+        .footer-section h4 {
+            margin-bottom: 16px;
+            font-size: 1.1rem;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 8px;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 32px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.25rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
         }
 
         .loading {
             text-align: center;
             padding: 20px;
-            color: #666;
+            color: var(--text-light);
         }
     </style>
 </head>
 <body>
-    <header>
+    <!-- Navigation -->
+    <nav>
         <div class="container">
-            <h1>🏃 RunTrend</h1>
-            <p class="tagline">Track and analyze your running progress from Strava</p>
+            <div class="logo">🏃 RunTrend</div>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#download">Download</a></li>
+                <li><a href="https://github.com/smarwei/run_trend" target="_blank">GitHub</a></li>
+            </ul>
         </div>
-    </header>
+    </nav>
 
-    <div class="container">
-        <div class="hero">
-            <h2 style="text-align: center; color: #667eea; margin-bottom: 40px;">Turn Your Runs Into Insights</h2>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container hero-content">
+            <h1>Your Personal Running<br>Analytics Dashboard</h1>
+            <p>Turn your Strava data into actionable insights. Track progress, predict race times, and optimize your training with powerful analytics.</p>
+            <div class="cta-buttons">
+                <a href="#download" class="btn btn-primary">Download Free</a>
+                <a href="https://github.com/smarwei/run_trend" target="_blank" class="btn btn-secondary">View on GitHub</a>
+            </div>
+        </div>
+    </section>
 
-            <div class="features">
-                <div class="feature">
-                    <h3>📊 Strava Integration</h3>
-                    <p>Connect your Strava account with OAuth and automatically sync your running activities.</p>
+    <!-- Trust Badges -->
+    <section class="trust-badges">
+        <div class="container">
+            <div class="badges">
+                <div class="badge">
+                    <span class="badge-icon">✅</span>
+                    <span>100% Free & Open Source</span>
                 </div>
-                <div class="feature">
-                    <h3>❤️ Heart Rate Analytics</h3>
-                    <p>Track your aerobic fitness development with detailed heart rate zone analysis.</p>
+                <div class="badge">
+                    <span class="badge-icon">🔒</span>
+                    <span>Privacy-Focused</span>
                 </div>
-                <div class="feature">
-                    <h3>🎯 Race Predictions</h3>
-                    <p>Get accurate race time predictions for 5K, 10K, half marathon, and marathon distances.</p>
+                <div class="badge">
+                    <span class="badge-icon">🚀</span>
+                    <span>Cross-Platform</span>
                 </div>
-                <div class="feature">
-                    <h3>🌍 Internationalization</h3>
-                    <p>Full support for German and English with automatic language detection.</p>
-                </div>
-                <div class="feature">
-                    <h3>🔒 Privacy-Focused</h3>
-                    <p>All your data is stored locally on your device. No cloud storage, no tracking.</p>
-                </div>
-                <div class="feature">
-                    <h3>📈 Trend Analysis</h3>
-                    <p>Visualize your progress over time with interactive charts and projections.</p>
+                <div class="badge">
+                    <span class="badge-icon">📊</span>
+                    <span>Strava Integration</span>
                 </div>
             </div>
+        </div>
+    </section>
 
+    <!-- Features Section -->
+    <section id="features" class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Everything You Need to Improve</h2>
+                <p class="section-subtitle">Powerful analytics tools designed for serious runners who want to track and optimize their performance.</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Seamless Strava Integration</h3>
+                    <p>Connect with OAuth, automatically sync your activities, and keep your data up-to-date without manual imports.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">❤️</div>
+                    <h3>Heart Rate Analytics</h3>
+                    <p>Monitor your aerobic fitness development with detailed heart rate zone analysis and trends over time.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Race Time Predictions</h3>
+                    <p>Get accurate predictions for 5K, 10K, half marathon, and marathon based on your current fitness level.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3>Progress Tracking</h3>
+                    <p>Visualize your improvement with interactive charts showing distance, pace, frequency, and training load.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Privacy First</h3>
+                    <p>All data stays on your device. No cloud storage, no tracking, complete control over your information.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3>Multilingual Support</h3>
+                    <p>Full support for German and English with automatic language detection based on your system settings.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="section how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Get Started in Minutes</h2>
+                <p class="section-subtitle">Three simple steps to unlock your running insights</p>
+            </div>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Download & Install</h3>
+                    <p>Choose your platform and install RunTrend on your computer. No complicated setup required.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Connect Strava</h3>
+                    <p>Securely link your Strava account with OAuth. Your credentials never leave Strava's servers.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Explore Insights</h3>
+                    <p>View your analytics, track progress, get race predictions, and optimize your training.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Screenshot -->
+    <section class="section screenshot-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Beautiful & Intuitive Interface</h2>
+                <p class="section-subtitle">Designed for clarity and ease of use</p>
+            </div>
             <img src="https://raw.githubusercontent.com/smarwei/run_trend/v0.1.0/screenshots/main-window.png"
-                 alt="RunTrend Screenshot"
+                 alt="RunTrend Interface"
                  class="screenshot"
                  onerror="this.style.display='none'">
         </div>
+    </section>
 
-        <div class="downloads">
-            <h2>Download RunTrend</h2>
-            <p style="text-align: center; color: #666; margin-bottom: 30px;">Choose your platform below</p>
+    <!-- Downloads -->
+    <section id="download" class="section downloads-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Download RunTrend</h2>
+                <p class="section-subtitle">Available for Windows, macOS, and Linux</p>
+            </div>
 
             <div class="download-grid">
                 <div class="download-card">
                     <div class="platform-icon">🪟</div>
                     <h3>Windows</h3>
-                    <p>Windows 10/11</p>
+                    <p>Windows 10 & 11</p>
                     <a href="#" id="windows-download" class="download-btn disabled">Download .msi</a>
                 </div>
 
@@ -258,34 +641,84 @@
                 <div class="loading">Loading latest version...</div>
             </div>
         </div>
-    </div>
+    </section>
 
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to Elevate Your Training?</h2>
+            <p>Join runners who are using data to run smarter, not just harder.</p>
+            <a href="#download" class="btn btn-primary">Download Now - It's Free</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
     <footer>
         <div class="container">
-            <p>RunTrend is open source software licensed under MIT with Commons Clause</p>
-            <p style="margin-top: 10px;">
-                <a href="https://github.com/smarwei/run_trend" target="_blank">GitHub</a> •
-                <a href="https://github.com/smarwei/run_trend/issues" target="_blank">Report Issues</a>
-            </p>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>RunTrend</h4>
+                    <p style="color: rgba(255,255,255,0.7); margin-top: 12px;">Your personal running analytics dashboard. Track, analyze, and improve your performance.</p>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Product</h4>
+                    <ul class="footer-links">
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#download">Download</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul class="footer-links">
+                        <li><a href="https://github.com/smarwei/run_trend" target="_blank">GitHub</a></li>
+                        <li><a href="https://github.com/smarwei/run_trend/issues" target="_blank">Report Issues</a></li>
+                        <li><a href="https://github.com/smarwei/run_trend/releases" target="_blank">Releases</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="https://github.com/smarwei/run_trend/blob/master/LICENSE" target="_blank">License</a></li>
+                        <li><span style="color: rgba(255,255,255,0.7);">MIT with Commons Clause</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 RunTrend. Open source software licensed under MIT with Commons Clause.</p>
+            </div>
         </div>
     </footer>
 
     <script>
-        // Fetch latest release info from GitHub
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Fetch latest release info
         async function loadLatestRelease() {
             try {
                 const response = await fetch('https://api.github.com/repos/smarwei/run_trend/releases/latest');
                 const release = await response.json();
 
                 if (release.tag_name) {
-                    // Update version info
                     document.getElementById('version-info').innerHTML = `
                         <strong>Latest Version:</strong> ${release.tag_name}
                         <span style="margin: 0 10px;">•</span>
                         <strong>Released:</strong> ${new Date(release.published_at).toLocaleDateString()}
                     `;
 
-                    // Find and link download assets
                     const assets = release.assets || [];
 
                     // Windows
@@ -305,16 +738,15 @@
                     }
                 } else {
                     document.getElementById('version-info').innerHTML =
-                        '<p>No releases available yet. Binaries will be available soon!</p>';
+                        '<p>Binaries will be available soon!</p>';
                 }
             } catch (error) {
                 console.error('Failed to load release info:', error);
                 document.getElementById('version-info').innerHTML =
-                    '<p>Unable to load release information. Please visit <a href="https://github.com/smarwei/run_trend/releases" target="_blank">GitHub Releases</a> directly.</p>';
+                    '<p>Visit <a href="https://github.com/smarwei/run_trend/releases" target="_blank" style="color: var(--primary);">GitHub Releases</a> for downloads.</p>';
             }
         }
 
-        // Load release info when page loads
         loadLatestRelease();
     </script>
 </body>
