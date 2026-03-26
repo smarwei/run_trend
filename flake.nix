@@ -25,7 +25,7 @@
           runtimeInputs = [ pythonEnv ];
           text = ''
             cd ${./.}
-            exec python -m app.main "$@"
+            exec python -m run_trend.main "$@"
           '';
         };
 
@@ -47,7 +47,7 @@
             echo "Python: ${pythonEnv}/bin/python --version"
             echo ""
             echo "Available commands:"
-            echo "  python app/main.py       - Run the application"
+            echo "  python -m run_trend.main - Run the application"
             echo "  pytest tests/            - Run tests"
             echo ""
           '';
