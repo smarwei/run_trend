@@ -2,23 +2,39 @@
 
 A desktop application for tracking and analyzing running progress from Strava.
 
+**Version:** 0.1.0
+**Documentation:** Press the Help button (❓) in the app for the full user manual
+
 ## Overview
 
-Running Progress Tracker is a PySide6-based desktop application that synchronizes your running activities from Strava, computes progress metrics, and visualizes your training development over time.
+Running Progress Tracker is a PySide6-based desktop application that synchronizes your running activities from Strava, computes progress metrics, and visualizes your training development over time. Features comprehensive heart rate analytics, race time predictions, and marathon readiness tracking.
 
 ## Features
 
 - **Strava Integration**: Automatic synchronization of running activities via OAuth
 - **Data Aggregation**: View progress by week or month
-- **Multiple Charts**:
-  - Distance progress over time
-  - Pace/Speed improvements
-  - Training frequency
-  - Composite training status score
-  - Future trend projections
+- **Comprehensive Charts**:
+  - **Overview Tab**: Distance progress, Pace/Speed improvements, Training frequency
+  - **Heart Rate Tab**: HR Range, Average HR, Efficiency Factor (aerobic fitness)
+  - **Endurance Tab**: Longest Run progression, Average Distance per Run
+  - **Score Tab**: Composite training status score
+  - **Projection Tab**: Future trend projections and milestone estimates
+- **Heart Rate Analytics**:
+  - Efficiency Factor tracking (pace-normalized HR for aerobic fitness)
+  - HR Zone analysis
+  - Manual HRmax configuration for improved accuracy
+  - HRmax plausibility checks with intelligent suggestions
+- **Race Time Predictions**:
+  - HR-based race time estimates for 5K, 10K, Half Marathon, and Marathon
+  - Uses McMillan Calculator methodology with Easy Run identification
+  - Scientific approach combining heart rate zones and training pace
+- **Marathon Readiness**:
+  - Long Run progression tracking
+  - Marathon Milestone estimation (32km Long Run target)
+  - Endurance-focused metrics
 - **Smoothing**: Apply SMA or EMA smoothing to visualize long-term trends
-- **Projections**: Estimate when you'll reach milestone distances (5K, 10K, half marathon, marathon)
-- **Training Score**: Transparent composite score based on distance, frequency, and pace
+- **Projections**: Estimate when you'll reach milestone distances and endurance targets
+- **Training Score**: Adaptive composite score (includes Efficiency Factor when HR data available)
 - **Local-First**: All data stored locally in SQLite
 
 ## Prerequisites
@@ -91,43 +107,60 @@ python app/main.py
 1. **Sync Activities**: Click "Sync Activities" in Settings to import your running data
    - By default, all activities since 2000 are imported (covers all Strava history)
    - You can adjust the "Start Date" in the toolbar before syncing if needed
-2. **Explore Charts**: Use the tabs to view different metrics:
-   - Distance: Total distance per period with smoothing
-   - Pace/Speed: Performance improvements over time
-   - Frequency: Number of runs per period
-   - Training Score: Composite progress metric
-   - Projection: Future trend estimates and milestone predictions
-6. **Adjust View**: Change aggregation period (Week/Month), smoothing strength, and metric type (Pace/Speed)
+2. **Configure Heart Rate** (Optional): Set your manual HRmax in Settings for improved accuracy
+   - The app auto-detects HRmax from your activities
+   - Manual configuration improves race time predictions
+   - The app will suggest a value if auto-detection seems implausible
+3. **Explore Charts**: Use the tabs to view different metrics:
+   - **Overview**: Distance, Pace/Speed, Frequency
+   - **Heart Rate**: HR Range, Average HR, Efficiency Factor (aerobic fitness indicator)
+   - **Endurance**: Longest Run progression, Average Distance per Run
+   - **Score**: Composite training progress metric (adapts to HR data availability)
+   - **Projection**: Future trend estimates, milestone predictions (Volume or Long Run mode)
+4. **View Summary Panel**: Left sidebar shows key metrics:
+   - Training volume and performance
+   - Heart rate metrics (if HR monitor used)
+   - Training Score (0-100)
+   - Marathon Milestone (32km Long Run readiness)
+   - Race Time Predictions (5K, 10K, Half, Marathon)
+5. **Adjust View**: Change aggregation period (Week/Month), smoothing strength, and metric type (Pace/Speed)
 
 ## Project Structure
 
 ```
 app/
-├── main.py                 # Application entry point
-├── ui/                     # User interface components
-│   ├── main_window.py      # Main application window
-│   └── summary_panel.py    # Summary statistics panel
-├── charts/                 # Chart widgets
-│   ├── distance_chart.py
-│   ├── pace_chart.py
-│   ├── frequency_chart.py
-│   ├── score_chart.py
-│   └── projection_chart.py
-├── strava/                 # Strava integration
-│   ├── auth.py             # OAuth authentication
-│   └── client.py           # API client
-├── storage/                # Data persistence
-│   └── database.py         # SQLite database
-├── sync/                   # Synchronization logic
-│   └── sync_manager.py
-├── analytics/              # Data analysis
-│   ├── aggregator.py       # Activity aggregation
-│   ├── smoothing.py        # Time series smoothing
-│   └── training_score.py   # Score calculation
-├── projection/             # Forecasting
-│   └── forecaster.py       # Trend projection
-└── settings/               # Configuration
-    └── config.py
+├── main.py                     # Application entry point
+├── ui/                         # User interface components
+│   ├── main_window.py          # Main application window
+│   ├── summary_panel.py        # Summary statistics panel
+│   ├── settings_dialog.py      # Settings dialog with Strava & HR config
+│   └── manual_dialog.py        # User manual dialog
+├── charts/                     # Chart widgets
+│   ├── distance_chart.py       # Distance progress chart
+│   ├── pace_chart.py           # Pace/Speed chart
+│   ├── frequency_chart.py      # Training frequency chart
+│   ├── heartrate_chart.py      # Heart rate & efficiency factor chart
+│   ├── longest_run_chart.py    # Longest run progression chart
+│   ├── avg_distance_chart.py   # Average distance per run chart
+│   ├── structure_overview_chart.py  # Training structure overview
+│   ├── score_chart.py          # Training score chart
+│   └── projection_chart.py     # Projection & forecasting chart
+├── strava/                     # Strava integration
+│   ├── auth.py                 # OAuth authentication
+│   └── client.py               # API client
+├── storage/                    # Data persistence
+│   └── database.py             # SQLite database
+├── sync/                       # Synchronization logic
+│   └── sync_manager.py         # Activity sync orchestration
+├── analytics/                  # Data analysis
+│   ├── aggregator.py           # Activity aggregation by period
+│   ├── smoothing.py            # Time series smoothing (SMA/EMA)
+│   ├── training_score.py       # Composite training score calculation
+│   └── race_predictor.py       # HR-based race time predictions (McMillan)
+├── projection/                 # Forecasting
+│   └── forecaster.py           # Trend projection & milestone estimation
+└── settings/                   # Configuration
+    └── config.py               # Settings persistence
 ```
 
 ## Running Tests
@@ -142,17 +175,28 @@ pytest tests/ --cov=app --cov-report=html
 
 ## Training Score Explanation
 
-The training score is a composite metric (0-100) that reflects your training progress:
+The training score is a composite metric (0-100) that reflects your training progress. The weighting adapts based on data availability:
 
-- **50%** - Distance component: Total distance vs baseline
+**With Heart Rate Data:**
+- **30%** - Distance component: Total distance vs baseline
+- **30%** - Pace component: Pace improvement vs baseline
+- **20%** - Efficiency Factor: Aerobic fitness (pace-normalized HR)
+- **20%** - Frequency component: Number of runs vs baseline
+
+**Without Heart Rate Data:**
+- **37.5%** - Distance component: Total distance vs baseline
+- **37.5%** - Pace component: Pace improvement vs baseline
 - **25%** - Frequency component: Number of runs vs baseline
-- **25%** - Pace component: Pace improvement vs baseline
 
-Score ranges:
+The score automatically adjusts when HR data is available vs unavailable, ensuring consistent evaluation regardless of whether you use a heart rate monitor.
+
+**Score ranges:**
 - 0-30: Below baseline
 - 30-60: Around baseline
 - 60-80: Above baseline, good progress
 - 80-100: Significantly above baseline, excellent progress
+
+**Key Insight:** Using a heart rate monitor provides the Efficiency Factor component, which tracks your aerobic fitness development - a crucial metric for endurance training!
 
 ## Data Storage
 
@@ -198,22 +242,26 @@ python main.py
 - **Numerics**: numpy
 - **Build System**: Nix Flakes
 
-## Requirements from Specification
+## Features Overview
 
-This implementation fulfills all requirements from `specification.md`:
+This implementation includes comprehensive running analytics:
 
-✓ Strava OAuth integration
-✓ Activity import and sync
+✓ Strava OAuth integration with automatic sync
+✓ Activity import and sync (incremental updates)
 ✓ Weekly/monthly aggregation
-✓ Distance, pace, speed, frequency charts
-✓ Smoothing (SMA, EMA)
-✓ Projection and forecasting
-✓ Training status score
-✓ Milestone estimation
-✓ Local SQLite storage
-✓ PySide6 UI
-✓ Nix Flakes build
-✓ Unit tests
+✓ **5 Chart Tabs**: Overview, Heart Rate, Endurance, Score, Projection
+✓ Heart Rate analytics (HR Range, Avg HR, Efficiency Factor)
+✓ Endurance tracking (Longest Run, Avg Distance per Run)
+✓ Smoothing (SMA, EMA) for trend visualization
+✓ Projection and forecasting (Volume & Long Run modes)
+✓ **Adaptive Training Score** (with/without HR data)
+✓ Milestone estimation (Marathon Readiness - 32km Long Run)
+✓ **Race Time Predictions** (HR-based McMillan methodology)
+✓ Manual HRmax configuration with plausibility checks
+✓ Local SQLite storage (privacy-first)
+✓ PySide6 Qt UI with dark mode support
+✓ Nix Flakes build system
+✓ Comprehensive unit tests (17 tests for race predictor alone)
 
 ## License
 
