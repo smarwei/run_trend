@@ -1,0 +1,51 @@
+{
+  "app-id": "de.arneweiss.RunTrend",
+  "runtime": "org.kde.Platform",
+  "runtime-version": "6.10",
+  "sdk": "org.kde.Sdk",
+  "command": "run-trend",
+  "finish-args": [
+    "--share=ipc",
+    "--socket=x11",
+    "--socket=wayland",
+    "--device=dri",
+    "--share=network",
+    "--filesystem=xdg-data/run_trend:create",
+    "--filesystem=xdg-config/run_trend:create"
+  ],
+  "cleanup": [
+    "/include",
+    "/lib/pkgconfig",
+    "/share/man",
+    "*.a",
+    "*.la"
+  ],
+  "modules": [
+    "python3-requirements.json",
+    {
+      "name": "run-trend",
+      "buildsystem": "simple",
+      "build-commands": [
+        "pip3 install --verbose --prefix=${FLATPAK_DEST} --no-build-isolation ."
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/smarwei/run_trend.git",
+          "tag": "v0.1.0",
+          "commit": "ea06c155f6769f092bb52f68d294b3c10ee67d70"
+        }
+      ],
+      "post-install": [
+        "install -Dm644 de.arneweiss.RunTrend.desktop ${FLATPAK_DEST}/share/applications/de.arneweiss.RunTrend.desktop",
+        "install -Dm644 de.arneweiss.RunTrend.metainfo.xml ${FLATPAK_DEST}/share/metainfo/de.arneweiss.RunTrend.metainfo.xml",
+        "install -Dm644 icons/hicolor/64x64/apps/de.arneweiss.RunTrend.png ${FLATPAK_DEST}/share/icons/hicolor/64x64/apps/de.arneweiss.RunTrend.png",
+        "install -Dm644 icons/hicolor/128x128/apps/de.arneweiss.RunTrend.png ${FLATPAK_DEST}/share/icons/hicolor/128x128/apps/de.arneweiss.RunTrend.png",
+        "install -Dm644 icons/hicolor/256x256/apps/de.arneweiss.RunTrend.png ${FLATPAK_DEST}/share/icons/hicolor/256x256/apps/de.arneweiss.RunTrend.png",
+        "install -Dm644 icons/hicolor/512x512/apps/de.arneweiss.RunTrend.png ${FLATPAK_DEST}/share/icons/hicolor/512x512/apps/de.arneweiss.RunTrend.png",
+        "install -Dm644 MANUAL_de.md ${FLATPAK_DEST}/lib/python3.13/site-packages/MANUAL_de.md",
+        "install -Dm644 MANUAL_en.md ${FLATPAK_DEST}/lib/python3.13/site-packages/MANUAL_en.md"
+      ]
+    }
+  ]
+}
