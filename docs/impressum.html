@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impressum - RunTrend</title>
+    <style>
+        :root {
+            --primary: #667eea;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --bg-light: #f7fafc;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.7;
+            color: var(--text-dark);
+            background: var(--bg-light);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        header {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 20px 0;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .content-box {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 32px;
+            color: var(--text-dark);
+            margin-bottom: 24px;
+        }
+
+        h2 {
+            font-size: 20px;
+            color: var(--text-dark);
+            margin-top: 32px;
+            margin-bottom: 16px;
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: var(--text-dark);
+        }
+
+        .contact-info {
+            background: var(--bg-light);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 24px 0;
+        }
+
+        .contact-info p {
+            margin-bottom: 4px;
+        }
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .lang-switch {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        .lang-switch a {
+            margin-left: 16px;
+            font-weight: 500;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            color: var(--text-light);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">🏃 RunTrend</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="lang-switch">
+            <a href="#de" onclick="switchLang('de')">Deutsch</a>
+            <a href="#en" onclick="switchLang('en')">English</a>
+        </div>
+
+        <div class="content-box">
+            <!-- German Version -->
+            <div id="content-de">
+                <h1>Impressum</h1>
+
+                <h2>Angaben gemäß § 5 TMG</h2>
+                <div class="contact-info">
+                    <p><strong>Arne Weiß</strong></p>
+                    <p>Edelweißstr. 3</p>
+                    <p>44289 Dortmund</p>
+                    <p>Deutschland</p>
+                </div>
+
+                <h2>Kontakt</h2>
+                <p>E-Mail: <a href="mailto:run-trend@arne-weiss.de">run-trend@arne-weiss.de</a></p>
+
+                <h2>Haftungsausschluss</h2>
+
+                <h3>Haftung für Inhalte</h3>
+                <p>Die Inhalte dieser Website wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte kann jedoch keine Gewähr übernommen werden. Als Diensteanbieter bin ich gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG bin ich als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen.</p>
+
+                <h3>Haftung für Links</h3>
+                <p>Diese Website enthält Links zu externen Websites Dritter, auf deren Inhalte ich keinen Einfluss habe. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich. Die verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße überprüft. Rechtswidrige Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar.</p>
+
+                <h3>Urheberrecht</h3>
+                <p>Die durch mich erstellten Inhalte und Werke auf dieser Website unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen meiner schriftlichen Zustimmung.</p>
+
+                <p>RunTrend ist Open-Source-Software und steht unter der <a href="https://github.com/smarwei/run_trend/blob/master/LICENSE" target="_blank">MIT License with Commons Clause</a>.</p>
+
+                <h2>Software-Hinweise</h2>
+                <p><strong>RunTrend</strong> ist ein kostenloses Open-Source-Projekt. Die Software wird "wie besehen" ohne jegliche Gewährleistung bereitgestellt. Die Nutzung erfolgt auf eigene Verantwortung.</p>
+
+                <p><strong>Datenschutz:</strong> RunTrend speichert alle Daten lokal auf deinem Gerät. Es erfolgt keine Übertragung an externe Server außer zur Strava API (nach deiner Autorisierung).</p>
+            </div>
+
+            <!-- English Version -->
+            <div id="content-en" style="display: none;">
+                <h1>Legal Notice</h1>
+
+                <h2>Information pursuant to § 5 TMG (German Telemedia Act)</h2>
+                <div class="contact-info">
+                    <p><strong>Arne Weiß</strong></p>
+                    <p>Edelweißstr. 3</p>
+                    <p>44289 Dortmund</p>
+                    <p>Germany</p>
+                </div>
+
+                <h2>Contact</h2>
+                <p>Email: <a href="mailto:run-trend@arne-weiss.de">run-trend@arne-weiss.de</a></p>
+
+                <h2>Disclaimer</h2>
+
+                <h3>Liability for Content</h3>
+                <p>The contents of this website have been created with the greatest care. However, I cannot guarantee the accuracy, completeness, and timeliness of the content. As a service provider, I am responsible for my own content on these pages in accordance with general law pursuant to Section 7(1) TMG. However, according to Sections 8 to 10 TMG, I am not obligated to monitor transmitted or stored third-party information.</p>
+
+                <h3>Liability for Links</h3>
+                <p>This website contains links to external third-party websites over whose content I have no control. Therefore, I cannot assume any liability for this external content. The respective provider or operator of the linked pages is always responsible for the content of those pages. The linked pages were checked for possible legal violations at the time of linking. Illegal content was not recognizable at the time of linking.</p>
+
+                <h3>Copyright</h3>
+                <p>The content and works created by me on this website are subject to German copyright law. The reproduction, editing, distribution, and any kind of use outside the limits of copyright law require my written consent.</p>
+
+                <p>RunTrend is open-source software licensed under the <a href="https://github.com/smarwei/run_trend/blob/master/LICENSE" target="_blank">MIT License with Commons Clause</a>.</p>
+
+                <h2>Software Notice</h2>
+                <p><strong>RunTrend</strong> is a free open-source project. The software is provided "as is" without any warranty. Use at your own risk.</p>
+
+                <p><strong>Privacy:</strong> RunTrend stores all data locally on your device. No data is transmitted to external servers except to the Strava API (after your authorization).</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 Arne Weiß • <a href="https://runtrend.arne-weiss.de">RunTrend</a> • <a href="https://github.com/smarwei/run_trend" target="_blank">GitHub</a></p>
+        </footer>
+    </div>
+
+    <script>
+        function switchLang(lang) {
+            if (lang === 'de') {
+                document.getElementById('content-de').style.display = 'block';
+                document.getElementById('content-en').style.display = 'none';
+                document.documentElement.lang = 'de';
+                localStorage.setItem('impressum-lang', 'de');
+            } else {
+                document.getElementById('content-de').style.display = 'none';
+                document.getElementById('content-en').style.display = 'block';
+                document.documentElement.lang = 'en';
+                localStorage.setItem('impressum-lang', 'en');
+            }
+        }
+
+        // Auto-detect language on load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('impressum-lang');
+            const browserLang = navigator.language.split('-')[0];
+            const lang = savedLang || (browserLang === 'de' ? 'de' : 'en');
+            switchLang(lang);
+        });
+    </script>
+</body>
+</html>
