@@ -1485,11 +1485,18 @@
         const initialLang = detectLanguage();
         setLanguage(initialLang);
 
-        // Smooth scroll
+        // Smooth scroll (only for valid anchor links, not download buttons)
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                // Skip if it's just "#" (download button placeholder)
+                if (href === '#') return;
+
+                // Only process if href still starts with "#" (internal anchors)
+                if (!href.startsWith('#')) return;
+
                 e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
+                const target = document.querySelector(href);
                 if (target) {
                     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
@@ -1504,7 +1511,8 @@
                 const release = await response.json();
 
                 if (release.tag_name) {
-                    const dateStr = new Date(release.published_at).toLocaleDateString(currentLang === 'de' ? 'de-DE' : 'en-US');
+                    const date = new Date(release.published_at);
+                    const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD format
                     document.getElementById('version-info').innerHTML = `
                         <strong>${currentLang === 'de' ? 'Neueste Version' : 'Latest Version'}:</strong> ${release.tag_name}
                         <span style="margin: 0 10px;">•</span>
