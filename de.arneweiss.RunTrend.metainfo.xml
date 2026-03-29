@@ -46,6 +46,19 @@
   </provides>
 
   <releases>
+    <release version="0.1.1" date="2026-03-29">
+      <description>
+        <p>Strava API compliance update</p>
+        <ul>
+          <li>Add proper Strava deauthorization support (calls Strava's deauth endpoint)</li>
+          <li>Add user-initiated data deletion feature in Settings</li>
+          <li>Update website language for Strava API compliance</li>
+          <li>Add Privacy Policy page</li>
+          <li>Add Strava Apps management link in footer</li>
+          <li>Update user manuals with disconnection instructions</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.1.0" date="2026-03-08">
       <description>
         <p>Initial release</p>
