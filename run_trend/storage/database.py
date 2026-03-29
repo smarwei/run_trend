@@ -251,6 +251,34 @@ class Database:
             return json.loads(result['value'])
         return default
 
+    def delete_all_activities(self) -> int:
+        """Delete all activities from the database.
+
+        Returns:
+            int: Number of activities deleted
+        """
+        cursor = self.conn.cursor()
+        cursor.execute('SELECT COUNT(*) as count FROM activities')
+        count = cursor.fetchone()['count']
+
+        cursor.execute('DELETE FROM activities')
+        self.conn.commit()
+
+        return count
+
+    def clear_sync_settings(self):
+        """Clear sync-related settings (last sync timestamp, etc.)."""
+        cursor = self.conn.cursor()
+        cursor.execute('''
+            DELETE FROM settings
+            WHERE key IN ('last_sync', 'training_start_date')
+        ''')
+        self.conn.commit()
+
+    def get_database_path(self) -> str:
+        """Get the full path to the database file."""
+        return self.db_path
+
     def close(self):
         """Close database connection."""
         if self.conn:

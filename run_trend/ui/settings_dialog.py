@@ -128,6 +128,27 @@ class SettingsDialog(QDialog):
         self.sync_btn.clicked.connect(self._handle_sync)
         actions_layout.addWidget(self.sync_btn)
 
+        # Disconnect & Delete Data button
+        self.delete_data_btn = QPushButton(self.tr("Disconnect Strava & Delete All Data"))
+        self.delete_data_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #d32f2f;
+                color: white;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #b71c1c;
+            }
+            QPushButton:disabled {
+                background-color: #9e9e9e;
+            }
+        """)
+        self.delete_data_btn.clicked.connect(self._handle_delete_data)
+        self.delete_data_btn.setEnabled(False)  # Disabled when not connected
+        actions_layout.addWidget(self.delete_data_btn)
+
         # Status label
         self.status_label = QLabel(self.tr("Not connected"))
         self.status_label.setStyleSheet("color: gray; font-size: 10px; padding: 5px;")
@@ -256,11 +277,13 @@ class SettingsDialog(QDialog):
         if self.main_window.auth and self.main_window.auth.is_authenticated():
             self.connect_btn.setText(self.tr("Disconnect from Strava"))
             self.sync_btn.setEnabled(True)
+            self.delete_data_btn.setEnabled(True)
             self.status_label.setText(self.tr("Connected to Strava"))
             self.status_label.setStyleSheet("color: green; font-size: 10px; padding: 5px;")
         else:
             self.connect_btn.setText(self.tr("Connect to Strava"))
             self.sync_btn.setEnabled(False)
+            self.delete_data_btn.setEnabled(False)
             self.status_label.setText(self.tr("Not connected"))
             self.status_label.setStyleSheet("color: gray; font-size: 10px; padding: 5px;")
 
@@ -287,3 +310,54 @@ class SettingsDialog(QDialog):
             return
 
         self.main_window._sync_activities()
+
+    def _handle_delete_data(self):
+        """Handle complete disconnection and data deletion."""
+        if not self.main_window or not self.main_window.auth:
+            return
+
+        # Confirmation dialog with strong warning
+        reply = QMessageBox.warning(
+            self,
+            self.tr("Delete All Data"),
+            self.tr(
+                "This will:\n\n"
+                "• Disconnect your Strava account\n"
+                "• Delete all synced activities from this device\n"
+                "• Remove RunTrend from your Strava authorized apps\n\n"
+                "This action cannot be undone.\n\n"
+                "Continue?"
+            ),
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+
+        if reply != QMessageBox.Yes:
+            return
+
+        # Perform deletion
+        activity_count = 0
+        if self.main_window.db:
+            activity_count = self.main_window.db.delete_all_activities()
+            self.main_window.db.clear_sync_settings()
+
+        # Revoke Strava auth
+        deauth_success = self.main_window.auth.revoke()
+
+        # Clear references
+        self.main_window.auth = None
+        self.main_window.client = None
+        self.main_window.sync_manager = None
+
+        # Update UI
+        self._update_auth_status()
+
+        # Show completion message
+        QMessageBox.information(
+            self,
+            self.tr("Data Deleted"),
+            self.tr(
+                "Successfully deleted {0} activities.\n\n"
+                "RunTrend has been disconnected from your Strava account."
+            ).format(activity_count)
+        )

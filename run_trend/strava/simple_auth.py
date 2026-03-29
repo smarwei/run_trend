@@ -273,11 +273,37 @@ class SimpleStravaAuth:
             print(f"Error exchanging code: {e}")
             return False
 
-    def revoke(self):
-        """Revoke authentication by clearing stored token data."""
+    def revoke(self) -> bool:
+        """Revoke authentication by calling Strava deauth endpoint and clearing local tokens.
+
+        Returns:
+            bool: True if successful (or tokens already cleared), False on error
+        """
+        success = True
+
+        # Step 1: Call Strava deauthorization endpoint if we have a token
+        if self._access_token:
+            try:
+                response = requests.post(
+                    'https://www.strava.com/oauth/deauthorize',
+                    headers={'Authorization': f'Bearer {self._access_token}'}
+                )
+
+                if response.status_code not in [200, 204]:
+                    print(f"Warning: Strava deauth returned {response.status_code}")
+                    success = False
+                    # Continue anyway - still clear local tokens
+            except requests.RequestException as e:
+                print(f"Warning: Failed to deauthorize with Strava: {e}")
+                success = False
+                # Continue anyway
+
+        # Step 2: Clear local tokens regardless of server response
         self._access_token = None
         self._refresh_token = None
         self._expires_at = None
 
         if self.settings:
             self.settings.set('strava_token_data', None)
+
+        return success
