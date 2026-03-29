@@ -1980,8 +1980,17 @@ Der Settings Dialog enthält alle wichtigen Konfigurationen und Aktionen:
 **Strava Actions:**
 - **Connect to Strava**: Verbindung zu Strava herstellen (öffnet Browser für OAuth)
   - Nach erfolgreicher Verbindung wirst du gefragt, ob sofort synchronisiert werden soll
-- **Disconnect from Strava**: Verbindung trennen
-- **Sync Activities**: Aktivitäten von Strava herunterladen
+- **Sync Activities**: Aktivitäten von Strava herunterladen (aktiviert wenn verbunden)
+- **Disconnect Strava & Delete All Data**: Vollständige Trennung und Datenlöschung (aktiviert wenn verbunden)
+  - **Was wird gemacht:**
+    - Entfernt RunTrend aus deinen autorisierten Strava-Apps (ruft Stravas Deautorisierungs-Endpunkt auf)
+    - Löscht alle synchronisierten Aktivitäten von deinem Gerät
+    - Löscht alle OAuth-Tokens
+    - Behält deine API-Anmeldedaten, damit du dich später wieder verbinden kannst
+  - **Warnung**: Diese Aktion kann nicht rückgängig gemacht werden! Du erhältst einen Bestätigungsdialog, der genau zeigt, was gelöscht wird
+  - **Datenschutz**: Deine Daten werden nur lokal gespeichert. Diese Löschung entfernt sie vollständig von deinem Gerät
+  - **Wiederherstellen**: Nach der Löschung kannst du dich jederzeit wieder verbinden. Deine Strava-Daten bleiben auf Stravas Servern erhalten
+  - **Manuelle Alternative**: Du kannst RunTrends Zugriff auch unter https://www.strava.com/settings/apps widerrufen
 - **Status**: Zeigt aktuellen Verbindungsstatus (Grün = verbunden, Grau = nicht verbunden)
 
 **Heart Rate Configuration:**
