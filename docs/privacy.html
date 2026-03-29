@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - RunTrend</title>
+    <style>
+        :root {
+            --primary: #667eea;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --bg-light: #f7fafc;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.7;
+            color: var(--text-dark);
+            background: white;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 48px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            color: var(--text-dark);
+        }
+
+        .last-updated {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-top: 40px;
+            margin-bottom: 16px;
+            color: var(--primary);
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            color: var(--text-dark);
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: var(--text-dark);
+        }
+
+        ul {
+            margin-left: 24px;
+            margin-bottom: 16px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .highlight {
+            background: var(--bg-light);
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            margin: 24px 0;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 24px;
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .lang-switcher {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .lang-btn {
+            padding: 8px 16px;
+            margin: 0 4px;
+            border: 2px solid var(--primary);
+            background: transparent;
+            color: var(--primary);
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .lang-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .lang-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .content[lang="de"] {
+            display: none;
+        }
+
+        html[lang="de"] .content[lang="en"] {
+            display: none;
+        }
+
+        html[lang="de"] .content[lang="de"] {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to RunTrend</a>
+
+        <div class="lang-switcher">
+            <button class="lang-btn" data-lang="en" onclick="setLanguage('en')">English</button>
+            <button class="lang-btn" data-lang="de" onclick="setLanguage('de')">Deutsch</button>
+        </div>
+
+        <!-- English Version -->
+        <div class="content" lang="en">
+            <div class="header">
+                <div class="logo">🏃 RunTrend</div>
+                <h1>Privacy Policy</h1>
+                <p class="last-updated">Last Updated: March 29, 2026</p>
+            </div>
+
+            <div class="highlight">
+                <p><strong>TL;DR:</strong> RunTrend processes your Strava activity data locally on your device. We don't collect, store, or transmit your data to any servers. You have full control and can delete all data anytime.</p>
+            </div>
+
+            <h2>1. Introduction</h2>
+            <p>RunTrend ("we", "our", or "the application") is a free, open-source desktop application that provides analytics for your running activities from Strava. This Privacy Policy explains how we handle your data.</p>
+
+            <h2>2. Data Controller</h2>
+            <p>For questions regarding this Privacy Policy, please contact:</p>
+            <p>
+                Arne Weiß<br>
+                Email: <a href="mailto:arne.weiss@posteo.de">arne.weiss@posteo.de</a><br>
+                GitHub: <a href="https://github.com/smarwei/run_trend" target="_blank">github.com/smarwei/run_trend</a>
+            </p>
+
+            <h2>3. Data We Access from Strava</h2>
+            <p>When you authorize RunTrend via OAuth 2.0, we request read-only access to your Strava activity data, specifically:</p>
+            <ul>
+                <li>Running activity metadata (date, distance, duration, pace)</li>
+                <li>Heart rate data (if available)</li>
+                <li>Activity names and types</li>
+                <li>Elevation gain data</li>
+            </ul>
+
+            <h3>Compatible with Strava</h3>
+            <p>RunTrend uses the official Strava API to access your activity data. We comply with Strava's API Agreement and Brand Guidelines. RunTrend is an independent application and is not affiliated with, endorsed by, or sponsored by Strava, Inc.</p>
+
+            <h2>4. How We Process Your Data</h2>
+            <p><strong>Local Processing Only:</strong> All data processing happens locally on your device. RunTrend:</p>
+            <ul>
+                <li>Downloads your activity data from Strava's servers to your device</li>
+                <li>Stores the data in a local SQLite database on your device</li>
+                <li>Performs all analytics calculations locally</li>
+                <li>Never uploads your activity data to any third-party servers</li>
+                <li>Never transmits your data to us or any other party</li>
+            </ul>
+
+            <div class="highlight">
+                <p><strong>Important:</strong> RunTrend does not have cloud servers. We cannot access your data because it never leaves your device.</p>
+            </div>
+
+            <h2>5. Data Storage Location</h2>
+            <p>Your activity data is stored locally in an SQLite database at:</p>
+            <ul>
+                <li><strong>Linux:</strong> <code>~/.local/share/run_trend/activities.db</code></li>
+                <li><strong>Windows:</strong> <code>%LOCALAPPDATA%\run_trend\activities.db</code></li>
+                <li><strong>macOS:</strong> <code>~/Library/Application Support/run_trend/activities.db</code></li>
+            </ul>
+            <p>Your Strava OAuth credentials are stored securely in your system's configuration directory.</p>
+
+            <h2>6. Data Retention and Deletion</h2>
+            <h3>How Long We Keep Data</h3>
+            <p>Your activity data remains on your device until you explicitly delete it. There is no automatic deletion.</p>
+
+            <h3>Your Right to Delete Data</h3>
+            <p>You have full control over your data and can delete it at any time:</p>
+            <ul>
+                <li><strong>From the application:</strong> Go to Settings → "Disconnect Strava & Delete All Data"</li>
+                <li><strong>Manually:</strong> Delete the database file at the location mentioned above</li>
+                <li><strong>Uninstall:</strong> Uninstalling RunTrend does not automatically delete your data. Follow the steps above first if you want to remove all data.</li>
+            </ul>
+
+            <h3>Strava Authorization Management</h3>
+            <p>When you use the "Disconnect Strava & Delete All Data" feature, RunTrend will:</p>
+            <ol>
+                <li>Call Strava's deauthorization endpoint to remove RunTrend from your authorized apps</li>
+                <li>Delete all local activity data from your device</li>
+                <li>Clear your local OAuth tokens</li>
+            </ol>
+            <p>You can also manually revoke RunTrend's access at any time by visiting: <a href="https://www.strava.com/settings/apps" target="_blank">https://www.strava.com/settings/apps</a></p>
+
+            <h2>7. Third-Party Services</h2>
+            <p>RunTrend interacts with only one third-party service:</p>
+            <ul>
+                <li><strong>Strava API:</strong> To download your activity data. See <a href="https://www.strava.com/legal/privacy" target="_blank">Strava's Privacy Policy</a> for how Strava handles your data.</li>
+            </ul>
+            <p>RunTrend does not use:</p>
+            <ul>
+                <li>Analytics services (no Google Analytics, Mixpanel, etc.)</li>
+                <li>Crash reporting services</li>
+                <li>Advertising networks</li>
+                <li>Any other tracking or data collection services</li>
+            </ul>
+
+            <h2>8. Data Security</h2>
+            <p>We take data security seriously:</p>
+            <ul>
+                <li><strong>Encrypted connections:</strong> All communication with Strava uses HTTPS</li>
+                <li><strong>OAuth 2.0:</strong> We never see or store your Strava password</li>
+                <li><strong>Local storage:</strong> Your data is protected by your device's file system permissions</li>
+                <li><strong>Open source:</strong> Our code is publicly auditable on <a href="https://github.com/smarwei/run_trend" target="_blank">GitHub</a></li>
+            </ul>
+
+            <h2>9. Children's Privacy</h2>
+            <p>RunTrend is not directed at children under 13. We do not knowingly collect data from children. If you are a parent or guardian and believe your child has provided us with data, please contact us.</p>
+
+            <h2>10. Changes to This Policy</h2>
+            <p>We may update this Privacy Policy from time to time. We will notify users of material changes by:</p>
+            <ul>
+                <li>Updating the "Last Updated" date</li>
+                <li>Publishing a notice in our GitHub repository</li>
+                <li>Displaying a notification in the application (if technically feasible)</li>
+            </ul>
+
+            <h2>11. Your Rights (GDPR)</h2>
+            <p>If you are in the European Economic Area, you have the following rights:</p>
+            <ul>
+                <li><strong>Right to access:</strong> You can access your data at the storage location above</li>
+                <li><strong>Right to rectification:</strong> You can modify your data by re-syncing from Strava or manually editing the database</li>
+                <li><strong>Right to erasure:</strong> You can delete all data as described in Section 6</li>
+                <li><strong>Right to data portability:</strong> Your data is stored in an SQLite database which you can export using standard database tools</li>
+                <li><strong>Right to object:</strong> You can stop data processing by disconnecting from Strava and deleting the data</li>
+            </ul>
+
+            <h2>12. Contact Us</h2>
+            <p>For questions, concerns, or requests regarding this Privacy Policy or your data:</p>
+            <ul>
+                <li><strong>Email:</strong> <a href="mailto:arne.weiss@posteo.de">arne.weiss@posteo.de</a></li>
+                <li><strong>GitHub Issues:</strong> <a href="https://github.com/smarwei/run_trend/issues" target="_blank">github.com/smarwei/run_trend/issues</a></li>
+            </ul>
+
+            <h2>13. Open Source License</h2>
+            <p>RunTrend is open source software licensed under the MIT License with Commons Clause. You can review the source code, report issues, or contribute at: <a href="https://github.com/smarwei/run_trend" target="_blank">github.com/smarwei/run_trend</a></p>
+        </div>
+
+        <!-- German Version -->
+        <div class="content" lang="de">
+            <div class="header">
+                <div class="logo">🏃 RunTrend</div>
+                <h1>Datenschutzerklärung</h1>
+                <p class="last-updated">Letzte Aktualisierung: 29. März 2026</p>
+            </div>
+
+            <div class="highlight">
+                <p><strong>Kurz gesagt:</strong> RunTrend verarbeitet deine Strava-Aktivitätsdaten lokal auf deinem Gerät. Wir sammeln, speichern oder übertragen deine Daten nicht an Server. Du hast die volle Kontrolle und kannst alle Daten jederzeit löschen.</p>
+            </div>
+
+            <h2>1. Einführung</h2>
+            <p>RunTrend („wir", „unser" oder „die Anwendung") ist eine kostenlose, quelloffene Desktop-Anwendung, die Analysen für deine Laufaktivitäten von Strava bereitstellt. Diese Datenschutzerklärung erklärt, wie wir mit deinen Daten umgehen.</p>
+
+            <h2>2. Verantwortlicher</h2>
+            <p>Bei Fragen zu dieser Datenschutzerklärung wende dich bitte an:</p>
+            <p>
+                Arne Weiß<br>
+                E-Mail: <a href="mailto:arne.weiss@posteo.de">arne.weiss@posteo.de</a><br>
+                GitHub: <a href="https://github.com/smarwei/run_trend" target="_blank">github.com/smarwei/run_trend</a>
+            </p>
+
+            <h2>3. Daten, die wir von Strava abrufen</h2>
+            <p>Wenn du RunTrend über OAuth 2.0 autorisierst, fordern wir Lesezugriff auf deine Strava-Aktivitätsdaten an, speziell:</p>
+            <ul>
+                <li>Laufaktivitäts-Metadaten (Datum, Distanz, Dauer, Tempo)</li>
+                <li>Herzfrequenzdaten (falls verfügbar)</li>
+                <li>Aktivitätsnamen und -typen</li>
+                <li>Höhenmeterdaten</li>
+            </ul>
+
+            <h3>Kompatibel mit Strava</h3>
+            <p>RunTrend verwendet die offizielle Strava-API, um auf deine Aktivitätsdaten zuzugreifen. Wir halten uns an Stravas API-Vereinbarung und Markenrichtlinien. RunTrend ist eine unabhängige Anwendung und wird nicht von Strava, Inc. unterstützt, empfohlen oder gesponsert.</p>
+
+            <h2>4. Wie wir deine Daten verarbeiten</h2>
+            <p><strong>Nur lokale Verarbeitung:</strong> Alle Datenverarbeitung erfolgt lokal auf deinem Gerät. RunTrend:</p>
+            <ul>
+                <li>Lädt deine Aktivitätsdaten von Stravas Servern auf dein Gerät herunter</li>
+                <li>Speichert die Daten in einer lokalen SQLite-Datenbank auf deinem Gerät</li>
+                <li>Führt alle Analyseberechnungen lokal durch</li>
+                <li>Lädt deine Aktivitätsdaten niemals auf Drittanbieter-Server hoch</li>
+                <li>Überträgt deine Daten niemals an uns oder andere Parteien</li>
+            </ul>
+
+            <div class="highlight">
+                <p><strong>Wichtig:</strong> RunTrend hat keine Cloud-Server. Wir können nicht auf deine Daten zugreifen, weil sie dein Gerät nie verlassen.</p>
+            </div>
+
+            <h2>5. Datenspeicherort</h2>
+            <p>Deine Aktivitätsdaten werden lokal in einer SQLite-Datenbank gespeichert unter:</p>
+            <ul>
+                <li><strong>Linux:</strong> <code>~/.local/share/run_trend/activities.db</code></li>
+                <li><strong>Windows:</strong> <code>%LOCALAPPDATA%\run_trend\activities.db</code></li>
+                <li><strong>macOS:</strong> <code>~/Library/Application Support/run_trend/activities.db</code></li>
+            </ul>
+            <p>Deine Strava-OAuth-Anmeldedaten werden sicher im Konfigurationsverzeichnis deines Systems gespeichert.</p>
+
+            <h2>6. Datenaufbewahrung und Löschung</h2>
+            <h3>Wie lange wir Daten aufbewahren</h3>
+            <p>Deine Aktivitätsdaten bleiben auf deinem Gerät, bis du sie ausdrücklich löschst. Es gibt keine automatische Löschung.</p>
+
+            <h3>Dein Recht auf Datenlöschung</h3>
+            <p>Du hast die volle Kontrolle über deine Daten und kannst sie jederzeit löschen:</p>
+            <ul>
+                <li><strong>Über die Anwendung:</strong> Gehe zu Einstellungen → „Strava trennen & alle Daten löschen"</li>
+                <li><strong>Manuell:</strong> Lösche die Datenbankdatei am oben genannten Speicherort</li>
+                <li><strong>Deinstallation:</strong> Die Deinstallation von RunTrend löscht deine Daten nicht automatisch. Befolge zuerst die obigen Schritte, wenn du alle Daten entfernen möchtest.</li>
+            </ul>
+
+            <h3>Strava-Autorisierungsverwaltung</h3>
+            <p>Wenn du die Funktion „Strava trennen & alle Daten löschen" verwendest, wird RunTrend:</p>
+            <ol>
+                <li>Den Strava-Deautorisierungs-Endpunkt aufrufen, um RunTrend aus deinen autorisierten Apps zu entfernen</li>
+                <li>Alle lokalen Aktivitätsdaten von deinem Gerät löschen</li>
+                <li>Deine lokalen OAuth-Token löschen</li>
+            </ol>
+            <p>Du kannst RunTrends Zugriff auch jederzeit manuell widerrufen unter: <a href="https://www.strava.com/settings/apps" target="_blank">https://www.strava.com/settings/apps</a></p>
+
+            <h2>7. Drittanbieterdienste</h2>
+            <p>RunTrend interagiert nur mit einem Drittanbieterdienst:</p>
+            <ul>
+                <li><strong>Strava-API:</strong> Um deine Aktivitätsdaten herunterzuladen. Siehe <a href="https://www.strava.com/legal/privacy" target="_blank">Stravas Datenschutzerklärung</a> für Informationen darüber, wie Strava mit deinen Daten umgeht.</li>
+            </ul>
+            <p>RunTrend verwendet nicht:</p>
+            <ul>
+                <li>Analysedienste (kein Google Analytics, Mixpanel usw.)</li>
+                <li>Absturzmeldedienste</li>
+                <li>Werbenetzwerke</li>
+                <li>Andere Tracking- oder Datenerfassungsdienste</li>
+            </ul>
+
+            <h2>8. Datensicherheit</h2>
+            <p>Wir nehmen Datensicherheit ernst:</p>
+            <ul>
+                <li><strong>Verschlüsselte Verbindungen:</strong> Alle Kommunikation mit Strava verwendet HTTPS</li>
+                <li><strong>OAuth 2.0:</strong> Wir sehen oder speichern dein Strava-Passwort niemals</li>
+                <li><strong>Lokale Speicherung:</strong> Deine Daten werden durch die Dateisystemberechtigungen deines Geräts geschützt</li>
+                <li><strong>Open Source:</strong> Unser Code ist öffentlich überprüfbar auf <a href="https://github.com/smarwei/run_trend" target="_blank">GitHub</a></li>
+            </ul>
+
+            <h2>9. Datenschutz für Kinder</h2>
+            <p>RunTrend richtet sich nicht an Kinder unter 13 Jahren. Wir sammeln wissentlich keine Daten von Kindern. Wenn du ein Elternteil oder Erziehungsberechtigter bist und glaubst, dass dein Kind uns Daten zur Verfügung gestellt hat, kontaktiere uns bitte.</p>
+
+            <h2>10. Änderungen an dieser Erklärung</h2>
+            <p>Wir können diese Datenschutzerklärung von Zeit zu Zeit aktualisieren. Wir werden Nutzer über wesentliche Änderungen informieren durch:</p>
+            <ul>
+                <li>Aktualisierung des „Letzte Aktualisierung"-Datums</li>
+                <li>Veröffentlichung einer Mitteilung in unserem GitHub-Repository</li>
+                <li>Anzeige einer Benachrichtigung in der Anwendung (falls technisch möglich)</li>
+            </ul>
+
+            <h2>11. Deine Rechte (DSGVO)</h2>
+            <p>Wenn du dich im Europäischen Wirtschaftsraum befindest, hast du folgende Rechte:</p>
+            <ul>
+                <li><strong>Recht auf Zugang:</strong> Du kannst auf deine Daten am oben genannten Speicherort zugreifen</li>
+                <li><strong>Recht auf Berichtigung:</strong> Du kannst deine Daten ändern, indem du von Strava neu synchronisierst oder die Datenbank manuell bearbeitest</li>
+                <li><strong>Recht auf Löschung:</strong> Du kannst alle Daten wie in Abschnitt 6 beschrieben löschen</li>
+                <li><strong>Recht auf Datenübertragbarkeit:</strong> Deine Daten werden in einer SQLite-Datenbank gespeichert, die du mit Standard-Datenbanktools exportieren kannst</li>
+                <li><strong>Widerspruchsrecht:</strong> Du kannst die Datenverarbeitung stoppen, indem du die Verbindung zu Strava trennst und die Daten löschst</li>
+            </ul>
+
+            <h2>12. Kontaktiere uns</h2>
+            <p>Bei Fragen, Bedenken oder Anfragen zu dieser Datenschutzerklärung oder deinen Daten:</p>
+            <ul>
+                <li><strong>E-Mail:</strong> <a href="mailto:arne.weiss@posteo.de">arne.weiss@posteo.de</a></li>
+                <li><strong>GitHub Issues:</strong> <a href="https://github.com/smarwei/run_trend/issues" target="_blank">github.com/smarwei/run_trend/issues</a></li>
+            </ul>
+
+            <h2>13. Open-Source-Lizenz</h2>
+            <p>RunTrend ist Open-Source-Software, lizenziert unter der MIT-Lizenz mit Commons Clause. Du kannst den Quellcode einsehen, Probleme melden oder beitragen unter: <a href="https://github.com/smarwei/run_trend" target="_blank">github.com/smarwei/run_trend</a></p>
+        </div>
+    </div>
+
+    <script>
+        function detectLanguage() {
+            const saved = localStorage.getItem('runtrend-privacy-lang');
+            if (saved && ['en', 'de'].includes(saved)) {
+                return saved;
+            }
+            const browserLang = navigator.language || navigator.userLanguage;
+            return browserLang.startsWith('de') ? 'de' : 'en';
+        }
+
+        function setLanguage(lang) {
+            if (!['en', 'de'].includes(lang)) lang = 'en';
+            localStorage.setItem('runtrend-privacy-lang', lang);
+            document.documentElement.lang = lang;
+
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+            });
+        }
+
+        const initialLang = detectLanguage();
+        setLanguage(initialLang);
+    </script>
+</body>
+</html>
