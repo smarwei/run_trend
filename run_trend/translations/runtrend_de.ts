@@ -576,6 +576,72 @@ Wähle ein früheres Startdatum oder synchronisiere, um neue Aktivitäten zu lad
       <source>First-Run Wizard</source>
       <translation type="finished">Ersteinrichtungs-Assistent</translation>
     </message>
+    <message>
+      <source>Saved race: {}</source>
+      <translation type="finished">Wettkampf gespeichert: {}</translation>
+    </message>
+    <message>
+      <source>Could not save race</source>
+      <translation type="finished">Wettkampf konnte nicht gespeichert werden</translation>
+    </message>
+    <message>
+      <source>Failed to save race marker: {}</source>
+      <translation type="finished">Speichern des Wettkampf-Markers fehlgeschlagen: {}</translation>
+    </message>
+  </context>
+  <context>
+    <name>RunsTable</name>
+    <message>
+      <source>Mark as Race…</source>
+      <translation type="finished">Als Wettkampf markieren…</translation>
+    </message>
+  </context>
+  <context>
+    <name>RaceDialog</name>
+    <message>
+      <source>Edit Race</source>
+      <translation type="finished">Wettkampf bearbeiten</translation>
+    </message>
+    <message>
+      <source>Mark as Race</source>
+      <translation type="finished">Als Wettkampf markieren</translation>
+    </message>
+    <message>
+      <source>Name:</source>
+      <translation type="finished">Name:</translation>
+    </message>
+    <message>
+      <source>Date:</source>
+      <translation type="finished">Datum:</translation>
+    </message>
+    <message>
+      <source>Distance:</source>
+      <translation type="finished">Distanz:</translation>
+    </message>
+    <message>
+      <source> km</source>
+      <translation type="finished"> km</translation>
+    </message>
+    <message>
+      <source>not set</source>
+      <translation type="finished">nicht gesetzt</translation>
+    </message>
+    <message>
+      <source>Result time:</source>
+      <translation type="finished">Zielzeit:</translation>
+    </message>
+    <message>
+      <source>Notes:</source>
+      <translation type="finished">Notizen:</translation>
+    </message>
+    <message>
+      <source>Missing name</source>
+      <translation type="finished">Name fehlt</translation>
+    </message>
+    <message>
+      <source>Please enter a name for this race.</source>
+      <translation type="finished">Bitte gib einen Namen für diesen Wettkampf ein.</translation>
+    </message>
   </context>
   <context>
     <name>OnboardingWizard</name>

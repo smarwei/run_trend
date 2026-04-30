@@ -36,11 +36,12 @@ CREATE TABLE race_markers (
 ## Acceptance
 
 - [x] Race-Tabelle wird automatisch migriert (idempotent, wie für trainer/manual gemacht)
-- [ ] Rechtsklick-Aktion in RunsTable
+- [x] Rechtsklick-Aktion in RunsTable
 - [ ] Marker auf allen Zeitachsen-Charts (Distance, Pace, Frequency, Duration, Score,
       Training-Load)
 - [ ] Race-Manager-Dialog für Edit/Delete
-- [ ] Übersetzt (DE/EN)
+- [x] Übersetzt (DE/EN) — RaceDialog + RunsTable; Manager-Strings folgen mit
+      dem Manager-Dialog
 
 ## Dateien
 
@@ -63,11 +64,17 @@ gemerged. Folgeiterationen ergänzen die UI-Teile:
   `delete_race_marker` mit `created_at`/`updated_at`-Timestamps
 - ✅ Tests in `tests/test_database.py` (10 Tests, inkl. Idempotenz, Reihenfolge,
   Partial-Update, NULL-Defaults für optionale Felder)
-- ⏳ `RaceDialog` (Name + Distanz + Zielzeit) — Folge-Ticket
-- ⏳ Kontextmenü „Mark as Race…" in `RunsTable` — Folge-Ticket
+- ✅ `RaceDialog` (`run_trend/ui/race_dialog.py`): Name, Datum, Distanz,
+  Zielzeit (HH:mm:ss), Notizen — Prefill aus Activity oder Marker, optionale
+  Felder werden als `None` zurückgegeben.
+- ✅ Kontextmenü „Mark as Race…" in `RunsTable` (rechte-Maus auf Lauf-Reihe)
+  emittiert `race_requested(activity)` mit dem Original-Activity-Dict
+  (sortierungs-stabil über `Qt.UserRole+1` auf der Date-Zelle).
+- ✅ Wiring in `MainWindow._mark_activity_as_race`: öffnet `RaceDialog`,
+  persistiert via `db.add_race_marker(...)`, zeigt Status-Toast.
 - ⏳ Race-Manager-Dialog (Liste + Edit/Delete) — Folge-Ticket
 - ⏳ Vertikale Marker auf allen Zeitachsen-Charts — Folge-Ticket
-- ⏳ Übersetzungen DE/EN — mit UI-Teilen
+- ✅ Übersetzungen für RaceDialog + Kontextmenü (DE/EN, `.ts` + `.qm`)
 
 ### Annahmen DB-Layer
 

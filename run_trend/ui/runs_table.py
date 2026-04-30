@@ -2,9 +2,11 @@
 Sortable table widget for individual runs.
 """
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QHeaderView
+    QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QHeaderView,
+    QMenu,
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QAction
 from datetime import datetime, timezone
 from typing import List, Dict, Any
 
@@ -26,6 +28,10 @@ class NumericTableItem(QTableWidgetItem):
 class RunsTable(QWidget):
     """Table widget showing individual runs with sortable columns."""
 
+    # Emitted when the user picks "Mark as Race…" in the row context menu.
+    # Carries the activity dict for the selected row.
+    race_requested = Signal(dict)
+
     COL_DATE = 0
     COL_NAME = 1
     COL_DISTANCE = 2
@@ -34,6 +40,10 @@ class RunsTable(QWidget):
     COL_ELEVATION = 5
     COL_AVG_HR = 6
     COL_MAX_HR = 7
+
+    # Custom Qt UserRole for stashing the source activity dict on the date
+    # cell so the context menu can recover it independent of sort order.
+    ACTIVITY_ROLE = Qt.UserRole + 1
 
     def __init__(self):
         super().__init__()
@@ -59,6 +69,8 @@ class RunsTable(QWidget):
         self.table.setSelectionBehavior(QTableWidget.SelectRows)
         self.table.setAlternatingRowColors(True)
         self.table.setSortingEnabled(True)
+        self.table.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.table.customContextMenuRequested.connect(self._on_context_menu)
 
         header = self.table.horizontalHeader()
         header.setSectionResizeMode(self.COL_NAME, QHeaderView.Stretch)
@@ -120,8 +132,9 @@ class RunsTable(QWidget):
             pace_str, pace_sort = self._format_pace(moving_time, dist_m)
             duration_str = self._format_duration(moving_time)
 
-            self.table.setItem(row, self.COL_DATE,
-                               NumericTableItem(date_str, date_ts))
+            date_item = NumericTableItem(date_str, date_ts)
+            date_item.setData(self.ACTIVITY_ROLE, act)
+            self.table.setItem(row, self.COL_DATE, date_item)
             self.table.setItem(row, self.COL_NAME,
                                QTableWidgetItem(act.get("name", "")))
             self.table.setItem(row, self.COL_DISTANCE,
@@ -150,3 +163,22 @@ class RunsTable(QWidget):
         self.table.setSortingEnabled(True)
         # Default: newest run first
         self.table.sortItems(self.COL_DATE, Qt.DescendingOrder)
+
+    def _on_context_menu(self, pos):
+        item = self.table.itemAt(pos)
+        if item is None:
+            return
+        date_item = self.table.item(item.row(), self.COL_DATE)
+        if date_item is None:
+            return
+        activity = date_item.data(self.ACTIVITY_ROLE)
+        if not activity:
+            return
+
+        menu = QMenu(self)
+        mark_action = QAction(self.tr("Mark as Race…"), menu)
+        mark_action.triggered.connect(
+            lambda _checked=False, a=activity: self.race_requested.emit(a)
+        )
+        menu.addAction(mark_action)
+        menu.exec(self.table.viewport().mapToGlobal(pos))

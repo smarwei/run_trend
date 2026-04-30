@@ -28,6 +28,7 @@ from .settings_dialog import SettingsDialog
 from .manual_dialog import ManualDialog
 from .about_dialog import AboutDialog
 from .onboarding_wizard import OnboardingWizard
+from .race_dialog import RaceDialog
 from ..charts.distance_chart import DistanceChart
 from ..charts.pace_chart import PaceChart
 from ..charts.frequency_chart import FrequencyChart
@@ -164,6 +165,9 @@ class MainWindow(QMainWindow):
         # Wire empty-state "Connect" buttons to the OAuth flow.
         for chart in self._all_charts():
             chart.connect_requested.connect(self._authenticate_strava)
+
+        # Right-click "Mark as Race…" on a row opens the RaceDialog.
+        self.runs_table.race_requested.connect(self._mark_activity_as_race)
 
         # Tab 1: Overview - Total Load Metrics
         overview_tab = QTabWidget()
@@ -626,6 +630,31 @@ class MainWindow(QMainWindow):
         # cleared sync settings.
         self._update_persistent_status()
         self._update_toolbar_state()
+
+    def _mark_activity_as_race(self, activity: dict):
+        """Open RaceDialog prefilled from an activity and persist on accept."""
+        dialog = RaceDialog(self, activity=activity)
+        if not dialog.exec():
+            return
+        data = dialog.get_data()
+        try:
+            self.db.add_race_marker(
+                date=data["date"],
+                name=data["name"],
+                distance_km=data["distance_km"],
+                result_time=data["result_time"],
+                notes=data["notes"],
+            )
+        except Exception as exc:  # pragma: no cover — defensive UI feedback
+            QMessageBox.warning(
+                self,
+                self.tr("Could not save race"),
+                self.tr("Failed to save race marker: {}").format(exc),
+            )
+            return
+        self.statusbar.showMessage(
+            self.tr("Saved race: {}").format(data["name"]), 5000
+        )
 
     def _show_manual(self):
         """Show manual/help dialog."""

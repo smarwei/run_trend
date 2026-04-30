@@ -576,6 +576,72 @@ Pick an earlier start date or sync to fetch new activities.</translation>
       <source>First-Run Wizard</source>
       <translation type="finished">First-Run Wizard</translation>
     </message>
+    <message>
+      <source>Saved race: {}</source>
+      <translation type="finished">Saved race: {}</translation>
+    </message>
+    <message>
+      <source>Could not save race</source>
+      <translation type="finished">Could not save race</translation>
+    </message>
+    <message>
+      <source>Failed to save race marker: {}</source>
+      <translation type="finished">Failed to save race marker: {}</translation>
+    </message>
+  </context>
+  <context>
+    <name>RunsTable</name>
+    <message>
+      <source>Mark as Race…</source>
+      <translation type="finished">Mark as Race…</translation>
+    </message>
+  </context>
+  <context>
+    <name>RaceDialog</name>
+    <message>
+      <source>Edit Race</source>
+      <translation type="finished">Edit Race</translation>
+    </message>
+    <message>
+      <source>Mark as Race</source>
+      <translation type="finished">Mark as Race</translation>
+    </message>
+    <message>
+      <source>Name:</source>
+      <translation type="finished">Name:</translation>
+    </message>
+    <message>
+      <source>Date:</source>
+      <translation type="finished">Date:</translation>
+    </message>
+    <message>
+      <source>Distance:</source>
+      <translation type="finished">Distance:</translation>
+    </message>
+    <message>
+      <source> km</source>
+      <translation type="finished"> km</translation>
+    </message>
+    <message>
+      <source>not set</source>
+      <translation type="finished">not set</translation>
+    </message>
+    <message>
+      <source>Result time:</source>
+      <translation type="finished">Result time:</translation>
+    </message>
+    <message>
+      <source>Notes:</source>
+      <translation type="finished">Notes:</translation>
+    </message>
+    <message>
+      <source>Missing name</source>
+      <translation type="finished">Missing name</translation>
+    </message>
+    <message>
+      <source>Please enter a name for this race.</source>
+      <translation type="finished">Please enter a name for this race.</translation>
+    </message>
   </context>
   <context>
     <name>OnboardingWizard</name>
