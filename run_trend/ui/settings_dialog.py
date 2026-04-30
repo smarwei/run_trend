@@ -94,6 +94,29 @@ class SettingsDialog(QDialog):
         )
         hr_layout.addRow(self.tr("Max Heart Rate:"), self.hrmax_input)
 
+        self.hr_rest_input = QSpinBox()
+        self.hr_rest_input.setRange(0, 200)  # 0 = unset
+        self.hr_rest_input.setSuffix(self.tr(" bpm"))
+        self.hr_rest_input.setSpecialValueText(self.tr("Not set"))
+        self.hr_rest_input.setToolTip(
+            self.tr("Resting heart rate. Required for the Karvonen zone scheme.\n"
+            "Typical values: 50–70 bpm.")
+        )
+        hr_layout.addRow(self.tr("Resting Heart Rate:"), self.hr_rest_input)
+
+        self.hr_zone_scheme_combo = QComboBox()
+        self.hr_zone_scheme_combo.addItem(
+            self.tr("Classic (% of HR-Max)"), userData='classic',
+        )
+        self.hr_zone_scheme_combo.addItem(
+            self.tr("Karvonen (HR-Reserve)"), userData='karvonen',
+        )
+        self.hr_zone_scheme_combo.setToolTip(
+            self.tr("Classic uses fixed percentages of HR-Max.\n"
+            "Karvonen uses HR-Reserve = (HR-Max − HR-Rest) and shifts zones up.")
+        )
+        hr_layout.addRow(self.tr("Zone Scheme:"), self.hr_zone_scheme_combo)
+
         hr_info_label = QLabel(
             self.tr("Manual HRmax improves race time predictions.\n"
             "If unsure, leave at 'Auto-detect'.")
@@ -264,6 +287,8 @@ class SettingsDialog(QDialog):
         client_id = self.settings.get('strava_client_id', '')
         client_secret = self.settings.get('strava_client_secret', '')
         manual_hrmax = self.settings.get('manual_hrmax', 0)
+        hr_rest = self.settings.get('hr_rest', 0)
+        hr_zone_scheme = self.settings.get('hr_zone_scheme', 'classic')
         language = self.settings.get('language', 'auto')
         include_treadmill = bool(self.settings.get('include_treadmill', True))
         include_manual = bool(self.settings.get('include_manual', True))
@@ -271,6 +296,9 @@ class SettingsDialog(QDialog):
         self.client_id_input.setText(client_id)
         self.client_secret_input.setText(client_secret)
         self.hrmax_input.setValue(manual_hrmax)
+        self.hr_rest_input.setValue(hr_rest)
+        scheme_idx = self.hr_zone_scheme_combo.findData(hr_zone_scheme)
+        self.hr_zone_scheme_combo.setCurrentIndex(scheme_idx if scheme_idx >= 0 else 0)
         self.include_treadmill_checkbox.setChecked(include_treadmill)
         self.include_manual_checkbox.setChecked(include_manual)
 
@@ -284,14 +312,33 @@ class SettingsDialog(QDialog):
         old_client_id = self.settings.get('strava_client_id', '')
         old_client_secret = self.settings.get('strava_client_secret', '')
         old_hrmax = self.settings.get('manual_hrmax', 0)
+        old_hr_rest = self.settings.get('hr_rest', 0)
+        old_hr_zone_scheme = self.settings.get('hr_zone_scheme', 'classic')
         old_include_treadmill = bool(self.settings.get('include_treadmill', True))
         old_include_manual = bool(self.settings.get('include_manual', True))
 
         client_id = self.client_id_input.text().strip()
         client_secret = self.client_secret_input.text().strip()
         manual_hrmax = self.hrmax_input.value()
+        hr_rest = self.hr_rest_input.value()
+        hr_zone_scheme = (
+            self.hr_zone_scheme_combo.currentData() or 'classic'
+        )
         include_treadmill = self.include_treadmill_checkbox.isChecked()
         include_manual = self.include_manual_checkbox.isChecked()
+
+        # Validate Karvonen requirements before persisting.
+        if hr_zone_scheme == 'karvonen':
+            if hr_rest <= 0 or manual_hrmax <= 0 or hr_rest >= manual_hrmax:
+                QMessageBox.warning(
+                    self,
+                    self.tr("Invalid Karvonen settings"),
+                    self.tr(
+                        "Karvonen zones need both Max Heart Rate and Resting "
+                        "Heart Rate set, with HR-Rest below HR-Max."
+                    ),
+                )
+                return
 
         # Get language selection
         language_index = self.language_combo.currentIndex()
@@ -300,6 +347,11 @@ class SettingsDialog(QDialog):
 
         strava_changed = (client_id != old_client_id or client_secret != old_client_secret)
         hrmax_changed = (manual_hrmax != old_hrmax)
+        hr_zone_config_changed = (
+            manual_hrmax != old_hrmax
+            or hr_rest != old_hr_rest
+            or hr_zone_scheme != old_hr_zone_scheme
+        )
         filters_changed = (
             include_treadmill != old_include_treadmill
             or include_manual != old_include_manual
@@ -318,8 +370,21 @@ class SettingsDialog(QDialog):
         self.settings.set('strava_client_id', client_id)
         self.settings.set('strava_client_secret', client_secret)
 
-        # Save manual HRmax
+        # Save manual HRmax + HR-zone config
         self.settings.set('manual_hrmax', manual_hrmax)
+        self.settings.set('hr_rest', hr_rest)
+        self.settings.set('hr_zone_scheme', hr_zone_scheme)
+
+        # Drop stale HR-zone cache rows when the inputs change. The cache
+        # lazily refills on next view; no recompute here.
+        if hr_zone_config_changed and self.main_window and getattr(
+            self.main_window, 'db', None,
+        ):
+            self.main_window.db.invalidate_activity_hr_zones(
+                hr_max=manual_hrmax if manual_hrmax > 0 else None,
+                hr_rest=hr_rest if hr_rest > 0 else None,
+                scheme=hr_zone_scheme,
+            )
 
         # Save activity filters
         self.settings.set('include_treadmill', include_treadmill)

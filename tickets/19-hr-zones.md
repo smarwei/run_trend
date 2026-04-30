@@ -85,7 +85,24 @@ ohne I/O.
   `_make_request`-Mock) und `tests/test_hr_zones_storage.py` (8 Tests
   inkl. Idempotenz-Reopen, Replace-Verhalten, Karvonen-Persistenz,
   Length-Validation, Invalidate-Pfade).
-- ⏳ Settings-UI für HR-Max + HR-Rest + Schema-Wahl — Folgeiteration
+- ✅ Settings-UI: General-Tab erweitert um Resting-HR-Spinbox (0 = unset),
+  Zonenschema-Combo (Classic / Karvonen). Save validiert Karvonen
+  (`hr_rest > 0 AND hr_max > 0 AND hr_rest < hr_max`) mit
+  QMessageBox.warning + Early-Return. Bei Änderung von HR-Max/HR-Rest/Scheme
+  wird `Database.invalidate_activity_hr_zones(...)` über das MainWindow
+  getriggert — Lazy-Refill bei der nächsten Cache-Anfrage.
+- ✅ Settings-Defaults: `hr_rest=0`, `hr_zone_scheme='classic'` werden über
+  `AppSettings.get(..., default)` aufgelöst (ohne neue DEFAULTS-Einträge —
+  konsistent mit `manual_hrmax`, das ebenfalls implizit per `get(..., 0)`
+  aufgelöst wird).
+- ✅ Übersetzungen: 9 neue Strings (Resting Heart Rate / Ruhepuls,
+  Not set / Nicht gesetzt, Tooltips, Zone Scheme / Zonenschema,
+  Classic + Karvonen Combo-Items, Karvonen-Validation-Messagebox).
+  `.qm` regeneriert (356 DE / 351 EN).
+- ✅ Tests in `tests/test_settings_dialog_hr.py` (7 Tests: Defaults,
+  Persistenz-Roundtrip, Karvonen-Block bei fehlendem HR-Rest,
+  Karvonen-Block bei `hr_rest >= hr_max`, Cache-Invalidation,
+  Cache-Persistenz wenn unverändert, Classic-Save-Pfad).
 - ⏳ Chart + Aggregations-Ansicht + 80/20-Indikator + Lazy-Fetch-Pipeline —
   Folgeiteration
 
@@ -120,3 +137,17 @@ ohne I/O.
 - Kein Foreign-Key-Constraint auf `activities.strava_id`: löschende
   Sync-Pfade müssen den Cache nicht explizit pflegen, und Stale-Rows ohne
   zugehörige Aktivität schaden nichts (werden auf Read ignoriert).
+
+### Annahmen Settings-UI
+
+- HR-Rest-Range 0..200 (statt der ursprünglich gedachten 0..120): Validation
+  erfolgt im Save-Pfad, nicht hart über die Spinbox. Damit lässt sich auch
+  ein bewusst falscher Wert testen, ohne dass die UI ihn vorab clampt.
+- HR-Zonen-Settings sind Single-User-Properties — sie werden im
+  `AppSettings`-JSON persistiert, nicht in der DB. Konsistent mit
+  `manual_hrmax`. Damit greift `invalidate_activity_hr_zones` weiterhin als
+  zentraler Cache-Refresh-Punkt, ohne Settings-Trigger in der DB selbst.
+- Karvonen-Validation greift nur auf dem Save-Pfad. Wer das Schema während
+  einer Sitzung im Combo wechselt, bekommt keinen Inline-Hint — der
+  „Save"-Button ist die natürliche Commit-Grenze, dort ist die Warnung
+  reichhaltig genug.

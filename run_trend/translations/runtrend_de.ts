@@ -1228,6 +1228,55 @@ If unsure, leave at 'Auto-detect'.</source>
 Wenn unsicher, bei 'Automatisch erkennen' belassen.</translation>
     </message>
     <message>
+      <location filename="../ui/settings_dialog.py" line="0" />
+      <source>Resting Heart Rate:</source>
+      <translation type="finished">Ruhepuls:</translation>
+    </message>
+    <message>
+      <location filename="../ui/settings_dialog.py" line="0" />
+      <source>Not set</source>
+      <translation type="finished">Nicht gesetzt</translation>
+    </message>
+    <message>
+      <location filename="../ui/settings_dialog.py" line="0" />
+      <source>Resting heart rate. Required for the Karvonen zone scheme.
+Typical values: 50–70 bpm.</source>
+      <translation type="finished">Ruhepuls. Wird für das Karvonen-Zonenschema benötigt.
+Typische Werte: 50–70 bpm.</translation>
+    </message>
+    <message>
+      <location filename="../ui/settings_dialog.py" line="0" />
+      <source>Zone Scheme:</source>
+      <translation type="finished">Zonenschema:</translation>
+    </message>
+    <message>
+      <location filename="../ui/settings_dialog.py" line="0" />
+      <source>Classic (% of HR-Max)</source>
+      <translation type="finished">Klassisch (% der HR-Max)</translation>
+    </message>
+    <message>
+      <location filename="../ui/settings_dialog.py" line="0" />
+      <source>Karvonen (HR-Reserve)</source>
+      <translation type="finished">Karvonen (HR-Reserve)</translation>
+    </message>
+    <message>
+      <location filename="../ui/settings_dialog.py" line="0" />
+      <source>Classic uses fixed percentages of HR-Max.
+Karvonen uses HR-Reserve = (HR-Max − HR-Rest) and shifts zones up.</source>
+      <translation type="finished">Klassisch nutzt feste Prozentwerte der HR-Max.
+Karvonen nutzt HR-Reserve = (HR-Max − HR-Ruhe) und verschiebt die Zonen nach oben.</translation>
+    </message>
+    <message>
+      <location filename="../ui/settings_dialog.py" line="0" />
+      <source>Invalid Karvonen settings</source>
+      <translation type="finished">Ungültige Karvonen-Einstellungen</translation>
+    </message>
+    <message>
+      <location filename="../ui/settings_dialog.py" line="0" />
+      <source>Karvonen zones need both Max Heart Rate and Resting Heart Rate set, with HR-Rest below HR-Max.</source>
+      <translation type="finished">Karvonen-Zonen brauchen sowohl Max-Herzfrequenz als auch Ruhepuls, wobei HR-Ruhe unter HR-Max liegen muss.</translation>
+    </message>
+    <message>
       <location filename="../ui/settings_dialog.py" line="117" />
       <source>Strava Actions</source>
       <translation type="finished">Strava-Aktionen</translation>
