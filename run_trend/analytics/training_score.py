@@ -5,6 +5,14 @@ from typing import List, Dict, Any
 import numpy as np
 
 
+# Minimum number of valid efficiency_factor samples required across the
+# training history before EF contributes to the training score. Below this
+# threshold we drop the EF component entirely and re-normalise the other
+# weights — preferable to a synthetic default that biases the score for
+# athletes without an established HR baseline.
+MIN_EF_SAMPLES = 3
+
+
 class TrainingScoreCalculator:
     """Calculates composite training status score."""
 
@@ -36,11 +44,17 @@ class TrainingScoreCalculator:
         paces = [a['weighted_avg_pace_min_per_km'] for a in complete_aggregates if a['weighted_avg_pace_min_per_km'] > 0]
         efficiencies = [a['efficiency_factor'] for a in complete_aggregates if a.get('efficiency_factor', 0) > 0]
 
+        # EF only contributes to the score when there are enough samples to
+        # form a meaningful baseline; otherwise we drop it and re-normalise
+        # the remaining weights instead of falling back to an arbitrary
+        # default that systematically biases the score for new athletes.
+        ef_history_sufficient = len(efficiencies) >= MIN_EF_SAMPLES
+
         # Calculate baseline values (rolling average approach)
         baseline_distance = np.mean(distances) if distances else 0
         baseline_frequency = np.mean(frequencies) if frequencies else 0
         baseline_pace = np.mean(paces) if paces else 0
-        baseline_efficiency = np.mean(efficiencies) if efficiencies else 0
+        baseline_efficiency = np.mean(efficiencies) if ef_history_sufficient else 0
 
         # Avoid division by zero
         if baseline_distance == 0:
@@ -49,8 +63,8 @@ class TrainingScoreCalculator:
             baseline_frequency = 1.0
         if baseline_pace == 0:
             baseline_pace = 6.0  # Default ~6 min/km
-        if baseline_efficiency == 0:
-            baseline_efficiency = 0.018  # Default ~0.018 (corresponds to ~2.78 m/s at 155 bpm)
+        # No fallback for baseline_efficiency: when ef_history_sufficient is
+        # False we never divide by it because has_hr_data stays False.
 
         # Calculate scores for each period
         scored_aggregates = []
@@ -94,9 +108,12 @@ class TrainingScoreCalculator:
             else:
                 normalized_pace = 0.0
 
-            # Normalize efficiency factor (higher is better)
+            # Normalize efficiency factor (higher is better).
+            # EF contributes only when the period has HR-derived EF AND the
+            # training history holds enough samples for a stable baseline
+            # (see ef_history_sufficient above).
             current_efficiency = aggregate.get('efficiency_factor', 0)
-            has_hr_data = current_efficiency > 0
+            has_hr_data = ef_history_sufficient and current_efficiency > 0
 
             if has_hr_data:
                 # Efficiency improvement: current / baseline (>1 means better)
@@ -222,7 +239,8 @@ Components (when HR data available):
 • Efficiency Factor (20%): Aerobic fitness (pace-normalized HR)
 • Frequency (20%): Number of runs compared to your baseline
 
-Components (when HR data NOT available):
+Components (when HR data NOT available, or fewer than 3 EF samples
+in the training history):
 • Distance (37.5%): Total distance compared to your baseline
 • Pace (37.5%): Pace improvement compared to your baseline
 • Frequency (25%): Number of runs compared to your baseline

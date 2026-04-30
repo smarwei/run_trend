@@ -258,7 +258,7 @@ class SummaryPanel(QWidget):
     def _set_breakdown_label(self, label: QLabel, name: str, contribution: dict):
         """Render one breakdown row as 'Name: contribution / max'."""
         if not contribution.get('has_data', False):
-            label.setText(self.tr("{}: No HR data").format(name))
+            label.setText(self.tr("{}: not available").format(name))
             return
         label.setText(
             self.tr("{}: {:.1f} / {:.0f}").format(

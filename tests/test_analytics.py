@@ -375,6 +375,96 @@ class TestTrainingScoreCalculator(unittest.TestCase):
         self.assertEqual(TrainingScoreCalculator.get_score_contributions({}), {})
         self.assertEqual(TrainingScoreCalculator.get_score_contributions(None), {})
 
+    def test_ef_dropped_when_fewer_than_three_samples(self):
+        """With < 3 EF samples in history, EF must not contribute to the score."""
+        aggregates = []
+        base_date = datetime(2024, 1, 1)
+        # 5 weeks: only 2 of them carry HR-derived efficiency_factor.
+        ef_values = [0.018, 0.0, 0.019, 0.0, 0.0]
+        for week, ef in enumerate(ef_values):
+            period_date = base_date + timedelta(weeks=week)
+            aggregates.append({
+                'period': f'2024-W{week + 1:02d}',
+                'period_start': period_date.isoformat(),
+                'total_distance_km': 20.0 + week,
+                'num_runs': 3,
+                'weighted_avg_pace_min_per_km': 6.0 - (week * 0.05),
+                'avg_speed_kmh': 10.0,
+                'efficiency_factor': ef,
+            })
+
+        scored = TrainingScoreCalculator.calculate_scores(aggregates)
+        # Even on the periods that *do* carry an EF value, the global
+        # threshold is not reached so EF must not enter the score.
+        for agg in scored:
+            comps = agg['score_components']
+            self.assertFalse(comps['has_hr_data'])
+            self.assertEqual(comps['normalized_efficiency'], 0.0)
+
+        # Re-normalised maxima still sum to 100.
+        contributions = TrainingScoreCalculator.get_score_contributions(
+            scored[-1]['score_components']
+        )
+        self.assertFalse(contributions['efficiency']['has_data'])
+        self.assertEqual(contributions['efficiency']['max'], 0)
+        self.assertAlmostEqual(
+            contributions['distance']['max']
+            + contributions['frequency']['max']
+            + contributions['pace']['max'],
+            100.0,
+        )
+
+    def test_ef_active_at_three_samples(self):
+        """At exactly 3 EF samples in history, EF starts contributing."""
+        aggregates = []
+        base_date = datetime(2024, 1, 1)
+        ef_values = [0.018, 0.019, 0.020, 0.0, 0.021]  # 4 valid samples
+        for week, ef in enumerate(ef_values):
+            period_date = base_date + timedelta(weeks=week)
+            aggregates.append({
+                'period': f'2024-W{week + 1:02d}',
+                'period_start': period_date.isoformat(),
+                'total_distance_km': 20.0 + week,
+                'num_runs': 3,
+                'weighted_avg_pace_min_per_km': 6.0 - (week * 0.05),
+                'avg_speed_kmh': 10.0,
+                'efficiency_factor': ef,
+            })
+        scored = TrainingScoreCalculator.calculate_scores(aggregates)
+        # Periods that themselves carry an EF value must now contribute it.
+        last = scored[-1]
+        self.assertTrue(last['score_components']['has_hr_data'])
+        self.assertGreater(last['score_components']['normalized_efficiency'], 0.0)
+
+    def test_no_arbitrary_default_baseline_for_efficiency(self):
+        """Sparse EF history must not be papered over by a hardcoded baseline.
+
+        Two athletes with identical volume/pace/frequency but different EF
+        histories (none vs. plenty) should NOT produce identical scores via
+        an injected baseline. With < 3 EF samples the component is dropped
+        entirely; the score reflects only the available metrics.
+        """
+        # No EF data at all — replicates a fresh user without HR sensor.
+        aggregates_no_ef = []
+        base_date = datetime(2024, 1, 1)
+        for week in range(5):
+            period_date = base_date + timedelta(weeks=week)
+            aggregates_no_ef.append({
+                'period': f'2024-W{week + 1:02d}',
+                'period_start': period_date.isoformat(),
+                'total_distance_km': 20.0 + week,
+                'num_runs': 3,
+                'weighted_avg_pace_min_per_km': 6.0 - (week * 0.05),
+                'avg_speed_kmh': 10.0,
+                'efficiency_factor': 0,
+            })
+        scored = TrainingScoreCalculator.calculate_scores(aggregates_no_ef)
+        # All periods should report no EF and a renormalised score (no sneaky
+        # 0.018 default leaking in).
+        for agg in scored:
+            self.assertFalse(agg['score_components']['has_hr_data'])
+            self.assertEqual(agg['score_components']['normalized_efficiency'], 0.0)
+
     def test_fallback_without_hr_data(self):
         """Test that score calculation works without HR data."""
         # Create aggregates without efficiency_factor

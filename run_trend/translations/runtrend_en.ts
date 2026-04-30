@@ -1577,8 +1577,8 @@ Predicts 5K / 10K / Half / Marathon times from your easy-run pace using the McMi
       <translation type="finished">{}: {:.1f} / {:.0f}</translation>
     </message>
     <message>
-      <source>{}: No HR data</source>
-      <translation type="finished">{}: No HR data</translation>
+      <source>{}: not available</source>
+      <translation type="finished">{}: not available</translation>
     </message>
     <message>
       <source>Distance</source>

@@ -1597,8 +1597,8 @@ Schätzt 5K / 10K / Halb / Marathon aus deiner Easy-Run-Pace per McMillan-Formel
       <translation type="finished">{}: {:.1f} / {:.0f}</translation>
     </message>
     <message>
-      <source>{}: No HR data</source>
-      <translation type="finished">{}: keine HF-Daten</translation>
+      <source>{}: not available</source>
+      <translation type="finished">{}: nicht verfügbar</translation>
     </message>
     <message>
       <source>Distance</source>
