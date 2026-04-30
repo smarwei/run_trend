@@ -588,6 +588,53 @@ Pick an earlier start date or sync to fetch new activities.</translation>
       <source>Failed to save race marker: {}</source>
       <translation type="finished">Failed to save race marker: {}</translation>
     </message>
+    <message>
+      <source>Manage Races…</source>
+      <translation type="finished">Manage Races…</translation>
+    </message>
+  </context>
+  <context>
+    <name>RaceManagerDialog</name>
+    <message>
+      <source>Manage Races</source>
+      <translation type="finished">Manage Races</translation>
+    </message>
+    <message>
+      <source>Date</source>
+      <translation type="finished">Date</translation>
+    </message>
+    <message>
+      <source>Name</source>
+      <translation type="finished">Name</translation>
+    </message>
+    <message>
+      <source>Distance (km)</source>
+      <translation type="finished">Distance (km)</translation>
+    </message>
+    <message>
+      <source>Time</source>
+      <translation type="finished">Time</translation>
+    </message>
+    <message>
+      <source>Add…</source>
+      <translation type="finished">Add…</translation>
+    </message>
+    <message>
+      <source>Edit…</source>
+      <translation type="finished">Edit…</translation>
+    </message>
+    <message>
+      <source>Delete</source>
+      <translation type="finished">Delete</translation>
+    </message>
+    <message>
+      <source>Delete race</source>
+      <translation type="finished">Delete race</translation>
+    </message>
+    <message>
+      <source>Delete '{}'? This cannot be undone.</source>
+      <translation type="finished">Delete '{}'? This cannot be undone.</translation>
+    </message>
   </context>
   <context>
     <name>RunsTable</name>

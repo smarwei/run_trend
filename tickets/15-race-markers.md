@@ -39,9 +39,8 @@ CREATE TABLE race_markers (
 - [x] Rechtsklick-Aktion in RunsTable
 - [ ] Marker auf allen Zeitachsen-Charts (Distance, Pace, Frequency, Duration, Score,
       Training-Load)
-- [ ] Race-Manager-Dialog für Edit/Delete
-- [x] Übersetzt (DE/EN) — RaceDialog + RunsTable; Manager-Strings folgen mit
-      dem Manager-Dialog
+- [x] Race-Manager-Dialog für Edit/Delete
+- [x] Übersetzt (DE/EN) für alle UI-Teile außer Chart-Marker
 
 ## Dateien
 
@@ -72,9 +71,15 @@ gemerged. Folgeiterationen ergänzen die UI-Teile:
   (sortierungs-stabil über `Qt.UserRole+1` auf der Date-Zelle).
 - ✅ Wiring in `MainWindow._mark_activity_as_race`: öffnet `RaceDialog`,
   persistiert via `db.add_race_marker(...)`, zeigt Status-Toast.
-- ⏳ Race-Manager-Dialog (Liste + Edit/Delete) — Folge-Ticket
+- ✅ Race-Manager-Dialog (`run_trend/ui/race_manager_dialog.py`): Liste aller
+  Marker + Add/Edit/Delete-Buttons; Doppelklick öffnet Edit; löschen erfordert
+  Bestätigung. Erreichbar über File → „Manage Races…".
+- ✅ Neue DB-Methode `replace_race_marker(id, ...)` schreibt alle Felder inkl.
+  expliziter NULLs (für Edit-Dialog, der optionale Felder leeren kann);
+  `update_race_marker` bleibt unverändert (kompatibel zu bisherigen Tests).
 - ⏳ Vertikale Marker auf allen Zeitachsen-Charts — Folge-Ticket
-- ✅ Übersetzungen für RaceDialog + Kontextmenü (DE/EN, `.ts` + `.qm`)
+- ✅ Übersetzungen für RaceDialog + Kontextmenü + Manager-Dialog (DE/EN,
+  `.ts` + `.qm`)
 
 ### Annahmen DB-Layer
 

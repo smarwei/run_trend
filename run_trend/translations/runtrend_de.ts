@@ -588,6 +588,53 @@ Wähle ein früheres Startdatum oder synchronisiere, um neue Aktivitäten zu lad
       <source>Failed to save race marker: {}</source>
       <translation type="finished">Speichern des Wettkampf-Markers fehlgeschlagen: {}</translation>
     </message>
+    <message>
+      <source>Manage Races…</source>
+      <translation type="finished">Wettkämpfe verwalten…</translation>
+    </message>
+  </context>
+  <context>
+    <name>RaceManagerDialog</name>
+    <message>
+      <source>Manage Races</source>
+      <translation type="finished">Wettkämpfe verwalten</translation>
+    </message>
+    <message>
+      <source>Date</source>
+      <translation type="finished">Datum</translation>
+    </message>
+    <message>
+      <source>Name</source>
+      <translation type="finished">Name</translation>
+    </message>
+    <message>
+      <source>Distance (km)</source>
+      <translation type="finished">Distanz (km)</translation>
+    </message>
+    <message>
+      <source>Time</source>
+      <translation type="finished">Zeit</translation>
+    </message>
+    <message>
+      <source>Add…</source>
+      <translation type="finished">Hinzufügen…</translation>
+    </message>
+    <message>
+      <source>Edit…</source>
+      <translation type="finished">Bearbeiten…</translation>
+    </message>
+    <message>
+      <source>Delete</source>
+      <translation type="finished">Löschen</translation>
+    </message>
+    <message>
+      <source>Delete race</source>
+      <translation type="finished">Wettkampf löschen</translation>
+    </message>
+    <message>
+      <source>Delete '{}'? This cannot be undone.</source>
+      <translation type="finished">'{}' wirklich löschen? Das kann nicht rückgängig gemacht werden.</translation>
+    </message>
   </context>
   <context>
     <name>RunsTable</name>

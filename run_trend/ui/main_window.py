@@ -29,6 +29,7 @@ from .manual_dialog import ManualDialog
 from .about_dialog import AboutDialog
 from .onboarding_wizard import OnboardingWizard
 from .race_dialog import RaceDialog
+from .race_manager_dialog import RaceManagerDialog
 from ..charts.distance_chart import DistanceChart
 from ..charts.pace_chart import PaceChart
 from ..charts.frequency_chart import FrequencyChart
@@ -217,6 +218,11 @@ class MainWindow(QMainWindow):
         export_csv_action.triggered.connect(self._export_activities_csv)
         file_menu.addAction(export_csv_action)
         self.export_csv_action = export_csv_action
+
+        manage_races_action = QAction(self.tr("Manage Races…"), self)
+        manage_races_action.triggered.connect(self._show_race_manager)
+        file_menu.addAction(manage_races_action)
+        self.manage_races_action = manage_races_action
 
         help_menu = menu_bar.addMenu(self.tr("&Help"))
         wizard_action = QAction(self.tr("First-Run Wizard"), self)
@@ -630,6 +636,11 @@ class MainWindow(QMainWindow):
         # cleared sync settings.
         self._update_persistent_status()
         self._update_toolbar_state()
+
+    def _show_race_manager(self):
+        """Open the Race-Manager dialog."""
+        dialog = RaceManagerDialog(self.db, self)
+        dialog.exec()
 
     def _mark_activity_as_race(self, activity: dict):
         """Open RaceDialog prefilled from an activity and persist on accept."""

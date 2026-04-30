@@ -117,6 +117,35 @@ class TestRaceMarkers(unittest.TestCase):
     def test_delete_unknown_id_returns_false(self):
         self.assertFalse(self.db.delete_race_marker(99999))
 
+    def test_replace_overwrites_all_fields_including_nulls(self):
+        new_id = self.db.add_race_marker(
+            date='2026-04-12',
+            name='Original',
+            distance_km=42.195,
+            result_time=13522,
+            notes='before',
+        )
+        ok = self.db.replace_race_marker(
+            new_id,
+            date='2026-05-01',
+            name='Updated',
+            distance_km=None,
+            result_time=None,
+            notes=None,
+        )
+        self.assertTrue(ok)
+        m = self.db.get_race_markers()[0]
+        self.assertEqual(m['date'], '2026-05-01')
+        self.assertEqual(m['name'], 'Updated')
+        self.assertIsNone(m['distance_km'])
+        self.assertIsNone(m['result_time'])
+        self.assertIsNone(m['notes'])
+
+    def test_replace_unknown_id_returns_false(self):
+        self.assertFalse(
+            self.db.replace_race_marker(99999, date='2026-04-12', name='X')
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

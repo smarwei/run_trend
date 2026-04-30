@@ -421,6 +421,36 @@ class Database:
         self.conn.commit()
         return cursor.rowcount > 0
 
+    def replace_race_marker(
+        self,
+        marker_id: int,
+        date: str,
+        name: str,
+        distance_km: Optional[float] = None,
+        result_time: Optional[int] = None,
+        notes: Optional[str] = None,
+    ) -> bool:
+        """Overwrite all editable fields on a race marker.
+
+        Unlike `update_race_marker`, None values are written verbatim (so
+        users can clear an optional field via the Edit dialog).
+
+        Returns True if a row was updated.
+        """
+        cursor = self.conn.cursor()
+        now = datetime.utcnow().isoformat()
+        cursor.execute(
+            '''
+            UPDATE race_markers
+               SET date = ?, name = ?, distance_km = ?, result_time = ?,
+                   notes = ?, updated_at = ?
+             WHERE id = ?
+            ''',
+            (date, name, distance_km, result_time, notes, now, marker_id),
+        )
+        self.conn.commit()
+        return cursor.rowcount > 0
+
     def delete_race_marker(self, marker_id: int) -> bool:
         """Delete a race marker by id. Returns True if a row was removed."""
         cursor = self.conn.cursor()
