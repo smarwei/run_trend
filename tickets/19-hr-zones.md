@@ -103,8 +103,22 @@ ohne I/O.
   Persistenz-Roundtrip, Karvonen-Block bei fehlendem HR-Rest,
   Karvonen-Block bei `hr_rest >= hr_max`, Cache-Invalidation,
   Cache-Persistenz wenn unverändert, Classic-Save-Pfad).
-- ⏳ Chart + Aggregations-Ansicht + 80/20-Indikator + Lazy-Fetch-Pipeline —
-  Folgeiteration
+- ✅ `run_trend/analytics/hr_zone_service.py`: `HrZoneService` mit
+  Dependency-Injection für Streams-Fetcher (testbar ohne Strava/Qt).
+  `get_zone_seconds(activity_id)` löst Settings-Config auf
+  (Karvonen-Downgrade auf Classic bei fehlendem/ungültigem HR-Rest),
+  prüft DB-Cache (Match auf `hr_max_used`/`hr_rest_used`/`scheme`),
+  ruft bei Cache-Miss `fetch_streams` auf, berechnet via
+  `compute_zone_bounds` + `time_in_zones` und persistiert das Ergebnis.
+  Liefert `None` bei fehlendem HR-Max, fehlenden Streams oder
+  unvollständigen Daten.
+- ✅ `tests/test_hr_zone_service.py`: 10 Tests (HR-Max-unset,
+  Karvonen-Downgrade, Karvonen-Erhalt, Cache-Hit, Cache-Mismatch
+  bei HR-Max, Cache-Mismatch bei HR-Rest, Fetch-None, fehlender
+  HR-Stream, fehlender Time-Stream, leere Streams) — Fakes für
+  Database/Settings, kein Qt/HTTP nötig.
+- ⏳ Chart + Aggregations-Ansicht + 80/20-Indikator + Tab-Integration in
+  MainWindow + Lazy-Fetch-Trigger bei Tab-Aktivierung — Folgeiteration
 
 ### Annahmen Analytics-Kern
 
