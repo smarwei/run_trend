@@ -964,6 +964,41 @@ Race predictions will be updated.</translation>
       <source>Connected to Strava</source>
       <translation type="finished">Connected to Strava</translation>
     </message>
+    <message>
+      <location filename="../ui/settings_dialog.py" line="29" />
+      <source>General</source>
+      <translation type="finished">General</translation>
+    </message>
+    <message>
+      <location filename="../ui/settings_dialog.py" line="30" />
+      <source>Connection</source>
+      <translation type="finished">Connection</translation>
+    </message>
+    <message>
+      <location filename="../ui/settings_dialog.py" line="31" />
+      <source>Sync</source>
+      <translation type="finished">Sync</translation>
+    </message>
+    <message>
+      <location filename="../ui/settings_dialog.py" line="32" />
+      <source>Data</source>
+      <translation type="finished">Data</translation>
+    </message>
+    <message>
+      <location filename="../ui/settings_dialog.py" line="184" />
+      <source>Manual Sync</source>
+      <translation type="finished">Manual Sync</translation>
+    </message>
+    <message>
+      <location filename="../ui/settings_dialog.py" line="201" />
+      <source>Disconnect &amp; Delete</source>
+      <translation type="finished">Disconnect &amp; Delete</translation>
+    </message>
+    <message>
+      <location filename="../ui/settings_dialog.py" line="221" />
+      <source>Removes the Strava authorization for RunTrend and erases all locally stored activities. This cannot be undone.</source>
+      <translation type="finished">Removes the Strava authorization for RunTrend and erases all locally stored activities. This cannot be undone.</translation>
+    </message>
   </context>
   <context>
     <name>StructureOverviewChart</name>

@@ -4,7 +4,7 @@ Settings dialog for application configuration.
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QFormLayout,
     QLineEdit, QPushButton, QLabel, QGroupBox, QMessageBox, QSpinBox, QComboBox,
-    QCheckBox,
+    QCheckBox, QTabWidget, QWidget,
 )
 from PySide6.QtCore import Qt
 
@@ -25,11 +25,42 @@ class SettingsDialog(QDialog):
         """Set up the user interface."""
         layout = QVBoxLayout(self)
 
+        tabs = QTabWidget()
+        tabs.addTab(self._build_general_tab(), self.tr("General"))
+        tabs.addTab(self._build_connection_tab(), self.tr("Connection"))
+        tabs.addTab(self._build_sync_tab(), self.tr("Sync"))
+        tabs.addTab(self._build_data_tab(), self.tr("Data"))
+        layout.addWidget(tabs)
+
+        # Update button states based on auth status
+        self._update_auth_status()
+
+        # Buttons
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+
+        save_btn = QPushButton(self.tr("Save"))
+        save_btn.clicked.connect(self._save_settings)
+        button_layout.addWidget(save_btn)
+
+        cancel_btn = QPushButton(self.tr("Cancel"))
+        cancel_btn.clicked.connect(self.reject)
+        button_layout.addWidget(cancel_btn)
+
+        layout.addLayout(button_layout)
+
+    # ------------------------------------------------------------------ #
+    # Tabs                                                                #
+    # ------------------------------------------------------------------ #
+
+    def _build_general_tab(self) -> QWidget:
+        tab = QWidget()
+        tab_layout = QVBoxLayout(tab)
+
         # Language Settings Group
         language_group = QGroupBox(self.tr("Language / Sprache"))
         language_layout = QFormLayout()
 
-        # Language selector
         self.language_combo = QComboBox()
         self.language_combo.addItems([
             self.tr("Auto-detect"),
@@ -38,7 +69,6 @@ class SettingsDialog(QDialog):
         ])
         language_layout.addRow(self.tr("Language:"), self.language_combo)
 
-        # Info label
         language_info_label = QLabel(
             self.tr("Language changes take effect after restarting the application.")
         )
@@ -47,18 +77,49 @@ class SettingsDialog(QDialog):
         language_layout.addRow("", language_info_label)
 
         language_group.setLayout(language_layout)
-        layout.addWidget(language_group)
+        tab_layout.addWidget(language_group)
+
+        # Heart Rate Settings Group
+        hr_group = QGroupBox(self.tr("Heart Rate Configuration"))
+        hr_layout = QFormLayout()
+
+        self.hrmax_input = QSpinBox()
+        self.hrmax_input.setRange(0, 220)  # 0 = auto-detect
+        self.hrmax_input.setSuffix(self.tr(" bpm"))
+        self.hrmax_input.setSpecialValueText(self.tr("Auto-detect from activities"))
+        self.hrmax_input.setToolTip(
+            self.tr("Set your maximum heart rate manually if known.\n"
+            "Set to 0 to auto-detect from your activity data.\n"
+            "Typical values: 180-200 bpm for younger athletes, 160-180 for older.")
+        )
+        hr_layout.addRow(self.tr("Max Heart Rate:"), self.hrmax_input)
+
+        hr_info_label = QLabel(
+            self.tr("Manual HRmax improves race time predictions.\n"
+            "If unsure, leave at 'Auto-detect'.")
+        )
+        hr_info_label.setWordWrap(True)
+        hr_info_label.setStyleSheet("color: gray; font-size: 10px;")
+        hr_layout.addRow("", hr_info_label)
+
+        hr_group.setLayout(hr_layout)
+        tab_layout.addWidget(hr_group)
+
+        tab_layout.addStretch()
+        return tab
+
+    def _build_connection_tab(self) -> QWidget:
+        tab = QWidget()
+        tab_layout = QVBoxLayout(tab)
 
         # Strava Settings Group
         strava_group = QGroupBox(self.tr("Strava API Configuration"))
         strava_layout = QFormLayout()
 
-        # Client ID
         self.client_id_input = QLineEdit()
         self.client_id_input.setPlaceholderText(self.tr("Your Strava API Client ID"))
         strava_layout.addRow(self.tr("Client ID:"), self.client_id_input)
 
-        # Client Secret
         self.client_secret_input = QLineEdit()
         self.client_secret_input.setEchoMode(QLineEdit.Password)
         self.client_secret_input.setPlaceholderText(self.tr("Your Strava API Client Secret"))
@@ -73,7 +134,6 @@ class SettingsDialog(QDialog):
 
         strava_layout.addRow(self.tr("Client Secret:"), secret_layout)
 
-        # Info label
         info_label = QLabel(
             self.tr("Get your API credentials from:\n"
             "https://www.strava.com/settings/api\n\n"
@@ -84,35 +144,23 @@ class SettingsDialog(QDialog):
         strava_layout.addRow("", info_label)
 
         strava_group.setLayout(strava_layout)
-        layout.addWidget(strava_group)
+        tab_layout.addWidget(strava_group)
 
-        # Heart Rate Settings Group
-        hr_group = QGroupBox(self.tr("Heart Rate Configuration"))
-        hr_layout = QFormLayout()
+        # Connect button + status (no nested GroupBox — the tab itself frames this)
+        self.connect_btn = QPushButton(self.tr("Connect to Strava"))
+        self.connect_btn.clicked.connect(self._handle_connect)
+        tab_layout.addWidget(self.connect_btn)
 
-        # Manual HRmax input
-        self.hrmax_input = QSpinBox()
-        self.hrmax_input.setRange(0, 220)  # 0 = auto-detect
-        self.hrmax_input.setSuffix(self.tr(" bpm"))
-        self.hrmax_input.setSpecialValueText(self.tr("Auto-detect from activities"))
-        self.hrmax_input.setToolTip(
-            self.tr("Set your maximum heart rate manually if known.\n"
-            "Set to 0 to auto-detect from your activity data.\n"
-            "Typical values: 180-200 bpm for younger athletes, 160-180 for older.")
-        )
-        hr_layout.addRow(self.tr("Max Heart Rate:"), self.hrmax_input)
+        self.status_label = QLabel(self.tr("Not connected"))
+        self.status_label.setStyleSheet("color: gray; font-size: 10px; padding: 5px;")
+        tab_layout.addWidget(self.status_label)
 
-        # Info label
-        hr_info_label = QLabel(
-            self.tr("Manual HRmax improves race time predictions.\n"
-            "If unsure, leave at 'Auto-detect'.")
-        )
-        hr_info_label.setWordWrap(True)
-        hr_info_label.setStyleSheet("color: gray; font-size: 10px;")
-        hr_layout.addRow("", hr_info_label)
+        tab_layout.addStretch()
+        return tab
 
-        hr_group.setLayout(hr_layout)
-        layout.addWidget(hr_group)
+    def _build_sync_tab(self) -> QWidget:
+        tab = QWidget()
+        tab_layout = QVBoxLayout(tab)
 
         # Activity Filters Group (spec §11)
         filters_group = QGroupBox(self.tr("Activity Filters"))
@@ -142,24 +190,30 @@ class SettingsDialog(QDialog):
         filters_layout.addWidget(filters_info)
 
         filters_group.setLayout(filters_layout)
-        layout.addWidget(filters_group)
+        tab_layout.addWidget(filters_group)
 
-        # Strava Actions Group
-        actions_group = QGroupBox(self.tr("Strava Actions"))
-        actions_layout = QVBoxLayout()
+        # Manual sync action
+        sync_group = QGroupBox(self.tr("Manual Sync"))
+        sync_layout = QVBoxLayout()
 
-        # Connect/Disconnect button
-        self.connect_btn = QPushButton(self.tr("Connect to Strava"))
-        self.connect_btn.clicked.connect(self._handle_connect)
-        actions_layout.addWidget(self.connect_btn)
-
-        # Sync button
         self.sync_btn = QPushButton(self.tr("Sync Activities"))
         self.sync_btn.setEnabled(False)
         self.sync_btn.clicked.connect(self._handle_sync)
-        actions_layout.addWidget(self.sync_btn)
+        sync_layout.addWidget(self.sync_btn)
 
-        # Disconnect & Delete Data button
+        sync_group.setLayout(sync_layout)
+        tab_layout.addWidget(sync_group)
+
+        tab_layout.addStretch()
+        return tab
+
+    def _build_data_tab(self) -> QWidget:
+        tab = QWidget()
+        tab_layout = QVBoxLayout(tab)
+
+        danger_group = QGroupBox(self.tr("Disconnect & Delete"))
+        danger_layout = QVBoxLayout()
+
         self.delete_data_btn = QPushButton(self.tr("Disconnect Strava & Delete All Data"))
         self.delete_data_btn.setStyleSheet("""
             QPushButton {
@@ -178,32 +232,25 @@ class SettingsDialog(QDialog):
         """)
         self.delete_data_btn.clicked.connect(self._handle_delete_data)
         self.delete_data_btn.setEnabled(False)  # Disabled when not connected
-        actions_layout.addWidget(self.delete_data_btn)
+        danger_layout.addWidget(self.delete_data_btn)
 
-        # Status label
-        self.status_label = QLabel(self.tr("Not connected"))
-        self.status_label.setStyleSheet("color: gray; font-size: 10px; padding: 5px;")
-        actions_layout.addWidget(self.status_label)
+        danger_info = QLabel(
+            self.tr("Removes the Strava authorization for RunTrend and erases "
+            "all locally stored activities. This cannot be undone.")
+        )
+        danger_info.setWordWrap(True)
+        danger_info.setStyleSheet("color: gray; font-size: 10px;")
+        danger_layout.addWidget(danger_info)
 
-        actions_group.setLayout(actions_layout)
-        layout.addWidget(actions_group)
+        danger_group.setLayout(danger_layout)
+        tab_layout.addWidget(danger_group)
 
-        # Update button states based on auth status
-        self._update_auth_status()
+        tab_layout.addStretch()
+        return tab
 
-        # Buttons
-        button_layout = QHBoxLayout()
-        button_layout.addStretch()
-
-        save_btn = QPushButton(self.tr("Save"))
-        save_btn.clicked.connect(self._save_settings)
-        button_layout.addWidget(save_btn)
-
-        cancel_btn = QPushButton(self.tr("Cancel"))
-        cancel_btn.clicked.connect(self.reject)
-        button_layout.addWidget(cancel_btn)
-
-        layout.addLayout(button_layout)
+    # ------------------------------------------------------------------ #
+    # Behaviour (unchanged from pre-tab layout)                            #
+    # ------------------------------------------------------------------ #
 
     def _toggle_secret_visibility(self):
         """Toggle client secret visibility."""

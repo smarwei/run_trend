@@ -964,6 +964,41 @@ Wettkampf-Vorhersagen werden aktualisiert.</translation>
       <source>Connected to Strava</source>
       <translation type="finished">Mit Strava verbunden</translation>
     </message>
+    <message>
+      <location filename="../ui/settings_dialog.py" line="29" />
+      <source>General</source>
+      <translation type="finished">Allgemein</translation>
+    </message>
+    <message>
+      <location filename="../ui/settings_dialog.py" line="30" />
+      <source>Connection</source>
+      <translation type="finished">Verbindung</translation>
+    </message>
+    <message>
+      <location filename="../ui/settings_dialog.py" line="31" />
+      <source>Sync</source>
+      <translation type="finished">Synchronisierung</translation>
+    </message>
+    <message>
+      <location filename="../ui/settings_dialog.py" line="32" />
+      <source>Data</source>
+      <translation type="finished">Daten</translation>
+    </message>
+    <message>
+      <location filename="../ui/settings_dialog.py" line="184" />
+      <source>Manual Sync</source>
+      <translation type="finished">Manuelle Synchronisierung</translation>
+    </message>
+    <message>
+      <location filename="../ui/settings_dialog.py" line="201" />
+      <source>Disconnect &amp; Delete</source>
+      <translation type="finished">Trennen &amp; Löschen</translation>
+    </message>
+    <message>
+      <location filename="../ui/settings_dialog.py" line="221" />
+      <source>Removes the Strava authorization for RunTrend and erases all locally stored activities. This cannot be undone.</source>
+      <translation type="finished">Entfernt die Strava-Autorisierung für RunTrend und löscht alle lokal gespeicherten Aktivitäten. Diese Aktion ist nicht rückgängig zu machen.</translation>
+    </message>
   </context>
   <context>
     <name>StructureOverviewChart</name>
