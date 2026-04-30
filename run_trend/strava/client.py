@@ -185,6 +185,46 @@ class StravaClient:
         """
         return self._make_request(f"activities/{activity_id}")
 
+    def get_activity_streams(
+        self,
+        activity_id: int,
+        keys: Optional[List[str]] = None,
+    ) -> Optional[Dict[str, List[Any]]]:
+        """
+        Fetch raw time-series streams for an activity.
+
+        Args:
+            activity_id: Strava activity ID.
+            keys: Stream keys to request (default: ['heartrate', 'time']).
+
+        Returns:
+            A dict mapping each requested key to its data list, e.g.
+            ``{'heartrate': [120, 125, ...], 'time': [0, 1, 2, ...]}``,
+            or ``None`` on error / missing streams.
+
+        Notes:
+            Strava returns a list of stream objects when called with
+            ``key_by_type=true`` we get the dict form directly. The
+            ``activity:read_all`` scope is required.
+        """
+        if keys is None:
+            keys = ['heartrate', 'time']
+        params = {
+            'keys': ','.join(keys),
+            'key_by_type': 'true',
+        }
+        result = self._make_request(
+            f"activities/{activity_id}/streams", params=params,
+        )
+        if not isinstance(result, dict):
+            return None
+        out: Dict[str, List[Any]] = {}
+        for key in keys:
+            entry = result.get(key)
+            if isinstance(entry, dict) and isinstance(entry.get('data'), list):
+                out[key] = entry['data']
+        return out or None
+
     def normalize_activity(self, activity: Dict[str, Any]) -> Dict[str, Any]:
         """
         Normalize activity data for storage.

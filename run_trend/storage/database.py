@@ -103,6 +103,25 @@ class Database:
             )
         ''')
 
+        # Per-activity HR-zone seconds cache (Ticket 19). One row per activity;
+        # foreign-key-style link via strava_id but no FK constraint to keep
+        # cache invalidation cheap. hr_max_used is recorded so we can detect
+        # stale entries when the user edits HR-Max in settings.
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS activity_hr_zones (
+                strava_id INTEGER PRIMARY KEY,
+                z1_seconds INTEGER NOT NULL DEFAULT 0,
+                z2_seconds INTEGER NOT NULL DEFAULT 0,
+                z3_seconds INTEGER NOT NULL DEFAULT 0,
+                z4_seconds INTEGER NOT NULL DEFAULT 0,
+                z5_seconds INTEGER NOT NULL DEFAULT 0,
+                hr_max_used INTEGER NOT NULL,
+                hr_rest_used INTEGER,
+                scheme TEXT NOT NULL DEFAULT 'classic',
+                computed_at TEXT NOT NULL
+            )
+        ''')
+
         # Create indices for performance
         cursor.execute('''
             CREATE INDEX IF NOT EXISTS idx_activities_start_date
@@ -563,6 +582,95 @@ class Database:
         cursor.execute('DELETE FROM goals WHERE id = ?', (goal_id,))
         self.conn.commit()
         return cursor.rowcount > 0
+
+    # ------------------------------------------------------------------
+    # HR-zone cache (Ticket 19)
+    # ------------------------------------------------------------------
+
+    def upsert_activity_hr_zones(
+        self,
+        strava_id: int,
+        zone_seconds: List[int],
+        hr_max_used: int,
+        hr_rest_used: Optional[int] = None,
+        scheme: str = "classic",
+    ) -> None:
+        """Insert or replace the per-activity HR-zone cache row.
+
+        ``zone_seconds`` must be a 5-element list (Z1..Z5).
+        """
+        if len(zone_seconds) != 5:
+            raise ValueError("zone_seconds must have exactly 5 entries")
+        now = datetime.utcnow().isoformat()
+        cursor = self.conn.cursor()
+        cursor.execute('''
+            INSERT INTO activity_hr_zones (
+                strava_id, z1_seconds, z2_seconds, z3_seconds, z4_seconds,
+                z5_seconds, hr_max_used, hr_rest_used, scheme, computed_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(strava_id) DO UPDATE SET
+                z1_seconds = excluded.z1_seconds,
+                z2_seconds = excluded.z2_seconds,
+                z3_seconds = excluded.z3_seconds,
+                z4_seconds = excluded.z4_seconds,
+                z5_seconds = excluded.z5_seconds,
+                hr_max_used = excluded.hr_max_used,
+                hr_rest_used = excluded.hr_rest_used,
+                scheme = excluded.scheme,
+                computed_at = excluded.computed_at
+        ''', (
+            strava_id,
+            int(zone_seconds[0]), int(zone_seconds[1]), int(zone_seconds[2]),
+            int(zone_seconds[3]), int(zone_seconds[4]),
+            int(hr_max_used),
+            int(hr_rest_used) if hr_rest_used is not None else None,
+            scheme,
+            now,
+        ))
+        self.conn.commit()
+
+    def get_activity_hr_zones(self, strava_id: int) -> Optional[Dict[str, Any]]:
+        """Return the cached HR-zone row for an activity, or None."""
+        cursor = self.conn.cursor()
+        cursor.execute(
+            'SELECT * FROM activity_hr_zones WHERE strava_id = ?',
+            (strava_id,),
+        )
+        row = cursor.fetchone()
+        return dict(row) if row else None
+
+    def invalidate_activity_hr_zones(
+        self,
+        hr_max: Optional[int] = None,
+        hr_rest: Optional[int] = None,
+        scheme: Optional[str] = None,
+    ) -> int:
+        """Drop cache rows whose stored config no longer matches.
+
+        Pass the **current** config values; rows that disagree on any
+        provided field are deleted so they get recomputed on next view.
+        Returns the number of deleted rows.
+        """
+        clauses = []
+        params: List[Any] = []
+        if hr_max is not None:
+            clauses.append('hr_max_used != ?')
+            params.append(int(hr_max))
+        if hr_rest is not None:
+            clauses.append('(hr_rest_used IS NULL OR hr_rest_used != ?)')
+            params.append(int(hr_rest))
+        if scheme is not None:
+            clauses.append('scheme != ?')
+            params.append(scheme)
+        if not clauses:
+            return 0
+        cursor = self.conn.cursor()
+        cursor.execute(
+            'DELETE FROM activity_hr_zones WHERE ' + ' OR '.join(clauses),
+            tuple(params),
+        )
+        self.conn.commit()
+        return cursor.rowcount
 
     def close(self):
         """Close database connection."""

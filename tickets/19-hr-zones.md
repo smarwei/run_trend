@@ -69,10 +69,25 @@ ohne I/O.
 - ✅ `tests/test_hr_zones.py`: 16 Tests (Bounds, Karvonen-Validierung,
   Zone-Klassifikation, Below-Z1-Drop, Mismatched-Length-Raise, Aggregation,
   Polarized-Fraktion, Empty-Safe).
-- ⏳ Strava-Streams-Endpoint (`get_activity_streams`) — Folgeiteration
-- ⏳ DB-Cache-Tabelle `activity_hr_zones` — Folgeiteration
+- ✅ `StravaClient.get_activity_streams(activity_id, keys=['heartrate','time'])`:
+  ruft `/activities/{id}/streams?key_by_type=true` auf, verlangt Scope
+  `activity:read_all` (haben wir bereits), gibt
+  `{stream_key: [datapoints…]}` zurück oder `None` (bei API-Fehler oder
+  fehlendem Stream). Malformed Einträge werden silenced gedroppt.
+- ✅ DB-Cache-Tabelle `activity_hr_zones` mit Spalten
+  `strava_id PK, z1..z5_seconds, hr_max_used, hr_rest_used (NULL),
+  scheme, computed_at`. CRUD: `upsert_activity_hr_zones`,
+  `get_activity_hr_zones`, `invalidate_activity_hr_zones(hr_max=,
+  hr_rest=, scheme=)` — letzteres droppt Rows, deren gespeicherte Config
+  vom übergebenen Soll-Wert abweicht (Strategie für Settings-Änderungen
+  in der nächsten Slice).
+- ✅ Tests: `tests/test_strava_streams.py` (6 Tests, gepatcht über
+  `_make_request`-Mock) und `tests/test_hr_zones_storage.py` (8 Tests
+  inkl. Idempotenz-Reopen, Replace-Verhalten, Karvonen-Persistenz,
+  Length-Validation, Invalidate-Pfade).
 - ⏳ Settings-UI für HR-Max + HR-Rest + Schema-Wahl — Folgeiteration
-- ⏳ Chart + Aggregations-Ansicht + 80/20-Indikator — Folgeiteration
+- ⏳ Chart + Aggregations-Ansicht + 80/20-Indikator + Lazy-Fetch-Pipeline —
+  Folgeiteration
 
 ### Annahmen Analytics-Kern
 
@@ -89,3 +104,19 @@ ohne I/O.
 - Samples mit `bpm` unterhalb der untersten Zone (Idle/Pause) werden
   ausgelassen, statt sie auf Z1 zu klemmen — sonst würden Pausen die
   Endurance-Quote künstlich erhöhen.
+
+### Annahmen Streams + Cache
+
+- `key_by_type=true` an Strava: liefert `{key: {data: [...]}}`-Dict statt
+  Liste — spart Client-seitiges Reshaping.
+- Cache-Schlüssel ist `strava_id` (PRIMARY KEY); pro Aktivität existiert
+  also höchstens eine Zeile. Re-Compute bei Settings-Änderung wird über
+  `invalidate_activity_hr_zones(...)` getriggert, das Rows mit nicht
+  passendem `hr_max_used`/`hr_rest_used`/`scheme` löscht — kein
+  Bulk-Recompute, sondern Lazy-Refill bei nächstem Request.
+- `hr_rest_used` ist NULLABLE: `classic`-Zonen brauchen keinen Wert. In
+  `invalidate(hr_rest=X)` matched eine Zeile mit `NULL` immer
+  „inkonsistent" und wird gelöscht — sicherer Default.
+- Kein Foreign-Key-Constraint auf `activities.strava_id`: löschende
+  Sync-Pfade müssen den Cache nicht explizit pflegen, und Stale-Rows ohne
+  zugehörige Aktivität schaden nichts (werden auf Read ignoriert).
