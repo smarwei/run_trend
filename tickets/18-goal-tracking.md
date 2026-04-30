@@ -69,11 +69,18 @@ zwingende Vorstufe — der DB-Layer — ist als eigene Iteration drin:
 - ✅ Tests in `tests/test_database.py::TestGoals` (10 Tests, inkl. Idempotenz,
   Reihenfolge nach `target_date`, Partial-Update, `achieved`-Filter,
   Unknown-ID-Fälle).
-- ⏳ Goal-Dialog (Distanz + Zielzeit + Zieldatum) — Folgeiteration
-- ⏳ Goal-Manager (mehrere Goals parallel) — Folgeiteration
+- ✅ `GoalDialog` (`run_trend/ui/goal_dialog.py`): Distanz-Combo mit Presets
+  (5K/10K/15K/Half/Marathon + Custom), QTimeEdit für Zielzeit (HH:mm:ss),
+  QDateEdit für Zieldatum (Default: +3 Monate). Edit-Modus prefillt aus
+  bestehendem Goal-Dict; bei Custom-Distanz wird automatisch der Combo-Slot
+  gewechselt und das Spin-Feld editierbar. `get_data()` liefert das
+  serialisierungsfertige Dict.
+- ✅ Übersetzungen für GoalDialog (DE/EN, `.ts` + `.qm` regeneriert).
+- ⏳ Goal-Manager-Dialog (Liste mit Add/Edit/Delete + Achieved-Toggle) —
+  Folgeiteration
+- ⏳ MainWindow-Integration (Menüeintrag, Wiring) — Folgeiteration
 - ⏳ Projection-Chart-Erweiterung (Zielpunkt + on-track/off-track-Farbe) —
   Folgeiteration
-- ⏳ Übersetzungen für Dialog/Manager — Folgeiteration
 
 ### Annahmen DB-Layer
 

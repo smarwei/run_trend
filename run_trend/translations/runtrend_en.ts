@@ -691,6 +691,53 @@ Pick an earlier start date or sync to fetch new activities.</translation>
     </message>
   </context>
   <context>
+    <name>GoalDialog</name>
+    <message>
+      <source>Edit Goal</source>
+      <translation type="finished">Edit Goal</translation>
+    </message>
+    <message>
+      <source>New Goal</source>
+      <translation type="finished">New Goal</translation>
+    </message>
+    <message>
+      <source>Distance:</source>
+      <translation type="finished">Distance:</translation>
+    </message>
+    <message>
+      <source>Custom</source>
+      <translation type="finished">Custom</translation>
+    </message>
+    <message>
+      <source> km</source>
+      <translation type="finished"> km</translation>
+    </message>
+    <message>
+      <source>Target time:</source>
+      <translation type="finished">Target time:</translation>
+    </message>
+    <message>
+      <source>Target date:</source>
+      <translation type="finished">Target date:</translation>
+    </message>
+    <message>
+      <source>Missing distance</source>
+      <translation type="finished">Missing distance</translation>
+    </message>
+    <message>
+      <source>Please enter a target distance.</source>
+      <translation type="finished">Please enter a target distance.</translation>
+    </message>
+    <message>
+      <source>Missing target time</source>
+      <translation type="finished">Missing target time</translation>
+    </message>
+    <message>
+      <source>Please enter a target finish time.</source>
+      <translation type="finished">Please enter a target finish time.</translation>
+    </message>
+  </context>
+  <context>
     <name>OnboardingWizard</name>
     <message>
       <source>Welcome to RunTrend</source>
