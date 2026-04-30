@@ -2,24 +2,29 @@
 <!DOCTYPE TS>
 <TS version="2.1">
   <context>
-    <name>AvgDistanceChart</name>
+    <name>EnduranceChart</name>
     <message>
-      <location filename="../charts/avg_distance_chart.py" line="26" />
-      <source>Average Distance per Run</source>
-      <translation type="finished">Durchschnittliche Distanz pro Lauf</translation>
+      <location filename="../charts/endurance_chart.py" line="24" />
+      <source>Endurance</source>
+      <translation type="finished">Ausdauer</translation>
     </message>
     <message>
-      <location filename="../charts/avg_distance_chart.py" line="63" />
+      <location filename="../charts/endurance_chart.py" line="50" />
+      <source>Longest Run</source>
+      <translation type="finished">Längster Lauf</translation>
+    </message>
+    <message>
+      <location filename="../charts/endurance_chart.py" line="56" />
       <source>Avg Distance per Run</source>
       <translation type="finished">Durchschn. Distanz pro Lauf</translation>
     </message>
     <message>
-      <location filename="../charts/avg_distance_chart.py" line="78" />
+      <location filename="../charts/endurance_chart.py" line="67" />
       <source>Date</source>
       <translation type="finished">Datum</translation>
     </message>
     <message>
-      <location filename="../charts/avg_distance_chart.py" line="86" />
+      <location filename="../charts/endurance_chart.py" line="73" />
       <source>Distance (km)</source>
       <translation type="finished">Distanz (km)</translation>
     </message>
@@ -126,29 +131,6 @@
       <location filename="../charts/heartrate_chart.py" line="168" />
       <source>Efficiency Factor (m/s per bpm ×1000)</source>
       <translation type="finished">Effizienzfaktor (m/s pro bpm ×1000)</translation>
-    </message>
-  </context>
-  <context>
-    <name>LongestRunChart</name>
-    <message>
-      <location filename="../charts/longest_run_chart.py" line="26" />
-      <source>Longest Run Progress</source>
-      <translation type="finished">Längster Lauf - Fortschritt</translation>
-    </message>
-    <message>
-      <location filename="../charts/longest_run_chart.py" line="63" />
-      <source>Longest Run</source>
-      <translation type="finished">Längster Lauf</translation>
-    </message>
-    <message>
-      <location filename="../charts/longest_run_chart.py" line="78" />
-      <source>Date</source>
-      <translation type="finished">Datum</translation>
-    </message>
-    <message>
-      <location filename="../charts/longest_run_chart.py" line="86" />
-      <source>Distance (km)</source>
-      <translation type="finished">Distanz (km)</translation>
     </message>
   </context>
   <context>
@@ -1185,6 +1167,26 @@ Wettkampf-Vorhersagen werden aktualisiert.</translation>
       <location filename="../ui/summary_panel.py" line="272" />
       <source>⚠️ {}</source>
       <translation type="finished">⚠️ {}</translation>
+    </message>
+    <message>
+      <source>DANGER</source>
+      <translation type="finished">GEFAHR</translation>
+    </message>
+    <message>
+      <source>WARNING</source>
+      <translation type="finished">WARNUNG</translation>
+    </message>
+    <message>
+      <source>CAUTION</source>
+      <translation type="finished">VORSICHT</translation>
+    </message>
+    <message>
+      <source>SAFE</source>
+      <translation type="finished">SICHER</translation>
+    </message>
+    <message>
+      <source>LOW</source>
+      <translation type="finished">NIEDRIG</translation>
     </message>
   </context>
 </TS>

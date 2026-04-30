@@ -3,7 +3,7 @@ Tests for heart rate metrics in aggregator.
 """
 import unittest
 from datetime import datetime, timedelta
-from app.analytics.aggregator import ActivityAggregator
+from run_trend.analytics.aggregator import ActivityAggregator
 
 
 class TestHeartRateMetrics(unittest.TestCase):

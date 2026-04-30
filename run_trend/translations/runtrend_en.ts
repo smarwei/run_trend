@@ -2,24 +2,29 @@
 <!DOCTYPE TS>
 <TS version="2.1">
   <context>
-    <name>AvgDistanceChart</name>
+    <name>EnduranceChart</name>
     <message>
-      <location filename="../charts/avg_distance_chart.py" line="26" />
-      <source>Average Distance per Run</source>
-      <translation type="finished">Average Distance per Run</translation>
+      <location filename="../charts/endurance_chart.py" line="24" />
+      <source>Endurance</source>
+      <translation type="finished">Endurance</translation>
     </message>
     <message>
-      <location filename="../charts/avg_distance_chart.py" line="63" />
+      <location filename="../charts/endurance_chart.py" line="50" />
+      <source>Longest Run</source>
+      <translation type="finished">Longest Run</translation>
+    </message>
+    <message>
+      <location filename="../charts/endurance_chart.py" line="56" />
       <source>Avg Distance per Run</source>
       <translation type="finished">Avg Distance per Run</translation>
     </message>
     <message>
-      <location filename="../charts/avg_distance_chart.py" line="78" />
+      <location filename="../charts/endurance_chart.py" line="67" />
       <source>Date</source>
       <translation type="finished">Date</translation>
     </message>
     <message>
-      <location filename="../charts/avg_distance_chart.py" line="86" />
+      <location filename="../charts/endurance_chart.py" line="73" />
       <source>Distance (km)</source>
       <translation type="finished">Distance (km)</translation>
     </message>
@@ -126,29 +131,6 @@
       <location filename="../charts/heartrate_chart.py" line="168" />
       <source>Efficiency Factor (m/s per bpm ×1000)</source>
       <translation type="finished">Efficiency Factor (m/s per bpm ×1000)</translation>
-    </message>
-  </context>
-  <context>
-    <name>LongestRunChart</name>
-    <message>
-      <location filename="../charts/longest_run_chart.py" line="26" />
-      <source>Longest Run Progress</source>
-      <translation type="finished">Longest Run Progress</translation>
-    </message>
-    <message>
-      <location filename="../charts/longest_run_chart.py" line="63" />
-      <source>Longest Run</source>
-      <translation type="finished">Longest Run</translation>
-    </message>
-    <message>
-      <location filename="../charts/longest_run_chart.py" line="78" />
-      <source>Date</source>
-      <translation type="finished">Date</translation>
-    </message>
-    <message>
-      <location filename="../charts/longest_run_chart.py" line="86" />
-      <source>Distance (km)</source>
-      <translation type="finished">Distance (km)</translation>
     </message>
   </context>
   <context>

@@ -16,9 +16,7 @@ from ..strava.simple_auth import SimpleStravaAuth
 from ..strava.client import StravaClient
 from ..sync.sync_manager import SyncManager
 from ..settings.config import AppSettings
-from ..analytics.aggregator import ActivityAggregator
-from ..analytics.training_score import TrainingScoreCalculator
-from ..analytics.training_load import TrainingLoadCalculator
+from ..analytics.data_manager import DataManager
 from ..analytics.smoothing import Smoother
 from ..analytics.race_predictor import RacePredictor
 from ..projection.forecaster import Forecaster
@@ -32,12 +30,13 @@ from ..charts.pace_chart import PaceChart
 from ..charts.frequency_chart import FrequencyChart
 from ..charts.score_chart import ScoreChart
 from ..charts.projection_chart import ProjectionChart
-from ..charts.longest_run_chart import LongestRunChart
-from ..charts.avg_distance_chart import AvgDistanceChart
+from ..charts.endurance_chart import EnduranceChart
 from ..charts.structure_overview_chart import StructureOverviewChart
 from ..charts.heartrate_chart import HeartRateChart
 from ..charts.duration_chart import DurationChart
 from ..charts.training_load_chart import TrainingLoadChart
+from .runs_table import RunsTable
+from ..charts.pace_distance_chart import PaceDistanceChart
 
 
 class SyncThread(QThread):
@@ -75,6 +74,20 @@ class SyncThread(QThread):
             db.close()
 
 
+class _StravaAuthThread(QThread):
+    finished = Signal(bool)
+
+    def __init__(self, auth, client_id, client_secret):
+        super().__init__()
+        self._auth = auth
+        self._client_id = client_id
+        self._client_secret = client_secret
+
+    def run(self):
+        result = self._auth.authorize(self._client_id, self._client_secret)
+        self.finished.emit(result)
+
+
 class MainWindow(QMainWindow):
     """Main application window."""
 
@@ -99,7 +112,6 @@ class MainWindow(QMainWindow):
         self._setup_ui()
         self._setup_toolbar()
         self._setup_statusbar()
-        self._connect_signals()
 
         # Set up projection chart settings callback
         self.projection_chart.settings_callback = self.settings.set
@@ -132,12 +144,13 @@ class MainWindow(QMainWindow):
         self.frequency_chart = FrequencyChart()
         self.score_chart = ScoreChart()
         self.projection_chart = ProjectionChart()
-        self.longest_run_chart = LongestRunChart()
-        self.avg_distance_chart = AvgDistanceChart()
+        self.endurance_chart = EnduranceChart()
         self.structure_overview_chart = StructureOverviewChart()
         self.heartrate_chart = HeartRateChart()
         self.duration_chart = DurationChart()
         self.training_load_chart = TrainingLoadChart()
+        self.runs_table = RunsTable()
+        self.pace_distance_chart = PaceDistanceChart()
 
         # Tab 1: Overview - Total Load Metrics
         overview_tab = QTabWidget()
@@ -150,10 +163,7 @@ class MainWindow(QMainWindow):
         self.tab_widget.addTab(self.heartrate_chart, self.tr("Heart Rate"))
 
         # Tab 3: Endurance - Training Structure Metrics
-        endurance_tab = QTabWidget()
-        endurance_tab.addTab(self.longest_run_chart, self.tr("Longest Run"))
-        endurance_tab.addTab(self.avg_distance_chart, self.tr("Avg Distance/Run"))
-        self.tab_widget.addTab(endurance_tab, self.tr("Endurance"))
+        self.tab_widget.addTab(self.endurance_chart, self.tr("Endurance"))
 
         # Tab 4: Duration Analysis
         self.tab_widget.addTab(self.duration_chart, self.tr("Duration"))
@@ -170,6 +180,12 @@ class MainWindow(QMainWindow):
         # Tab 8: Projection
         self.tab_widget.addTab(self.projection_chart, self.tr("Projection"))
 
+        # Tab 9: Runs — individual activity list and scatter plot
+        runs_tab = QTabWidget()
+        runs_tab.addTab(self.runs_table, self.tr("Tabelle"))
+        runs_tab.addTab(self.pace_distance_chart, self.tr("Pace vs. Distanz"))
+        self.tab_widget.addTab(runs_tab, self.tr("Runs"))
+
         main_layout.addWidget(self.tab_widget, stretch=3)
 
     def _setup_toolbar(self):
@@ -181,6 +197,11 @@ class MainWindow(QMainWindow):
         settings_action = QAction(self.tr("Settings"), self)
         settings_action.triggered.connect(self._show_settings)
         toolbar.addAction(settings_action)
+
+        # Sync button (manual trigger; spec §13.1)
+        sync_action = QAction(self.tr("Sync"), self)
+        sync_action.triggered.connect(self._sync_activities)
+        toolbar.addAction(sync_action)
 
         toolbar.addSeparator()
 
@@ -242,10 +263,6 @@ class MainWindow(QMainWindow):
         self.statusbar = QStatusBar()
         self.setStatusBar(self.statusbar)
         self.statusbar.showMessage(self.tr("Ready"))
-
-    def _connect_signals(self):
-        """Connect signals and slots."""
-        pass
 
     def _check_authentication(self):
         """Check if user is already authenticated."""
@@ -348,19 +365,22 @@ class MainWindow(QMainWindow):
         # Show progress message
         self.statusbar.showMessage(self.tr("Opening browser for Strava authorization..."))
 
-        # Start OAuth flow (this will block until complete)
-        if self.auth.authorize(client_id, client_secret):
+        # Run OAuth flow in background thread so the Qt event loop stays alive
+        self._auth_thread = _StravaAuthThread(self.auth, client_id, client_secret)
+        self._auth_thread.finished.connect(self._on_auth_finished)
+        self._auth_thread.finished.connect(self._auth_thread.deleteLater)
+        self._auth_thread.start()
+
+    def _on_auth_finished(self, success: bool):
+        if success:
             self._setup_strava_client()
             self.statusbar.showMessage(self.tr("Successfully connected to Strava!"))
-
-            # Auto-sync after successful connection
             reply = QMessageBox.question(
                 self, self.tr("Sync Activities"),
                 self.tr("Successfully connected to Strava!\n\n"
                 "Do you want to sync your activities now?"),
                 QMessageBox.Yes | QMessageBox.No
             )
-
             if reply == QMessageBox.Yes:
                 self._sync_activities()
         else:
@@ -403,6 +423,10 @@ class MainWindow(QMainWindow):
     def _sync_activities(self):
         """Sync activities from Strava."""
         if not self.sync_manager:
+            QMessageBox.information(
+                self, self.tr("Not Connected"),
+                self.tr("Please connect to Strava first via Settings.")
+            )
             return
 
         # Check if this is initial sync
@@ -429,6 +453,7 @@ class MainWindow(QMainWindow):
         self.sync_thread = SyncThread(self.db.db_path, self.client, sync_type, start_date)
         self.sync_thread.progress.connect(self._on_sync_progress)
         self.sync_thread.finished.connect(self._on_sync_finished)
+        self.sync_thread.finished.connect(self.sync_thread.deleteLater)
         self.sync_thread.start()
 
     def _run_silent_sync(self):
@@ -436,6 +461,7 @@ class MainWindow(QMainWindow):
         # Create and start sync thread for incremental sync only
         self.silent_sync_thread = SyncThread(self.db.db_path, self.client, 'incremental', None)
         self.silent_sync_thread.finished.connect(self._on_silent_sync_finished)
+        self.silent_sync_thread.finished.connect(self.silent_sync_thread.deleteLater)
         self.silent_sync_thread.start()
         self.statusbar.showMessage(self.tr("Checking for new activities..."))
 
@@ -484,8 +510,16 @@ class MainWindow(QMainWindow):
         start_date_q = self.start_date_edit.date()
         start_date_str = f"{start_date_q.year()}-{start_date_q.month():02d}-{start_date_q.day():02d}"
 
+        # Apply spec §11 inclusion filters (treadmill, manual entries)
+        include_treadmill = bool(self.settings.get('include_treadmill', True))
+        include_manual = bool(self.settings.get('include_manual', True))
+
         # Load activities from start date onwards
-        self.activities = self.db.get_activities_since(start_date_str)
+        self.activities = self.db.get_activities_since(
+            start_date_str,
+            include_treadmill=include_treadmill,
+            include_manual=include_manual,
+        )
 
         # Aggregate data
         self._refresh_data()
@@ -495,25 +529,7 @@ class MainWindow(QMainWindow):
         if not self.activities:
             return
 
-        # Aggregate by current period
-        if self.current_period == 'week':
-            self.aggregates = ActivityAggregator.aggregate_by_week(self.activities)
-        else:
-            self.aggregates = ActivityAggregator.aggregate_by_month(self.activities)
-
-        # Calculate training scores
-        self.aggregates = TrainingScoreCalculator.calculate_scores(self.aggregates)
-
-        # Calculate training load (ACWR)
-        # Must use COMPLETE aggregates only
-        complete_for_acwr = [agg for agg in self.aggregates if agg.get('is_complete', True)]
-        for i, agg in enumerate(self.aggregates):
-            if agg.get('is_complete', True) and i >= 4:  # Need 5 periods minimum
-                # Calculate for each complete period (not just latest)
-                relevant_aggs = complete_for_acwr[:complete_for_acwr.index(agg)+1]
-                if len(relevant_aggs) >= 5:
-                    load_data = TrainingLoadCalculator.calculate_training_load(relevant_aggs)
-                    agg['training_load'] = load_data
+        self.aggregates = DataManager.build_aggregates(self.activities, self.current_period)
 
         # Update summary panel
         self._update_summary()
@@ -615,25 +631,32 @@ class MainWindow(QMainWindow):
             'race_predictions': race_predictions,
             'hrmax_check': hrmax_check,
             'is_current_period_complete': is_current_period_complete,
-            'training_load': load_data
+            'training_load': load_data,
+            'active_days': latest_agg.get('active_days'),
+            'consistency_ratio': latest_agg.get('consistency_ratio'),
         })
 
     def _update_charts(self):
         """Update all charts."""
-        smoothing_strength = self.smoothing_combo.currentText().lower()
+        # Use index instead of localized text so non-English UIs work correctly
+        smoothing_levels = ['off', 'light', 'medium', 'strong']
+        smoothing_strength = smoothing_levels[self.smoothing_combo.currentIndex()]
+
+        metric_levels = ['pace', 'speed']
+        metric = metric_levels[self.metric_combo.currentIndex()]
 
         self.distance_chart.update_chart(self.aggregates, smoothing_strength)
-        self.pace_chart.update_chart(self.aggregates, smoothing_strength,
-                                     self.metric_combo.currentText().lower())
+        self.pace_chart.update_chart(self.aggregates, smoothing_strength, metric)
         self.frequency_chart.update_chart(self.aggregates, smoothing_strength)
         self.heartrate_chart.update_chart(self.aggregates, smoothing_strength)
         self.duration_chart.update_chart(self.aggregates, smoothing_strength)
-        self.longest_run_chart.update_chart(self.aggregates, smoothing_strength)
-        self.avg_distance_chart.update_chart(self.aggregates, smoothing_strength)
+        self.endurance_chart.update_chart(self.aggregates, smoothing_strength)
         self.structure_overview_chart.update_chart(self.aggregates, smoothing_strength)
         self.score_chart.update_chart(self.aggregates, smoothing_strength)
         self.training_load_chart.update_chart(self.aggregates)
         self.projection_chart.update_chart(self.aggregates, self.current_period)
+        self.runs_table.update_table(self.activities)
+        self.pace_distance_chart.update_chart(self.activities)
 
     def _on_start_date_changed(self):
         """Handle start date change."""
@@ -649,7 +672,8 @@ class MainWindow(QMainWindow):
         # Save to settings
         self.settings.set('ui_period', text)
 
-        self.current_period = text.lower()
+        # Use index instead of localized text to determine period
+        self.current_period = 'week' if self.period_combo.currentIndex() == 0 else 'month'
         self._refresh_data()
 
     def _on_metric_changed(self, text):

@@ -217,8 +217,8 @@ class TestSmoother(unittest.TestCase):
         smoothed = Smoother.simple_moving_average(data, 3)
 
         self.assertEqual(len(smoothed), len(data))
-        # Middle values should be averages
-        self.assertAlmostEqual(smoothed[4], 4.0, places=1)
+        # Implementation uses centered window: index 4 averages [4,5,6] = 5.0
+        self.assertAlmostEqual(smoothed[4], 5.0, places=1)
 
     def test_exponential_moving_average(self):
         """Test exponential moving average."""

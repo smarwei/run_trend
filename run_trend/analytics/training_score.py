@@ -90,7 +90,7 @@ class TrainingScoreCalculator:
             if current_pace > 0:
                 # Pace improvement: baseline / current (>1 means faster)
                 pace_improvement = rolling_baseline_pace / current_pace
-                normalized_pace = min(pace_improvement, 1.5)  # Cap at 1.5x improvement
+                normalized_pace = min(pace_improvement, 2.0)  # Cap at 2x improvement
             else:
                 normalized_pace = 0.0
 
@@ -101,7 +101,7 @@ class TrainingScoreCalculator:
             if has_hr_data:
                 # Efficiency improvement: current / baseline (>1 means better)
                 normalized_efficiency = current_efficiency / rolling_baseline_efficiency
-                normalized_efficiency = min(normalized_efficiency, 1.5)  # Cap at 1.5x improvement
+                normalized_efficiency = min(normalized_efficiency, 2.0)  # Cap at 2x improvement
             else:
                 normalized_efficiency = 0.0
 
@@ -174,10 +174,12 @@ How it works:
 - Baseline is computed from your historical rolling average
 - Score is designed to not overreact to single workouts
 - Weights adjust automatically when HR data is unavailable
+- All metrics are capped at 2x their baseline, making 100 the true maximum
 
 Interpretation:
 • 0-30: Below baseline, consider increasing volume/consistency
 • 30-60: Around baseline, maintaining current level
 • 60-80: Above baseline, making good progress
 • 80-100: Significantly above baseline, excellent progress
+• 100: All metrics at 2x their historical baseline simultaneously
 """.strip()

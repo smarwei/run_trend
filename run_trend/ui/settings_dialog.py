@@ -3,7 +3,8 @@ Settings dialog for application configuration.
 """
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QFormLayout,
-    QLineEdit, QPushButton, QLabel, QGroupBox, QMessageBox, QSpinBox, QComboBox
+    QLineEdit, QPushButton, QLabel, QGroupBox, QMessageBox, QSpinBox, QComboBox,
+    QCheckBox,
 )
 from PySide6.QtCore import Qt
 
@@ -113,6 +114,36 @@ class SettingsDialog(QDialog):
         hr_group.setLayout(hr_layout)
         layout.addWidget(hr_group)
 
+        # Activity Filters Group (spec §11)
+        filters_group = QGroupBox(self.tr("Activity Filters"))
+        filters_layout = QVBoxLayout()
+
+        self.include_treadmill_checkbox = QCheckBox(
+            self.tr("Include treadmill / indoor runs")
+        )
+        self.include_treadmill_checkbox.setToolTip(
+            self.tr("Strava marks indoor/treadmill runs with the 'trainer' flag.")
+        )
+        filters_layout.addWidget(self.include_treadmill_checkbox)
+
+        self.include_manual_checkbox = QCheckBox(
+            self.tr("Include manually entered activities")
+        )
+        self.include_manual_checkbox.setToolTip(
+            self.tr("Activities entered by hand instead of recorded by a device.")
+        )
+        filters_layout.addWidget(self.include_manual_checkbox)
+
+        filters_info = QLabel(
+            self.tr("Filters apply when loading existing data; changes refresh charts immediately.")
+        )
+        filters_info.setWordWrap(True)
+        filters_info.setStyleSheet("color: gray; font-size: 10px;")
+        filters_layout.addWidget(filters_info)
+
+        filters_group.setLayout(filters_layout)
+        layout.addWidget(filters_group)
+
         # Strava Actions Group
         actions_group = QGroupBox(self.tr("Strava Actions"))
         actions_layout = QVBoxLayout()
@@ -187,10 +218,14 @@ class SettingsDialog(QDialog):
         client_secret = self.settings.get('strava_client_secret', '')
         manual_hrmax = self.settings.get('manual_hrmax', 0)
         language = self.settings.get('language', 'auto')
+        include_treadmill = bool(self.settings.get('include_treadmill', True))
+        include_manual = bool(self.settings.get('include_manual', True))
 
         self.client_id_input.setText(client_id)
         self.client_secret_input.setText(client_secret)
         self.hrmax_input.setValue(manual_hrmax)
+        self.include_treadmill_checkbox.setChecked(include_treadmill)
+        self.include_manual_checkbox.setChecked(include_manual)
 
         # Set language combo box
         language_map = {'auto': 0, 'de': 1, 'en': 2}
@@ -202,10 +237,14 @@ class SettingsDialog(QDialog):
         old_client_id = self.settings.get('strava_client_id', '')
         old_client_secret = self.settings.get('strava_client_secret', '')
         old_hrmax = self.settings.get('manual_hrmax', 0)
+        old_include_treadmill = bool(self.settings.get('include_treadmill', True))
+        old_include_manual = bool(self.settings.get('include_manual', True))
 
         client_id = self.client_id_input.text().strip()
         client_secret = self.client_secret_input.text().strip()
         manual_hrmax = self.hrmax_input.value()
+        include_treadmill = self.include_treadmill_checkbox.isChecked()
+        include_manual = self.include_manual_checkbox.isChecked()
 
         # Get language selection
         language_index = self.language_combo.currentIndex()
@@ -214,6 +253,10 @@ class SettingsDialog(QDialog):
 
         strava_changed = (client_id != old_client_id or client_secret != old_client_secret)
         hrmax_changed = (manual_hrmax != old_hrmax)
+        filters_changed = (
+            include_treadmill != old_include_treadmill
+            or include_manual != old_include_manual
+        )
 
         if not client_id or not client_secret:
             reply = QMessageBox.question(
@@ -230,6 +273,10 @@ class SettingsDialog(QDialog):
 
         # Save manual HRmax
         self.settings.set('manual_hrmax', manual_hrmax)
+
+        # Save activity filters
+        self.settings.set('include_treadmill', include_treadmill)
+        self.settings.set('include_manual', include_manual)
 
         # Save language
         self.settings.set('language', language)
@@ -263,9 +310,13 @@ class SettingsDialog(QDialog):
 
         QMessageBox.information(self, self.tr("Settings Saved"), message)
 
-        # Trigger data refresh in main window if HRmax changed
-        if hrmax_changed and self.main_window:
-            self.main_window._refresh_data()
+        # Trigger data refresh in main window
+        if self.main_window:
+            if filters_changed:
+                # Filters affect the DB query — reload activities, not just charts
+                self.main_window._load_data()
+            elif hrmax_changed:
+                self.main_window._refresh_data()
 
         self.accept()
 

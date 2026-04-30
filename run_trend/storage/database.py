@@ -3,10 +3,13 @@ SQLite database management for Running Progress Tracker.
 """
 import sqlite3
 import os
+import logging
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 import json
+
+logger = logging.getLogger(__name__)
 
 
 class Database:
@@ -52,6 +55,8 @@ class Database:
                 average_heartrate REAL,
                 max_heartrate REAL,
                 has_heartrate INTEGER DEFAULT 0,
+                trainer INTEGER DEFAULT 0,
+                manual INTEGER DEFAULT 0,
                 last_synced TEXT NOT NULL,
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL
@@ -78,7 +83,20 @@ class Database:
             ON activities(type)
         ''')
 
+        # Migrate older databases that predate the trainer/manual columns
+        self._migrate_add_column('activities', 'trainer', 'INTEGER DEFAULT 0')
+        self._migrate_add_column('activities', 'manual', 'INTEGER DEFAULT 0')
+
         self.conn.commit()
+
+    def _migrate_add_column(self, table: str, column: str, decl: str):
+        """Idempotently add a column to a table when missing."""
+        cursor = self.conn.cursor()
+        cursor.execute(f"PRAGMA table_info({table})")
+        existing = {row['name'] for row in cursor.fetchall()}
+        if column not in existing:
+            cursor.execute(f"ALTER TABLE {table} ADD COLUMN {column} {decl}")
+            logger.info("Migrated %s: added column %s", table, column)
 
     def insert_activity(self, activity_data: Dict[str, Any]) -> bool:
         """
@@ -99,9 +117,9 @@ class Database:
                     strava_id, name, type, start_date, timezone,
                     distance, moving_time, elapsed_time, average_speed,
                     max_speed, elevation_gain, average_heartrate,
-                    max_heartrate, has_heartrate,
+                    max_heartrate, has_heartrate, trainer, manual,
                     last_synced, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
                          ?,
                          COALESCE((SELECT created_at FROM activities WHERE strava_id = ?), ?),
                          ?)
@@ -120,6 +138,8 @@ class Database:
                 activity_data.get('average_heartrate'),
                 activity_data.get('max_heartrate'),
                 1 if activity_data.get('has_heartrate') else 0,
+                1 if activity_data.get('trainer') else 0,
+                1 if activity_data.get('manual') else 0,
                 now,
                 activity_data['strava_id'],
                 now,
@@ -127,47 +147,74 @@ class Database:
             ))
             self.conn.commit()
             return True
-        except Exception as e:
-            print(f"Error inserting activity: {e}")
+        except Exception:
+            logger.exception("Error inserting activity")
             self.conn.rollback()
             return False
 
-    def get_all_activities(self, activity_type: str = 'Run') -> List[Dict[str, Any]]:
+    @staticmethod
+    def _filter_clause(include_treadmill: bool, include_manual: bool) -> str:
+        """Build the optional ``AND ...`` clause used by activity queries."""
+        clauses = []
+        if not include_treadmill:
+            clauses.append("COALESCE(trainer, 0) = 0")
+        if not include_manual:
+            clauses.append("COALESCE(manual, 0) = 0")
+        return (" AND " + " AND ".join(clauses)) if clauses else ""
+
+    def get_all_activities(
+        self,
+        activity_type: str = 'Run',
+        include_treadmill: bool = True,
+        include_manual: bool = True,
+    ) -> List[Dict[str, Any]]:
         """
         Get all activities of a specific type.
 
         Args:
             activity_type: Type of activity (default: 'Run')
+            include_treadmill: Include trainer/treadmill activities (default True)
+            include_manual: Include manually entered activities (default True)
 
         Returns:
             List of activity dictionaries
         """
         cursor = self.conn.cursor()
-        cursor.execute('''
-            SELECT * FROM activities
-            WHERE type = ?
-            ORDER BY start_date ASC
-        ''', (activity_type,))
+        cursor.execute(
+            'SELECT * FROM activities WHERE type = ?'
+            + self._filter_clause(include_treadmill, include_manual)
+            + ' ORDER BY start_date ASC',
+            (activity_type,),
+        )
 
         return [dict(row) for row in cursor.fetchall()]
 
-    def get_activities_since(self, start_date: str, activity_type: str = 'Run') -> List[Dict[str, Any]]:
+    def get_activities_since(
+        self,
+        start_date: str,
+        activity_type: str = 'Run',
+        include_treadmill: bool = True,
+        include_manual: bool = True,
+    ) -> List[Dict[str, Any]]:
         """
         Get activities since a specific date.
 
         Args:
             start_date: ISO format date string
             activity_type: Type of activity (default: 'Run')
+            include_treadmill: Include trainer/treadmill activities (default True)
+            include_manual: Include manually entered activities (default True)
 
         Returns:
             List of activity dictionaries
         """
         cursor = self.conn.cursor()
-        cursor.execute('''
-            SELECT * FROM activities
-            WHERE type = ? AND start_date >= ?
-            ORDER BY start_date ASC
-        ''', (activity_type, start_date))
+        cursor.execute(
+            'SELECT * FROM activities WHERE type = ? AND start_date >= ?'
+            + self._filter_clause(include_treadmill, include_manual)
+            + ' ORDER BY start_date ASC',
+            (activity_type, start_date),
+        )
 
         return [dict(row) for row in cursor.fetchall()]
 

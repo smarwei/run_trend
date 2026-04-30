@@ -3,7 +3,7 @@ Tests for race time prediction module.
 """
 import unittest
 from datetime import datetime, timedelta, timezone
-from app.analytics.race_predictor import RacePredictor
+from run_trend.analytics.race_predictor import RacePredictor
 
 
 class TestRacePredictor(unittest.TestCase):

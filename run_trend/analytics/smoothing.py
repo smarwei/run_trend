@@ -29,22 +29,12 @@ class Smoother:
         # Use numpy for efficient computation
         data_array = np.array(data)
         smoothed = np.zeros(len(data_array))
+        half = window // 2
 
-        # Calculate centered moving average for middle points
+        # Use a partial window at edges so boundary points keep their variation
         for i in range(len(data_array)):
-            # At the start: use forward-looking window
-            if i < window // 2:
-                start_idx = 0
-                end_idx = min(window, len(data_array))
-            # At the end: use backward-looking window
-            elif i >= len(data_array) - window // 2:
-                start_idx = max(0, len(data_array) - window)
-                end_idx = len(data_array)
-            # In the middle: use centered window
-            else:
-                start_idx = i - window // 2
-                end_idx = i + window // 2 + 1
-
+            start_idx = max(0, i - half)
+            end_idx = min(len(data_array), i + half + 1)
             smoothed[i] = np.mean(data_array[start_idx:end_idx])
 
         return smoothed.tolist()

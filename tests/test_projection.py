@@ -3,7 +3,7 @@ Unit tests for projection module.
 """
 import unittest
 from datetime import datetime, timedelta
-from app.projection.forecaster import Forecaster
+from run_trend.projection.forecaster import Forecaster
 
 
 class TestForecaster(unittest.TestCase):

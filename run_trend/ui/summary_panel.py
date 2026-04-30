@@ -41,9 +41,11 @@ class SummaryPanel(QWidget):
 
         self.current_distance_label = QLabel(self.tr("Avg Distance: -"))
         self.current_pace_label = QLabel(self.tr("Avg Pace: -"))
+        self.consistency_label = QLabel(self.tr("Active Days: -"))
 
         current_layout.addWidget(self.current_distance_label)
         current_layout.addWidget(self.current_pace_label)
+        current_layout.addWidget(self.consistency_label)
         current_group.setLayout(current_layout)
         layout.addWidget(current_group)
 
@@ -166,6 +168,16 @@ class SummaryPanel(QWidget):
             self.current_pace_label.setText(self.tr("Avg Pace: {}:{:02d} min/km").format(pace_min, pace_sec))
         else:
             self.current_pace_label.setText(self.tr("Avg Pace: -"))
+
+        # Consistency (active days / days in period) — spec §6.2
+        active_days = data.get('active_days')
+        consistency = data.get('consistency_ratio')
+        if active_days is not None and consistency is not None:
+            self.consistency_label.setText(
+                self.tr("Active Days: {} ({:.0%})").format(active_days, consistency)
+            )
+        else:
+            self.consistency_label.setText(self.tr("Active Days: -"))
 
         # Heart rate metrics
         avg_hr = data.get('current_avg_hr', 0)
@@ -310,19 +322,19 @@ class SummaryPanel(QWidget):
             # Color coding
             if load_score >= 90:
                 color = "#e74c3c"  # Red
-                status_text = "GEFAHR"
+                status_text = self.tr("DANGER")
             elif load_score >= 80:
                 color = "#e67e22"  # Orange
-                status_text = "WARNUNG"
+                status_text = self.tr("WARNING")
             elif load_score >= 70:
                 color = "#f39c12"  # Yellow
-                status_text = "VORSICHT"
+                status_text = self.tr("CAUTION")
             elif load_score >= 40:
                 color = "#27ae60"  # Green
-                status_text = "SICHER"
+                status_text = self.tr("SAFE")
             else:
                 color = "#3498db"  # Blue
-                status_text = "NIEDRIG"
+                status_text = self.tr("LOW")
 
             self.load_score_label.setStyleSheet(f"font-size: 20px; font-weight: bold; color: {color};")
             self.load_status_label.setText(self.tr("Status: {}").format(status_text))
