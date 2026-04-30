@@ -449,6 +449,42 @@ Bitte versuchen Sie es erneut oder überprüfen Sie Ihre API-Zugangsdaten in den
       <source>No new activities found</source>
       <translation type="finished">Keine neuen Aktivitäten gefunden</translation>
     </message>
+    <message>
+      <source>● Connected</source>
+      <translation type="finished">● Verbunden</translation>
+    </message>
+    <message>
+      <source>○ Not connected</source>
+      <translation type="finished">○ Nicht verbunden</translation>
+    </message>
+    <message>
+      <source>Not connected to Strava</source>
+      <translation type="finished">Nicht mit Strava verbunden</translation>
+    </message>
+    <message>
+      <source>Never synced</source>
+      <translation type="finished">Noch nie synchronisiert</translation>
+    </message>
+    <message>
+      <source>Last sync: {}</source>
+      <translation type="finished">Letzte Synchr.: {}</translation>
+    </message>
+    <message>
+      <source>just now</source>
+      <translation type="finished">gerade eben</translation>
+    </message>
+    <message>
+      <source>{} min ago</source>
+      <translation type="finished">vor {} Min.</translation>
+    </message>
+    <message>
+      <source>{} hr ago</source>
+      <translation type="finished">vor {} Std.</translation>
+    </message>
+    <message>
+      <source>{} days ago</source>
+      <translation type="finished">vor {} Tagen</translation>
+    </message>
   </context>
   <context>
     <name>ManualDialog</name>

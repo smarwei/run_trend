@@ -449,6 +449,42 @@ Please try again or check your API credentials in Settings.</translation>
       <source>No new activities found</source>
       <translation type="finished">No new activities found</translation>
     </message>
+    <message>
+      <source>● Connected</source>
+      <translation type="finished">● Connected</translation>
+    </message>
+    <message>
+      <source>○ Not connected</source>
+      <translation type="finished">○ Not connected</translation>
+    </message>
+    <message>
+      <source>Not connected to Strava</source>
+      <translation type="finished">Not connected to Strava</translation>
+    </message>
+    <message>
+      <source>Never synced</source>
+      <translation type="finished">Never synced</translation>
+    </message>
+    <message>
+      <source>Last sync: {}</source>
+      <translation type="finished">Last sync: {}</translation>
+    </message>
+    <message>
+      <source>just now</source>
+      <translation type="finished">just now</translation>
+    </message>
+    <message>
+      <source>{} min ago</source>
+      <translation type="finished">{} min ago</translation>
+    </message>
+    <message>
+      <source>{} hr ago</source>
+      <translation type="finished">{} hr ago</translation>
+    </message>
+    <message>
+      <source>{} days ago</source>
+      <translation type="finished">{} days ago</translation>
+    </message>
   </context>
   <context>
     <name>ManualDialog</name>

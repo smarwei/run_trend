@@ -259,10 +259,72 @@ class MainWindow(QMainWindow):
 
 
     def _setup_statusbar(self):
-        """Set up the status bar."""
+        """Set up the status bar.
+
+        Permanent widgets on the right show auth status and last-sync time
+        (spec §13.1). Transient `showMessage()` calls write to the left area
+        and never overwrite the permanent widgets.
+        """
         self.statusbar = QStatusBar()
         self.setStatusBar(self.statusbar)
+
+        self.auth_status_label = QLabel()
+        self.last_sync_label = QLabel()
+        self.statusbar.addPermanentWidget(self.auth_status_label)
+        self.statusbar.addPermanentWidget(self.last_sync_label)
+
+        self._update_persistent_status()
+        # Refresh "N min ago" once a minute so the label stays accurate.
+        self._status_refresh_timer = QTimer(self)
+        self._status_refresh_timer.setInterval(60_000)
+        self._status_refresh_timer.timeout.connect(self._update_persistent_status)
+        self._status_refresh_timer.start()
+
         self.statusbar.showMessage(self.tr("Ready"))
+
+    def _update_persistent_status(self):
+        """Refresh the auth/last-sync labels in the status bar."""
+        if getattr(self, 'auth', None) is not None and self.auth.is_authenticated():
+            self.auth_status_label.setText(self.tr("● Connected"))
+            self.auth_status_label.setToolTip(self.tr("Connected to Strava"))
+        else:
+            self.auth_status_label.setText(self.tr("○ Not connected"))
+            self.auth_status_label.setToolTip(self.tr("Not connected to Strava"))
+
+        last_sync = self.db.get_setting('last_sync')
+        if not last_sync:
+            self.last_sync_label.setText(self.tr("Never synced"))
+        else:
+            self.last_sync_label.setText(
+                self.tr("Last sync: {}").format(self._format_relative_time(last_sync))
+            )
+
+    def _format_relative_time(self, iso_str: str) -> str:
+        """Return a short relative time string for an ISO timestamp."""
+        try:
+            ts = datetime.fromisoformat(iso_str.replace('Z', '+00:00'))
+        except (ValueError, TypeError):
+            return iso_str
+
+        if ts.tzinfo is None:
+            # Stored as naive UTC by sync_manager (datetime.utcnow().isoformat()).
+            now = datetime.utcnow()
+        else:
+            from datetime import timezone
+            now = datetime.now(timezone.utc)
+
+        delta = now - ts
+        seconds = int(delta.total_seconds())
+        if seconds < 60:
+            return self.tr("just now")
+        minutes = seconds // 60
+        if minutes < 60:
+            return self.tr("{} min ago").format(minutes)
+        hours = minutes // 60
+        if hours < 24:
+            return self.tr("{} hr ago").format(hours)
+        days = hours // 24
+        return self.tr("{} days ago").format(days)
 
     def _check_authentication(self):
         """Check if user is already authenticated."""
@@ -284,6 +346,8 @@ class MainWindow(QMainWindow):
             self.statusbar.showMessage(self.tr("Not connected - Please configure Strava connection"))
             # Use QTimer to open settings after main window is shown
             QTimer.singleShot(100, self._show_settings)
+
+        self._update_persistent_status()
 
     def _restore_ui_settings(self):
         """Restore UI settings from previous session."""
@@ -372,6 +436,7 @@ class MainWindow(QMainWindow):
         self._auth_thread.start()
 
     def _on_auth_finished(self, success: bool):
+        self._update_persistent_status()
         if success:
             self._setup_strava_client()
             self.statusbar.showMessage(self.tr("Successfully connected to Strava!"))
@@ -402,6 +467,9 @@ class MainWindow(QMainWindow):
                 if self.auth.is_authenticated():
                     self._setup_strava_client()
                     self.statusbar.showMessage(self.tr("Reconnected to Strava with new settings"))
+        # Refresh persistent status — the dialog may have revoked auth or
+        # cleared sync settings.
+        self._update_persistent_status()
 
     def _show_manual(self):
         """Show manual/help dialog."""
@@ -487,6 +555,7 @@ class MainWindow(QMainWindow):
 
         # Refresh data
         self._load_data()
+        self._update_persistent_status()
 
     def _on_silent_sync_finished(self, stats):
         """Handle silent sync completion (no dialog, only status message)."""
@@ -503,6 +572,7 @@ class MainWindow(QMainWindow):
             self.statusbar.showMessage(self.tr("No new activities found"))
             # Clear message after 3 seconds
             QTimer.singleShot(3000, lambda: self.statusbar.showMessage(self.tr("Connected to Strava")))
+        self._update_persistent_status()
 
     def _load_data(self):
         """Load activities from database and refresh UI."""
