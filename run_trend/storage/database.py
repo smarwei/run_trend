@@ -72,6 +72,22 @@ class Database:
             )
         ''')
 
+        # Race markers (annotations on the time axis: races, time trials,
+        # other notable events). distance_km / result_time are optional so
+        # the user can record a race without filling in performance data.
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS race_markers (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                date TEXT NOT NULL,
+                name TEXT NOT NULL,
+                distance_km REAL,
+                result_time INTEGER,
+                notes TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            )
+        ''')
+
         # Create indices for performance
         cursor.execute('''
             CREATE INDEX IF NOT EXISTS idx_activities_start_date
@@ -81,6 +97,11 @@ class Database:
         cursor.execute('''
             CREATE INDEX IF NOT EXISTS idx_activities_type
             ON activities(type)
+        ''')
+
+        cursor.execute('''
+            CREATE INDEX IF NOT EXISTS idx_race_markers_date
+            ON race_markers(date)
         ''')
 
         # Migrate older databases that predate the trainer/manual columns
@@ -325,6 +346,87 @@ class Database:
     def get_database_path(self) -> str:
         """Get the full path to the database file."""
         return self.db_path
+
+    # ------------------------------------------------------------------ #
+    # Race markers                                                         #
+    # ------------------------------------------------------------------ #
+
+    def add_race_marker(
+        self,
+        date: str,
+        name: str,
+        distance_km: Optional[float] = None,
+        result_time: Optional[int] = None,
+        notes: Optional[str] = None,
+    ) -> int:
+        """Insert a race marker and return its new row id.
+
+        Args:
+            date: ISO date string of the race.
+            name: Display name (e.g. "Hannover Marathon").
+            distance_km: Race distance in kilometres, optional.
+            result_time: Net time in seconds, optional.
+            notes: Free-form notes, optional.
+        """
+        cursor = self.conn.cursor()
+        now = datetime.utcnow().isoformat()
+        cursor.execute('''
+            INSERT INTO race_markers (
+                date, name, distance_km, result_time, notes,
+                created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (date, name, distance_km, result_time, notes, now, now))
+        self.conn.commit()
+        return cursor.lastrowid
+
+    def get_race_markers(self) -> List[Dict[str, Any]]:
+        """Return all race markers ordered by date ascending."""
+        cursor = self.conn.cursor()
+        cursor.execute('SELECT * FROM race_markers ORDER BY date ASC')
+        return [dict(row) for row in cursor.fetchall()]
+
+    def update_race_marker(
+        self,
+        marker_id: int,
+        date: Optional[str] = None,
+        name: Optional[str] = None,
+        distance_km: Optional[float] = None,
+        result_time: Optional[int] = None,
+        notes: Optional[str] = None,
+    ) -> bool:
+        """Update fields on a race marker. Only non-None args are written.
+
+        Returns True if a row was updated, False if no marker with that id exists.
+        """
+        fields = {
+            'date': date,
+            'name': name,
+            'distance_km': distance_km,
+            'result_time': result_time,
+            'notes': notes,
+        }
+        updates = {k: v for k, v in fields.items() if v is not None}
+        if not updates:
+            return False
+
+        updates['updated_at'] = datetime.utcnow().isoformat()
+        set_clause = ', '.join(f'{k} = ?' for k in updates)
+        values = list(updates.values()) + [marker_id]
+
+        cursor = self.conn.cursor()
+        cursor.execute(
+            f'UPDATE race_markers SET {set_clause} WHERE id = ?',
+            values,
+        )
+        self.conn.commit()
+        return cursor.rowcount > 0
+
+    def delete_race_marker(self, marker_id: int) -> bool:
+        """Delete a race marker by id. Returns True if a row was removed."""
+        cursor = self.conn.cursor()
+        cursor.execute('DELETE FROM race_markers WHERE id = ?', (marker_id,))
+        self.conn.commit()
+        return cursor.rowcount > 0
 
     def close(self):
         """Close database connection."""
