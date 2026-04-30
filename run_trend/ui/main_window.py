@@ -30,6 +30,7 @@ from .about_dialog import AboutDialog
 from .onboarding_wizard import OnboardingWizard
 from .race_dialog import RaceDialog
 from .race_manager_dialog import RaceManagerDialog
+from .goal_manager_dialog import GoalManagerDialog
 from ..charts.distance_chart import DistanceChart
 from ..charts.pace_chart import PaceChart
 from ..charts.frequency_chart import FrequencyChart
@@ -223,6 +224,11 @@ class MainWindow(QMainWindow):
         manage_races_action.triggered.connect(self._show_race_manager)
         file_menu.addAction(manage_races_action)
         self.manage_races_action = manage_races_action
+
+        manage_goals_action = QAction(self.tr("Manage Goals…"), self)
+        manage_goals_action.triggered.connect(self._show_goal_manager)
+        file_menu.addAction(manage_goals_action)
+        self.manage_goals_action = manage_goals_action
 
         help_menu = menu_bar.addMenu(self.tr("&Help"))
         wizard_action = QAction(self.tr("First-Run Wizard"), self)
@@ -644,6 +650,11 @@ class MainWindow(QMainWindow):
         # Markers may have changed (add/edit/delete); redraw charts.
         if getattr(self, 'aggregates', None):
             self._update_charts()
+
+    def _show_goal_manager(self):
+        """Open the Goal-Manager dialog."""
+        dialog = GoalManagerDialog(self.db, self)
+        dialog.exec()
 
     def _mark_activity_as_race(self, activity: dict):
         """Open RaceDialog prefilled from an activity and persist on accept."""

@@ -592,6 +592,10 @@ Wähle ein früheres Startdatum oder synchronisiere, um neue Aktivitäten zu lad
       <source>Manage Races…</source>
       <translation type="finished">Wettkämpfe verwalten…</translation>
     </message>
+    <message>
+      <source>Manage Goals…</source>
+      <translation type="finished">Ziele verwalten…</translation>
+    </message>
   </context>
   <context>
     <name>RaceManagerDialog</name>
@@ -735,6 +739,61 @@ Wähle ein früheres Startdatum oder synchronisiere, um neue Aktivitäten zu lad
     <message>
       <source>Please enter a target finish time.</source>
       <translation type="finished">Bitte gib eine Zielzeit ein.</translation>
+    </message>
+  </context>
+  <context>
+    <name>GoalManagerDialog</name>
+    <message>
+      <source>Manage Goals</source>
+      <translation type="finished">Ziele verwalten</translation>
+    </message>
+    <message>
+      <source>Target date</source>
+      <translation type="finished">Zieldatum</translation>
+    </message>
+    <message>
+      <source>Distance (km)</source>
+      <translation type="finished">Distanz (km)</translation>
+    </message>
+    <message>
+      <source>Target time</source>
+      <translation type="finished">Zielzeit</translation>
+    </message>
+    <message>
+      <source>Status</source>
+      <translation type="finished">Status</translation>
+    </message>
+    <message>
+      <source>Add…</source>
+      <translation type="finished">Hinzufügen…</translation>
+    </message>
+    <message>
+      <source>Edit…</source>
+      <translation type="finished">Bearbeiten…</translation>
+    </message>
+    <message>
+      <source>Toggle Achieved</source>
+      <translation type="finished">Erreicht-Status umschalten</translation>
+    </message>
+    <message>
+      <source>Delete</source>
+      <translation type="finished">Löschen</translation>
+    </message>
+    <message>
+      <source>Achieved</source>
+      <translation type="finished">Erreicht</translation>
+    </message>
+    <message>
+      <source>Active</source>
+      <translation type="finished">Aktiv</translation>
+    </message>
+    <message>
+      <source>Delete goal</source>
+      <translation type="finished">Ziel löschen</translation>
+    </message>
+    <message>
+      <source>Delete '{}'? This cannot be undone.</source>
+      <translation type="finished">'{}' wirklich löschen? Das kann nicht rückgängig gemacht werden.</translation>
     </message>
   </context>
   <context>

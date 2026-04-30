@@ -76,9 +76,13 @@ zwingende Vorstufe — der DB-Layer — ist als eigene Iteration drin:
   gewechselt und das Spin-Feld editierbar. `get_data()` liefert das
   serialisierungsfertige Dict.
 - ✅ Übersetzungen für GoalDialog (DE/EN, `.ts` + `.qm` regeneriert).
-- ⏳ Goal-Manager-Dialog (Liste mit Add/Edit/Delete + Achieved-Toggle) —
-  Folgeiteration
-- ⏳ MainWindow-Integration (Menüeintrag, Wiring) — Folgeiteration
+- ✅ `GoalManagerDialog` (`run_trend/ui/goal_manager_dialog.py`): Tabelle
+  mit Datum/Distanz/Zielzeit/Status, Buttons Add/Edit/Toggle-Achieved/Delete,
+  Doppelklick öffnet Edit, Delete bestätigungspflichtig. Sortierung über
+  `db.get_goals()` (Date asc).
+- ✅ MainWindow-Integration: File → „Manage Goals…", `_show_goal_manager`
+  öffnet den Dialog modal.
+- ✅ Übersetzungen für GoalManagerDialog + Menüeintrag (DE/EN, `.ts` + `.qm`).
 - ⏳ Projection-Chart-Erweiterung (Zielpunkt + on-track/off-track-Farbe) —
   Folgeiteration
 

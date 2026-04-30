@@ -592,6 +592,10 @@ Pick an earlier start date or sync to fetch new activities.</translation>
       <source>Manage Races…</source>
       <translation type="finished">Manage Races…</translation>
     </message>
+    <message>
+      <source>Manage Goals…</source>
+      <translation type="finished">Manage Goals…</translation>
+    </message>
   </context>
   <context>
     <name>RaceManagerDialog</name>
@@ -735,6 +739,61 @@ Pick an earlier start date or sync to fetch new activities.</translation>
     <message>
       <source>Please enter a target finish time.</source>
       <translation type="finished">Please enter a target finish time.</translation>
+    </message>
+  </context>
+  <context>
+    <name>GoalManagerDialog</name>
+    <message>
+      <source>Manage Goals</source>
+      <translation type="finished">Manage Goals</translation>
+    </message>
+    <message>
+      <source>Target date</source>
+      <translation type="finished">Target date</translation>
+    </message>
+    <message>
+      <source>Distance (km)</source>
+      <translation type="finished">Distance (km)</translation>
+    </message>
+    <message>
+      <source>Target time</source>
+      <translation type="finished">Target time</translation>
+    </message>
+    <message>
+      <source>Status</source>
+      <translation type="finished">Status</translation>
+    </message>
+    <message>
+      <source>Add…</source>
+      <translation type="finished">Add…</translation>
+    </message>
+    <message>
+      <source>Edit…</source>
+      <translation type="finished">Edit…</translation>
+    </message>
+    <message>
+      <source>Toggle Achieved</source>
+      <translation type="finished">Toggle Achieved</translation>
+    </message>
+    <message>
+      <source>Delete</source>
+      <translation type="finished">Delete</translation>
+    </message>
+    <message>
+      <source>Achieved</source>
+      <translation type="finished">Achieved</translation>
+    </message>
+    <message>
+      <source>Active</source>
+      <translation type="finished">Active</translation>
+    </message>
+    <message>
+      <source>Delete goal</source>
+      <translation type="finished">Delete goal</translation>
+    </message>
+    <message>
+      <source>Delete '{}'? This cannot be undone.</source>
+      <translation type="finished">Delete '{}'? This cannot be undone.</translation>
     </message>
   </context>
   <context>
