@@ -57,11 +57,12 @@ class PaceDistanceChart(BaseChart):
         )
 
         margin = max((max(paces) - min(paces)) * 0.1, 0.5)
-        axis_y = self._create_value_axis(
+        axis_y = self._create_pace_axis(
             self.tr("Pace (min/km)"),
-            min_val=min(paces) - margin, max_val=max(paces) + margin,
+            min_val=min(paces) - margin,
+            max_val=max(paces) + margin,
+            reverse=True,  # Faster pace (lower value) appears at top
         )
-        axis_y.setReverse(True)  # Faster pace (lower value) appears at top
 
         self.chart.addAxis(axis_x, Qt.AlignBottom)
         self.chart.addAxis(axis_y, Qt.AlignLeft)

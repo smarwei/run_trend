@@ -1,14 +1,28 @@
 """
 Base chart widget with shared functionality for all chart classes.
 """
+import math
 from PySide6.QtWidgets import QWidget, QVBoxLayout
-from PySide6.QtCharts import QChart, QChartView, QDateTimeAxis, QValueAxis
+from PySide6.QtCharts import (
+    QChart, QChartView, QCategoryAxis, QDateTimeAxis, QValueAxis,
+)
 from PySide6.QtCore import Qt, QDateTime
 from PySide6.QtGui import QPainter, QBrush, QColor
 from typing import Any, Dict, List, Optional
 
 from ..analytics.smoothing import Smoother
 from ..projection.forecaster import Forecaster
+
+
+def format_pace_minutes(value: float) -> str:
+    """Format pace given in min/km decimal as MM:SS (e.g. 5.5 -> "5:30").
+
+    Rounds to the nearest whole second so floating-point tick values like
+    4.9999 don't render as "4:59" when 5.0 was intended.
+    """
+    total_seconds = max(0, int(round(value * 60)))
+    mins, secs = divmod(total_seconds, 60)
+    return f"{mins}:{secs:02d}"
 
 
 class BaseChart(QWidget):
@@ -121,6 +135,54 @@ class BaseChart(QWidget):
         axis.setLabelFormat(fmt)
         if min_val is not None and max_val is not None:
             axis.setRange(min_val, max_val)
+        return axis
+
+    def _create_pace_axis(
+        self,
+        title: str,
+        min_val: float,
+        max_val: float,
+        reverse: bool = False,
+    ) -> QCategoryAxis:
+        """Create a pace axis whose tick labels read as MM:SS instead of decimal.
+
+        The axis range and ticks are aligned to clean pace boundaries (every
+        15 s, 30 s, or full minute depending on span) so labels never end up
+        like "5:17" — they always sit on natural pace marks.
+
+        Args:
+            title:   Already-translated axis label.
+            min_val: Lower bound of the data (in min/km).
+            max_val: Upper bound of the data (in min/km).
+            reverse: Set True to put faster pace (lower values) at the top.
+        """
+        axis = QCategoryAxis()
+        axis.setTitleText(title)
+        axis.setLabelsPosition(QCategoryAxis.AxisLabelsPositionOnValue)
+
+        span = max(max_val - min_val, 1e-6)
+        if span <= 1.5:
+            step = 0.25  # 15 s ticks for narrow ranges
+        elif span <= 4.0:
+            step = 0.5   # 30 s ticks
+        else:
+            step = 1.0   # full-minute ticks
+
+        start = math.floor(min_val / step) * step
+        end = math.ceil(max_val / step) * step
+        if end <= start:
+            end = start + step
+
+        axis.setRange(start, end)
+
+        eps = step * 1e-3
+        v = start
+        while v <= end + eps:
+            axis.append(format_pace_minutes(v), v)
+            v += step
+
+        if reverse:
+            axis.setReverse(True)
         return axis
 
     # ------------------------------------------------------------------ #

@@ -85,14 +85,21 @@ class PaceChart(BaseChart):
         self.chart.addSeries(series)
 
         axis_x = self._create_datetime_axis(period_dates, self.tr("Date"))
-        axis_y = QValueAxis()
-        axis_y.setTitleText(y_label)
-        axis_y.setLabelFormat("%.2f")
         valid = [d for d in data if d > 0]
-        if valid:
+        if metric == 'pace' and valid:
             lo, hi = min(valid), max(valid)
-            margin = (hi - lo) * 0.1
-            axis_y.setRange(max(0, lo - margin), hi + margin)
+            margin = max((hi - lo) * 0.1, 0.05)
+            axis_y = self._create_pace_axis(
+                y_label, max(0.0, lo - margin), hi + margin,
+            )
+        else:
+            axis_y = QValueAxis()
+            axis_y.setTitleText(y_label)
+            axis_y.setLabelFormat("%.2f")
+            if valid:
+                lo, hi = min(valid), max(valid)
+                margin = (hi - lo) * 0.1
+                axis_y.setRange(max(0, lo - margin), hi + margin)
 
         self.chart.addAxis(axis_x, Qt.AlignBottom)
         self.chart.addAxis(axis_y, Qt.AlignLeft)
