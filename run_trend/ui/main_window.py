@@ -4,10 +4,10 @@ Main application window.
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QToolBar, QPushButton, QLabel, QComboBox, QDateEdit,
-    QStatusBar, QTabWidget, QMessageBox, QProgressDialog, QSizePolicy
+    QStatusBar, QStyle, QTabWidget, QMessageBox, QProgressDialog, QSizePolicy
 )
 from PySide6.QtCore import Qt, QDate, QThread, QTimer, Signal
-from PySide6.QtGui import QAction
+from PySide6.QtGui import QAction, QIcon
 from datetime import datetime
 from typing import Optional
 
@@ -193,15 +193,35 @@ class MainWindow(QMainWindow):
         toolbar = QToolBar(self.tr("Main Toolbar"))
         self.addToolBar(toolbar)
 
+        style = self.style()
+
         # Settings button (left)
         settings_action = QAction(self.tr("Settings"), self)
+        settings_action.setIcon(QIcon.fromTheme(
+            "preferences-system",
+            style.standardIcon(QStyle.SP_FileDialogDetailedView),
+        ))
         settings_action.triggered.connect(self._show_settings)
         toolbar.addAction(settings_action)
 
-        # Sync button (manual trigger; spec §13.1)
-        sync_action = QAction(self.tr("Sync"), self)
-        sync_action.triggered.connect(self._sync_activities)
-        toolbar.addAction(sync_action)
+        # Connect button (visible only while not authenticated; spec §13.1)
+        self.connect_action = QAction(self.tr("Connect to Strava"), self)
+        self.connect_action.setIcon(QIcon.fromTheme(
+            "network-connect",
+            style.standardIcon(QStyle.SP_DriveNetIcon),
+        ))
+        self.connect_action.triggered.connect(self._authenticate_strava)
+        toolbar.addAction(self.connect_action)
+
+        # Sync button (manual trigger; spec §13.1).
+        # Disabled while a manual sync is in flight to prevent double trigger.
+        self.sync_action = QAction(self.tr("Sync"), self)
+        self.sync_action.setIcon(QIcon.fromTheme(
+            "view-refresh",
+            style.standardIcon(QStyle.SP_BrowserReload),
+        ))
+        self.sync_action.triggered.connect(self._sync_activities)
+        toolbar.addAction(self.sync_action)
 
         toolbar.addSeparator()
 
@@ -299,6 +319,15 @@ class MainWindow(QMainWindow):
                 self.tr("Last sync: {}").format(self._format_relative_time(last_sync))
             )
 
+    def _update_toolbar_state(self):
+        """Show/hide the Connect button based on current auth state (spec §13.1)."""
+        if not hasattr(self, 'connect_action'):
+            return  # Toolbar not yet built
+        authenticated = (
+            getattr(self, 'auth', None) is not None and self.auth.is_authenticated()
+        )
+        self.connect_action.setVisible(not authenticated)
+
     def _format_relative_time(self, iso_str: str) -> str:
         """Return a short relative time string for an ISO timestamp."""
         try:
@@ -348,6 +377,7 @@ class MainWindow(QMainWindow):
             QTimer.singleShot(100, self._show_settings)
 
         self._update_persistent_status()
+        self._update_toolbar_state()
 
     def _restore_ui_settings(self):
         """Restore UI settings from previous session."""
@@ -402,6 +432,8 @@ class MainWindow(QMainWindow):
                 self.client = None
                 self.sync_manager = None
                 self.statusbar.showMessage(self.tr("Disconnected from Strava"))
+                self._update_persistent_status()
+                self._update_toolbar_state()
             return
 
         # Start OAuth flow
@@ -437,6 +469,7 @@ class MainWindow(QMainWindow):
 
     def _on_auth_finished(self, success: bool):
         self._update_persistent_status()
+        self._update_toolbar_state()
         if success:
             self._setup_strava_client()
             self.statusbar.showMessage(self.tr("Successfully connected to Strava!"))
@@ -470,6 +503,7 @@ class MainWindow(QMainWindow):
         # Refresh persistent status — the dialog may have revoked auth or
         # cleared sync settings.
         self._update_persistent_status()
+        self._update_toolbar_state()
 
     def _show_manual(self):
         """Show manual/help dialog."""
@@ -512,6 +546,8 @@ class MainWindow(QMainWindow):
 
     def _run_sync(self, sync_type, start_date=None):
         """Run sync in background thread."""
+        self.sync_action.setEnabled(False)
+
         # Create progress dialog
         self.progress_dialog = QProgressDialog(self.tr("Syncing activities..."), self.tr("Cancel"), 0, 100, self)
         self.progress_dialog.setWindowModality(Qt.WindowModal)
@@ -543,6 +579,7 @@ class MainWindow(QMainWindow):
     def _on_sync_finished(self, stats):
         """Handle sync completion."""
         self.progress_dialog.close()
+        self.sync_action.setEnabled(True)
 
         message = self.tr("Sync completed:\n")
         message += self.tr("Fetched: {}\n").format(stats['fetched'])

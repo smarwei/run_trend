@@ -206,6 +206,16 @@
       <translation type="finished">Settings</translation>
     </message>
     <message>
+      <location filename="../ui/main_window.py" line="172" />
+      <source>Connect to Strava</source>
+      <translation type="finished">Connect to Strava</translation>
+    </message>
+    <message>
+      <location filename="../ui/main_window.py" line="174" />
+      <source>Sync</source>
+      <translation type="finished">Sync</translation>
+    </message>
+    <message>
       <location filename="../ui/main_window.py" line="177" />
       <source>Start Date:</source>
       <translation type="finished">Start Date:</translation>
