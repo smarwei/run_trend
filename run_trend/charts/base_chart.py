@@ -2,11 +2,13 @@
 Base chart widget with shared functionality for all chart classes.
 """
 import math
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
+from PySide6.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QStackedWidget, QLabel, QPushButton,
+)
 from PySide6.QtCharts import (
     QChart, QChartView, QCategoryAxis, QDateTimeAxis, QValueAxis,
 )
-from PySide6.QtCore import Qt, QDateTime
+from PySide6.QtCore import Qt, QDateTime, QCoreApplication, Signal
 from PySide6.QtGui import QPainter, QBrush, QColor
 from typing import Any, Dict, List, Optional
 
@@ -29,6 +31,11 @@ def format_pace_minutes(value: float) -> str:
 class BaseChart(QWidget):
     """Base class for all chart widgets. Provides shared helper methods."""
 
+    # Emitted when the user clicks the empty-state "Connect" button.
+    # MainWindow connects this to the OAuth flow so users can authorize
+    # without leaving the chart they were looking at.
+    connect_requested = Signal()
+
     def _setup_chart_view(self, title: str, help_tooltip: Optional[str] = None) -> None:
         """Create self.chart and self.chart_view. Call from subclass _setup_ui().
 
@@ -50,14 +57,77 @@ class BaseChart(QWidget):
         self.chart_view = QChartView(self.chart)
         self.chart_view.setRenderHint(QPainter.Antialiasing)
 
-        layout.addWidget(self.chart_view)
+        layout.addWidget(self._wrap_chart_view_with_empty_state(self.chart_view))
+
+    # ------------------------------------------------------------------ #
+    # Empty-state overlay                                                  #
+    # ------------------------------------------------------------------ #
+
+    def _wrap_chart_view_with_empty_state(self, chart_view: QChartView) -> QStackedWidget:
+        """Wrap a QChartView in a QStackedWidget that can swap to an empty-state page.
+
+        Returns the stack (page 0 = chart_view, page 1 = empty state) — add the
+        return value to your subclass layout instead of `chart_view` directly.
+
+        The empty-state page contains a centred message label and an optional
+        "Connect to Strava" button that emits self.connect_requested when clicked.
+        """
+        stack = QStackedWidget()
+        stack.addWidget(chart_view)
+
+        empty_widget = QWidget()
+        el = QVBoxLayout(empty_widget)
+        el.addStretch()
+
+        self._empty_label = QLabel("")
+        self._empty_label.setAlignment(Qt.AlignCenter)
+        self._empty_label.setWordWrap(True)
+        self._empty_label.setStyleSheet(
+            "color: gray; font-size: 13px; padding: 20px;"
+        )
+        el.addWidget(self._empty_label)
+
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()
+        self._connect_button = QPushButton(
+            QCoreApplication.translate("BaseChart", "Connect to Strava")
+        )
+        self._connect_button.clicked.connect(self.connect_requested.emit)
+        self._connect_button.setVisible(False)
+        btn_row.addWidget(self._connect_button)
+        btn_row.addStretch()
+        el.addLayout(btn_row)
+        el.addStretch()
+
+        stack.addWidget(empty_widget)
+        self._chart_stack = stack
+        return stack
+
+    def show_empty_state(self, message: str, show_connect_button: bool = False) -> None:
+        """Replace the chart with a centred message (and optional Connect button)."""
+        if not hasattr(self, "_chart_stack"):
+            return  # No empty-state overlay installed (custom layout opted out)
+        self._empty_label.setText(message)
+        self._connect_button.setVisible(show_connect_button)
+        self._chart_stack.setCurrentIndex(1)
+
+    def _hide_empty_state(self) -> None:
+        """Show the chart again, hiding any empty-state overlay."""
+        if hasattr(self, "_chart_stack"):
+            self._chart_stack.setCurrentIndex(0)
 
     # ------------------------------------------------------------------ #
     # Chart lifecycle helpers                                              #
     # ------------------------------------------------------------------ #
 
     def _clear_chart(self) -> None:
-        """Remove all series and axes from the chart."""
+        """Remove all series and axes from the chart, and hide the empty-state overlay.
+
+        Charts call this at the top of update_chart, so the chart_view is
+        always restored before plotting fresh data; subclasses that determine
+        the data is empty can call show_empty_state() afterwards.
+        """
+        self._hide_empty_state()
         self.chart.removeAllSeries()
         for axis in self.chart.axes():
             self.chart.removeAxis(axis)

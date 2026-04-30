@@ -152,6 +152,10 @@ class MainWindow(QMainWindow):
         self.runs_table = RunsTable()
         self.pace_distance_chart = PaceDistanceChart()
 
+        # Wire empty-state "Connect" buttons to the OAuth flow.
+        for chart in self._all_charts():
+            chart.connect_requested.connect(self._authenticate_strava)
+
         # Tab 1: Overview - Total Load Metrics
         overview_tab = QTabWidget()
         overview_tab.addTab(self.distance_chart, self.tr("Distance"))
@@ -187,6 +191,9 @@ class MainWindow(QMainWindow):
         self.tab_widget.addTab(runs_tab, self.tr("Runs"))
 
         main_layout.addWidget(self.tab_widget, stretch=3)
+
+        # Charts open empty until data loads (or auth completes).
+        self._show_charts_empty_state()
 
     def _setup_toolbar(self):
         """Set up the toolbar."""
@@ -634,6 +641,7 @@ class MainWindow(QMainWindow):
     def _refresh_data(self):
         """Refresh aggregations and charts."""
         if not self.activities:
+            self._show_charts_empty_state()
             return
 
         self.aggregates = DataManager.build_aggregates(self.activities, self.current_period)
@@ -643,6 +651,37 @@ class MainWindow(QMainWindow):
 
         # Update charts
         self._update_charts()
+
+    def _all_charts(self):
+        """Return every chart widget so we can broadcast empty-state changes."""
+        return [
+            self.distance_chart, self.pace_chart, self.frequency_chart,
+            self.score_chart, self.projection_chart, self.endurance_chart,
+            self.structure_overview_chart, self.heartrate_chart,
+            self.duration_chart, self.training_load_chart,
+            self.pace_distance_chart,
+        ]
+
+    def _show_charts_empty_state(self):
+        """Display a guidance message on every chart when there are no runs."""
+        connected = (
+            getattr(self, 'auth', None) is not None and self.auth.is_authenticated()
+        )
+        if not connected:
+            message = self.tr(
+                "No runs yet.\n"
+                "Connect your Strava account to import your activities."
+            )
+            show_button = True
+        else:
+            message = self.tr(
+                "No runs in the selected date range.\n"
+                "Pick an earlier start date or sync to fetch new activities."
+            )
+            show_button = False
+
+        for chart in self._all_charts():
+            chart.show_empty_state(message, show_connect_button=show_button)
 
     def _update_summary(self):
         """Update summary panel with current data."""

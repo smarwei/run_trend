@@ -514,6 +514,28 @@ Bitte versuchen Sie es erneut oder überprüfen Sie Ihre API-Zugangsdaten in den
       <source>{} days ago</source>
       <translation type="finished">vor {} Tagen</translation>
     </message>
+    <message>
+      <location filename="../ui/main_window.py" line="671" />
+      <source>No runs yet.
+Connect your Strava account to import your activities.</source>
+      <translation type="finished">Noch keine Läufe.
+Verbinde dein Strava-Konto, um Aktivitäten zu importieren.</translation>
+    </message>
+    <message>
+      <location filename="../ui/main_window.py" line="677" />
+      <source>No runs in the selected date range.
+Pick an earlier start date or sync to fetch new activities.</source>
+      <translation type="finished">Keine Läufe im gewählten Zeitraum.
+Wähle ein früheres Startdatum oder synchronisiere, um neue Aktivitäten zu laden.</translation>
+    </message>
+  </context>
+  <context>
+    <name>BaseChart</name>
+    <message>
+      <location filename="../charts/base_chart.py" line="93" />
+      <source>Connect to Strava</source>
+      <translation type="finished">Mit Strava verbinden</translation>
+    </message>
   </context>
   <context>
     <name>ManualDialog</name>

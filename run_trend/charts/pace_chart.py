@@ -35,7 +35,7 @@ class PaceChart(BaseChart):
 
         self.chart_view = QChartView(self.chart)
         self.chart_view.setRenderHint(QPainter.Antialiasing)
-        layout.addWidget(self.chart_view)
+        layout.addWidget(self._wrap_chart_view_with_empty_state(self.chart_view))
 
     def update_chart(
         self,

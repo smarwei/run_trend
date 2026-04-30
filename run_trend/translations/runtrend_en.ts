@@ -514,6 +514,28 @@ Please try again or check your API credentials in Settings.</translation>
       <source>{} days ago</source>
       <translation type="finished">{} days ago</translation>
     </message>
+    <message>
+      <location filename="../ui/main_window.py" line="671" />
+      <source>No runs yet.
+Connect your Strava account to import your activities.</source>
+      <translation type="finished">No runs yet.
+Connect your Strava account to import your activities.</translation>
+    </message>
+    <message>
+      <location filename="../ui/main_window.py" line="677" />
+      <source>No runs in the selected date range.
+Pick an earlier start date or sync to fetch new activities.</source>
+      <translation type="finished">No runs in the selected date range.
+Pick an earlier start date or sync to fetch new activities.</translation>
+    </message>
+  </context>
+  <context>
+    <name>BaseChart</name>
+    <message>
+      <location filename="../charts/base_chart.py" line="93" />
+      <source>Connect to Strava</source>
+      <translation type="finished">Connect to Strava</translation>
+    </message>
   </context>
   <context>
     <name>ManualDialog</name>
