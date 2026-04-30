@@ -596,6 +596,97 @@ Wähle ein früheres Startdatum oder synchronisiere, um neue Aktivitäten zu lad
       <source>Manage Goals…</source>
       <translation type="finished">Ziele verwalten…</translation>
     </message>
+    <message>
+      <source>HR Zones</source>
+      <translation type="finished">HF-Zonen</translation>
+    </message>
+    <message>
+      <source>Fetching heart-rate zones (0/{})…</source>
+      <translation type="finished">Lade Herzfrequenz-Zonen (0/{})…</translation>
+    </message>
+    <message>
+      <source>Fetching heart-rate zones ({}/{})…</source>
+      <translation type="finished">Lade Herzfrequenz-Zonen ({}/{})…</translation>
+    </message>
+    <message>
+      <source>Heart-rate zones updated</source>
+      <translation type="finished">Herzfrequenz-Zonen aktualisiert</translation>
+    </message>
+  </context>
+  <context>
+    <name>HrZoneChart</name>
+    <message>
+      <source>80/20-Polarization indicator:
+
+• Low (Z1+Z2)  — easy aerobic, target ~80%
+• Middle (Z3)  — tempo, kept small in polarized training
+• High (Z4+Z5) — threshold/vo2, target ~20%
+
+Computed from the visible dataset. Needs HR-Max configured.</source>
+      <translation type="finished">80/20-Polarisations-Indikator:
+
+• Low (Z1+Z2)  — leichtes Ausdauertraining, Ziel ~80%
+• Middle (Z3)  — Tempo, im polarisierten Training klein gehalten
+• High (Z4+Z5) — Schwelle/VO2max, Ziel ~20%
+
+Aus den sichtbaren Daten berechnet. Benötigt konfigurierte HF-Max.</translation>
+    </message>
+    <message>
+      <source>Time in Zone (per period)</source>
+      <translation type="finished">Zeit in Zone (pro Periode)</translation>
+    </message>
+    <message>
+      <source>Time in Zone (recent runs)</source>
+      <translation type="finished">Zeit in Zone (letzte Läufe)</translation>
+    </message>
+    <message>
+      <source>Aggregated</source>
+      <translation type="finished">Aggregiert</translation>
+    </message>
+    <message>
+      <source>Per Run</source>
+      <translation type="finished">Pro Lauf</translation>
+    </message>
+    <message>
+      <source>Configure your maximum heart rate in Settings to see zones.</source>
+      <translation type="finished">HF-Max in den Einstellungen konfigurieren, um Zonen zu sehen.</translation>
+    </message>
+    <message>
+      <source>No activities with heart-rate data yet.</source>
+      <translation type="finished">Noch keine Aktivitäten mit Herzfrequenz-Daten.</translation>
+    </message>
+    <message>
+      <source>Heart-rate streams haven't been fetched yet for these runs.</source>
+      <translation type="finished">Herzfrequenz-Streams für diese Läufe noch nicht geladen.</translation>
+    </message>
+    <message>
+      <source>80/20: no zone time recorded</source>
+      <translation type="finished">80/20: keine Zonenzeit erfasst</translation>
+    </message>
+    <message>
+      <source>80/20: {low:.0f}% low / {mid:.0f}% middle / {high:.0f}% high — {verdict}</source>
+      <translation type="finished">80/20: {low:.0f}% low / {mid:.0f}% middle / {high:.0f}% high — {verdict}</translation>
+    </message>
+    <message>
+      <source>Polarized ✓</source>
+      <translation type="finished">Polarisiert ✓</translation>
+    </message>
+    <message>
+      <source>Not polarized</source>
+      <translation type="finished">Nicht polarisiert</translation>
+    </message>
+    <message>
+      <source>Period</source>
+      <translation type="finished">Periode</translation>
+    </message>
+    <message>
+      <source>Run</source>
+      <translation type="finished">Lauf</translation>
+    </message>
+    <message>
+      <source>Minutes</source>
+      <translation type="finished">Minuten</translation>
+    </message>
   </context>
   <context>
     <name>RaceManagerDialog</name>

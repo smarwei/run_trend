@@ -11,6 +11,9 @@ from PySide6.QtCore import Qt, QDate, QThread, QTimer, Signal
 from PySide6.QtGui import QAction, QIcon
 from datetime import datetime
 from typing import Optional
+import logging
+
+logger = logging.getLogger(__name__)
 
 from ..storage.database import Database
 from ..strava.simple_auth import SimpleStravaAuth
@@ -39,6 +42,8 @@ from ..charts.projection_chart import ProjectionChart
 from ..charts.endurance_chart import EnduranceChart
 from ..charts.structure_overview_chart import StructureOverviewChart
 from ..charts.heartrate_chart import HeartRateChart
+from ..charts.hr_zone_chart import HrZoneChart
+from ..analytics.hr_zone_service import HrZoneService
 from ..charts.duration_chart import DurationChart
 from ..charts.training_load_chart import TrainingLoadChart
 from .runs_table import RunsTable
@@ -78,6 +83,59 @@ class SyncThread(QThread):
             self.finished.emit(stats)
         finally:
             db.close()
+
+
+class HrZoneFetchThread(QThread):
+    """Fetch HR-streams for a list of activities and cache the resulting zones.
+
+    Runs in its own thread so the UI stays responsive during the (potentially
+    many) Strava API calls. Each iteration emits ``progress(current, total)``;
+    callers refresh the chart on ``finished_signal``.
+    """
+    progress = Signal(int, int)
+    finished_signal = Signal()
+
+    def __init__(self, db_path, client, settings_snapshot, activity_ids):
+        super().__init__()
+        self._db_path = db_path
+        self._client = client
+        self._settings_snapshot = dict(settings_snapshot)
+        self._activity_ids = list(activity_ids)
+        self._cancel = False
+
+    def cancel(self):
+        self._cancel = True
+
+    def run(self):
+        from ..storage.database import Database
+        from ..analytics.hr_zone_service import HrZoneService
+
+        class _DictSettings:
+            def __init__(self, d):
+                self._d = d
+
+            def get(self, key, default=None):
+                return self._d.get(key, default)
+
+        db = Database(self._db_path)
+        try:
+            svc = HrZoneService(
+                db,
+                _DictSettings(self._settings_snapshot),
+                lambda aid: self._client.get_activity_streams(aid),
+            )
+            total = len(self._activity_ids)
+            for i, aid in enumerate(self._activity_ids):
+                if self._cancel:
+                    break
+                try:
+                    svc.get_zone_seconds(aid)
+                except Exception:  # noqa: BLE001 — never let one bad call kill the loop
+                    logger.exception("HR-zone fetch failed for activity %s", aid)
+                self.progress.emit(i + 1, total)
+        finally:
+            db.close()
+        self.finished_signal.emit()
 
 
 class _StravaAuthThread(QThread):
@@ -159,6 +217,7 @@ class MainWindow(QMainWindow):
         self.endurance_chart = EnduranceChart()
         self.structure_overview_chart = StructureOverviewChart()
         self.heartrate_chart = HeartRateChart()
+        self.hr_zone_chart = HrZoneChart()
         self.duration_chart = DurationChart()
         self.training_load_chart = TrainingLoadChart()
         self.runs_table = RunsTable()
@@ -180,6 +239,14 @@ class MainWindow(QMainWindow):
 
         # Tab 2: Heart Rate Analysis
         self.tab_widget.addTab(self.heartrate_chart, self.tr("Heart Rate"))
+
+        # Tab 2b: HR Zones — lazy-fetches streams the first time the user opens it.
+        self._hr_zone_tab_index = self.tab_widget.addTab(
+            self.hr_zone_chart, self.tr("HR Zones")
+        )
+        self.tab_widget.currentChanged.connect(self._on_tab_changed)
+        self.hr_zone_fetch_thread: Optional[HrZoneFetchThread] = None
+        self._hr_zone_autofetch_done = False
 
         # Tab 3: Endurance - Training Structure Metrics
         self.tab_widget.addTab(self.endurance_chart, self.tr("Endurance"))
@@ -869,7 +936,7 @@ class MainWindow(QMainWindow):
             self.distance_chart, self.pace_chart, self.frequency_chart,
             self.score_chart, self.projection_chart, self.endurance_chart,
             self.structure_overview_chart, self.heartrate_chart,
-            self.duration_chart, self.training_load_chart,
+            self.hr_zone_chart, self.duration_chart, self.training_load_chart,
             self.pace_distance_chart,
         ]
 
@@ -1044,6 +1111,101 @@ class MainWindow(QMainWindow):
         self.projection_chart.update_chart(self.aggregates, self.current_period)
         self.runs_table.update_table(self.activities)
         self.pace_distance_chart.update_chart(self.activities)
+        self._update_hr_zone_chart()
+
+    def _update_hr_zone_chart(self):
+        """Render whatever zone data is already cached for the visible runs.
+
+        The heavy work — fetching streams from Strava — runs lazily in
+        ``_maybe_start_hr_zone_fetch`` triggered by tab activation. This
+        method is a pure DB-and-render pass so it's cheap to call from
+        ``_update_charts``.
+        """
+        hr_max_configured = int(self.settings.get('manual_hrmax', 0) or 0) > 0
+        hr_activities = [a for a in self.activities if a.get('has_heartrate')]
+        any_hr_activities = bool(hr_activities)
+
+        per_activity = []
+        for a in hr_activities:
+            cached = self.db.get_activity_hr_zones(a['strava_id'])
+            if not cached:
+                continue
+            try:
+                start = datetime.fromisoformat(a['start_date'].replace('Z', '+00:00'))
+            except (ValueError, AttributeError, KeyError):
+                continue
+            per_activity.append({
+                'date': start.replace(tzinfo=None),
+                'activity_id': a['strava_id'],
+                'zone_seconds': [
+                    int(cached['z1_seconds']), int(cached['z2_seconds']),
+                    int(cached['z3_seconds']), int(cached['z4_seconds']),
+                    int(cached['z5_seconds']),
+                ],
+                'name': a.get('name', ''),
+            })
+
+        self.hr_zone_chart.update_chart(
+            per_activity,
+            period_type=self.current_period,
+            hr_max_configured=hr_max_configured,
+            any_hr_activities=any_hr_activities,
+        )
+
+    def _on_tab_changed(self, index):
+        """Trigger a lazy stream-fetch the first time the user opens HR Zones."""
+        if index != getattr(self, '_hr_zone_tab_index', -1):
+            return
+        if self._hr_zone_autofetch_done:
+            return
+        self._maybe_start_hr_zone_fetch()
+
+    def _maybe_start_hr_zone_fetch(self):
+        """Spawn a worker that fills the HR-zone cache for visible activities."""
+        if self.hr_zone_fetch_thread and self.hr_zone_fetch_thread.isRunning():
+            return
+        if int(self.settings.get('manual_hrmax', 0) or 0) <= 0:
+            return  # nothing to compute without HR-Max
+        if not self.client or not self.activities:
+            return
+
+        targets = []
+        for a in self.activities:
+            if not a.get('has_heartrate'):
+                continue
+            if self.db.get_activity_hr_zones(a['strava_id']) is None:
+                targets.append(a['strava_id'])
+        if not targets:
+            self._hr_zone_autofetch_done = True
+            return
+
+        snapshot = {
+            'manual_hrmax': self.settings.get('manual_hrmax', 0),
+            'hr_rest': self.settings.get('hr_rest', 0),
+            'hr_zone_scheme': self.settings.get('hr_zone_scheme', 'classic'),
+        }
+        self.hr_zone_fetch_thread = HrZoneFetchThread(
+            self.db.db_path, self.client, snapshot, targets,
+        )
+        self.hr_zone_fetch_thread.progress.connect(self._on_hr_zone_progress)
+        self.hr_zone_fetch_thread.finished_signal.connect(self._on_hr_zone_fetch_done)
+        self.hr_zone_fetch_thread.finished.connect(
+            self.hr_zone_fetch_thread.deleteLater
+        )
+        self.statusbar.showMessage(
+            self.tr("Fetching heart-rate zones (0/{})…").format(len(targets))
+        )
+        self.hr_zone_fetch_thread.start()
+
+    def _on_hr_zone_progress(self, current, total):
+        self.statusbar.showMessage(
+            self.tr("Fetching heart-rate zones ({}/{})…").format(current, total)
+        )
+
+    def _on_hr_zone_fetch_done(self):
+        self._hr_zone_autofetch_done = True
+        self.statusbar.showMessage(self.tr("Heart-rate zones updated"), 4000)
+        self._update_hr_zone_chart()
 
     def _on_start_date_changed(self):
         """Handle start date change."""

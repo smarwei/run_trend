@@ -36,12 +36,12 @@ Neuer Tab oder Karte:
 
 ## Acceptance
 
-- [ ] HR-Max konfigurierbar
-- [ ] Streams werden nachgeladen und gecached (kein Re-Fetch beim erneuten Öffnen)
-- [ ] Pro-Lauf und aggregierte Ansicht
-- [ ] 80/20-Indikator
-- [ ] Funktioniert auch ohne HR-Daten (Empty-State)
-- [ ] Übersetzt (DE/EN)
+- [x] HR-Max konfigurierbar
+- [x] Streams werden nachgeladen und gecached (kein Re-Fetch beim erneuten Öffnen)
+- [x] Pro-Lauf und aggregierte Ansicht
+- [x] 80/20-Indikator
+- [x] Funktioniert auch ohne HR-Daten (Empty-State)
+- [x] Übersetzt (DE/EN)
 
 ## Dateien
 
@@ -53,11 +53,15 @@ Neuer Tab oder Karte:
 
 ## Status / Fortschritt
 
-**Teilweise umgesetzt — Analytics-Kern fertig, Strava-Streams + DB-Cache + UI
-noch offen.**
+**Vollständig umgesetzt — Analytics, Streams, Cache, Settings-UI, Service,
+Chart und MainWindow-Integration alle gemerged.**
 
-Das Ticket wird in Slices gemerged. Erste Iteration: pure Analytics-Funktionen
-ohne I/O.
+Das Ticket wurde in 5 Slices gemerged. Reihenfolge:
+1. Analytics-Kern (pure Funktionen)
+2. Strava-Streams + DB-Cache
+3. Settings-UI (HR-Rest, Zonenschema, Karvonen-Validation)
+4. Lazy-Fetcher-Service (HrZoneService)
+5. Chart + Tab + Lazy-Fetch-Worker
 
 - ✅ `run_trend/analytics/hr_zones.py`: 5-Zonen-Klassik (`% × HR-Max`) +
   Karvonen (`pct × (HR-Max − HR-Rest) + HR-Rest`), `compute_zone_bounds`,
@@ -117,8 +121,36 @@ ohne I/O.
   bei HR-Max, Cache-Mismatch bei HR-Rest, Fetch-None, fehlender
   HR-Stream, fehlender Time-Stream, leere Streams) — Fakes für
   Database/Settings, kein Qt/HTTP nötig.
-- ⏳ Chart + Aggregations-Ansicht + 80/20-Indikator + Tab-Integration in
-  MainWindow + Lazy-Fetch-Trigger bei Tab-Aktivierung — Folgeiteration
+- ✅ `run_trend/charts/hr_zone_chart.py`: `HrZoneChart` mit innerem
+  QTabWidget („Aggregated" + „Per Run"), QStackedBarSeries pro Zone,
+  Z1..Z5-Farbskala (kalt → warm), 80/20-Header-Label
+  („80/20: NN% low / NN% middle / NN% high — Polarized ✓ / Not polarized";
+  Polarized-Heuristik: low ≥ 75% UND high ≥ 10%). Aggregation per ISO-Woche
+  oder Kalendermonat (`period_type` per `current_period`). Per-Run-Ansicht
+  zeigt die letzten 20 Aktivitäten als datierten Stacked-Bar.
+  Empty-States: HF-Max-fehlt → Settings-Hint, keine HR-Aktivitäten →
+  No-Data-Hint, keine Cache-Hits → Streams-noch-nicht-geladen-Hint.
+- ✅ `run_trend/ui/main_window.py`: HR-Zonen-Tab nach „Heart Rate"
+  eingehängt, `_update_hr_zone_chart` baut DB-only-Render (Cache-Hit)
+  bei jedem `_update_charts`. Neuer `HrZoneFetchThread` (Pattern wie
+  `SyncThread`: eigenständige DB-Connection, Service injiziert
+  `client.get_activity_streams`) wird beim ersten Tab-Öffnen mit
+  `_hr_zone_autofetch_done`-Gate gestartet, iteriert über alle
+  HR-Aktivitäten ohne Cache-Eintrag, meldet Fortschritt im Statusbar
+  („Fetching heart-rate zones (i/N)…"), Chart wird auf
+  `finished_signal` neu gerendert.
+- ✅ Cache-Invalidate-Hook im Settings-Save erweitert: nach
+  `Database.invalidate_activity_hr_zones(...)` wird
+  `_hr_zone_autofetch_done` zurückgesetzt — nächste Tab-Aktivierung
+  triggert einen frischen Fetch.
+- ✅ `tests/test_hr_zone_chart.py`: 9 Tests (3 Empty-State-Pfade,
+  3 Indikator-Varianten inkl. Polarized/Not-polarized/Zero-total,
+  ISO-Woche- und Monats-Bucketing, Per-Run-Limit). Offscreen-Qt,
+  keine Strava/DB-Mocks nötig.
+- ✅ Übersetzungen: 19 neue Strings in `HrZoneChart`-Kontext
+  (Tooltip, Tab- und Achs-Labels, Empty-States, Indikator-Format,
+  Polarisations-Verdikte) sowie 4 in `MainWindow` („HR Zones", die
+  drei Statusbar-Strings). `.qm`: 375 DE / 370 EN regeneriert.
 
 ### Annahmen Analytics-Kern
 

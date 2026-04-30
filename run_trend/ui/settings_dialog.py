@@ -385,6 +385,10 @@ class SettingsDialog(QDialog):
                 hr_rest=hr_rest if hr_rest > 0 else None,
                 scheme=hr_zone_scheme,
             )
+            # Also re-arm the auto-fetch trigger so reopening the HR-Zone
+            # tab picks up the now-stale rows.
+            if hasattr(self.main_window, '_hr_zone_autofetch_done'):
+                self.main_window._hr_zone_autofetch_done = False
 
         # Save activity filters
         self.settings.set('include_treadmill', include_treadmill)
