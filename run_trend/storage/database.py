@@ -88,6 +88,21 @@ class Database:
             )
         ''')
 
+        # Goals (race targets the user is training for: distance + time + date).
+        # achieved is a 0/1 flag the user can toggle once the goal date passes,
+        # so completed goals stay visible without re-entering them.
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS goals (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                target_distance_km REAL NOT NULL,
+                target_time_seconds INTEGER NOT NULL,
+                target_date TEXT NOT NULL,
+                achieved INTEGER NOT NULL DEFAULT 0,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            )
+        ''')
+
         # Create indices for performance
         cursor.execute('''
             CREATE INDEX IF NOT EXISTS idx_activities_start_date
@@ -102,6 +117,11 @@ class Database:
         cursor.execute('''
             CREATE INDEX IF NOT EXISTS idx_race_markers_date
             ON race_markers(date)
+        ''')
+
+        cursor.execute('''
+            CREATE INDEX IF NOT EXISTS idx_goals_target_date
+            ON goals(target_date)
         ''')
 
         # Migrate older databases that predate the trainer/manual columns
@@ -455,6 +475,92 @@ class Database:
         """Delete a race marker by id. Returns True if a row was removed."""
         cursor = self.conn.cursor()
         cursor.execute('DELETE FROM race_markers WHERE id = ?', (marker_id,))
+        self.conn.commit()
+        return cursor.rowcount > 0
+
+    # ------------------------------------------------------------------ #
+    # Goals                                                                #
+    # ------------------------------------------------------------------ #
+
+    def add_goal(
+        self,
+        target_distance_km: float,
+        target_time_seconds: int,
+        target_date: str,
+    ) -> int:
+        """Insert a goal and return its new row id.
+
+        Args:
+            target_distance_km: Race distance the goal is set for.
+            target_time_seconds: Target finish time in seconds.
+            target_date: ISO date string of the target race day.
+        """
+        cursor = self.conn.cursor()
+        now = datetime.utcnow().isoformat()
+        cursor.execute('''
+            INSERT INTO goals (
+                target_distance_km, target_time_seconds, target_date,
+                achieved, created_at, updated_at
+            ) VALUES (?, ?, ?, 0, ?, ?)
+        ''', (target_distance_km, target_time_seconds, target_date, now, now))
+        self.conn.commit()
+        return cursor.lastrowid
+
+    def get_goals(self, include_achieved: bool = True) -> List[Dict[str, Any]]:
+        """Return all goals ordered by target_date ascending.
+
+        Args:
+            include_achieved: When False, hides goals already marked achieved.
+        """
+        cursor = self.conn.cursor()
+        if include_achieved:
+            cursor.execute('SELECT * FROM goals ORDER BY target_date ASC')
+        else:
+            cursor.execute(
+                'SELECT * FROM goals WHERE achieved = 0 '
+                'ORDER BY target_date ASC'
+            )
+        return [dict(row) for row in cursor.fetchall()]
+
+    def update_goal(
+        self,
+        goal_id: int,
+        target_distance_km: Optional[float] = None,
+        target_time_seconds: Optional[int] = None,
+        target_date: Optional[str] = None,
+        achieved: Optional[bool] = None,
+    ) -> bool:
+        """Update fields on a goal. Only non-None args are written.
+
+        Returns True if a row was updated, False if no goal with that id exists.
+        """
+        fields: Dict[str, Any] = {
+            'target_distance_km': target_distance_km,
+            'target_time_seconds': target_time_seconds,
+            'target_date': target_date,
+        }
+        updates = {k: v for k, v in fields.items() if v is not None}
+        if achieved is not None:
+            updates['achieved'] = 1 if achieved else 0
+        if not updates:
+            return False
+
+        updates['updated_at'] = datetime.utcnow().isoformat()
+        set_clause = ', '.join(f'{k} = ?' for k in updates)
+        values = list(updates.values()) + [goal_id]
+
+        cursor = self.conn.cursor()
+        cursor.execute(
+            f'UPDATE goals SET {set_clause} WHERE id = ?',
+            values,
+        )
+        self.conn.commit()
+        return cursor.rowcount > 0
+
+    def delete_goal(self, goal_id: int) -> bool:
+        """Delete a goal by id. Returns True if a row was removed."""
+        cursor = self.conn.cursor()
+        cursor.execute('DELETE FROM goals WHERE id = ?', (goal_id,))
         self.conn.commit()
         return cursor.rowcount > 0
 

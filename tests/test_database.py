@@ -147,5 +147,105 @@ class TestRaceMarkers(unittest.TestCase):
         )
 
 
+class TestGoals(unittest.TestCase):
+    """Goals CRUD (Ticket 18 DB layer)."""
+
+    def setUp(self):
+        self.tmpfile = tempfile.NamedTemporaryFile(
+            suffix='.db', delete=False
+        )
+        self.tmpfile.close()
+        self.db = Database(db_path=self.tmpfile.name)
+
+    def tearDown(self):
+        self.db.close()
+        os.unlink(self.tmpfile.name)
+
+    def test_table_created_on_init(self):
+        cursor = self.db.conn.cursor()
+        cursor.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' "
+            "AND name='goals'"
+        )
+        self.assertIsNotNone(cursor.fetchone())
+
+    def test_init_is_idempotent(self):
+        self.db.close()
+        db2 = Database(db_path=self.tmpfile.name)
+        try:
+            self.assertEqual(db2.get_goals(), [])
+        finally:
+            db2.close()
+            self.db = Database(db_path=self.tmpfile.name)
+
+    def test_add_and_get_returns_inserted_goal(self):
+        new_id = self.db.add_goal(
+            target_distance_km=21.0975,
+            target_time_seconds=6600,  # 1:50:00
+            target_date='2026-09-13',
+        )
+        self.assertIsInstance(new_id, int)
+        goals = self.db.get_goals()
+        self.assertEqual(len(goals), 1)
+        g = goals[0]
+        self.assertEqual(g['id'], new_id)
+        self.assertAlmostEqual(g['target_distance_km'], 21.0975)
+        self.assertEqual(g['target_time_seconds'], 6600)
+        self.assertEqual(g['target_date'], '2026-09-13')
+        self.assertEqual(g['achieved'], 0)
+        self.assertIsNotNone(g['created_at'])
+        self.assertIsNotNone(g['updated_at'])
+
+    def test_get_returns_goals_ordered_by_target_date(self):
+        self.db.add_goal(10.0, 3000, '2026-09-13')
+        self.db.add_goal(5.0, 1300, '2026-05-01')
+        self.db.add_goal(42.195, 14400, '2026-12-06')
+        dates = [g['target_date'] for g in self.db.get_goals()]
+        self.assertEqual(dates, ['2026-05-01', '2026-09-13', '2026-12-06'])
+
+    def test_get_can_filter_achieved(self):
+        a = self.db.add_goal(10.0, 3000, '2026-05-01')
+        b = self.db.add_goal(21.0, 6300, '2026-09-13')
+        self.db.update_goal(a, achieved=True)
+        all_goals = self.db.get_goals()
+        active = self.db.get_goals(include_achieved=False)
+        self.assertEqual(len(all_goals), 2)
+        self.assertEqual(len(active), 1)
+        self.assertEqual(active[0]['id'], b)
+
+    def test_update_changes_only_provided_fields(self):
+        gid = self.db.add_goal(10.0, 3000, '2026-05-01')
+        original_created = self.db.get_goals()[0]['created_at']
+
+        self.assertTrue(self.db.update_goal(gid, target_time_seconds=2950))
+        g = self.db.get_goals()[0]
+        self.assertEqual(g['target_time_seconds'], 2950)
+        self.assertAlmostEqual(g['target_distance_km'], 10.0)
+        self.assertEqual(g['target_date'], '2026-05-01')
+        self.assertEqual(g['created_at'], original_created)
+
+    def test_update_achieved_flag(self):
+        gid = self.db.add_goal(10.0, 3000, '2026-05-01')
+        self.assertTrue(self.db.update_goal(gid, achieved=True))
+        self.assertEqual(self.db.get_goals()[0]['achieved'], 1)
+        self.assertTrue(self.db.update_goal(gid, achieved=False))
+        self.assertEqual(self.db.get_goals()[0]['achieved'], 0)
+
+    def test_update_unknown_id_returns_false(self):
+        self.assertFalse(self.db.update_goal(99999, target_distance_km=42.195))
+
+    def test_update_with_no_fields_returns_false(self):
+        gid = self.db.add_goal(10.0, 3000, '2026-05-01')
+        self.assertFalse(self.db.update_goal(gid))
+
+    def test_delete_removes_goal(self):
+        gid = self.db.add_goal(10.0, 3000, '2026-05-01')
+        self.assertTrue(self.db.delete_goal(gid))
+        self.assertEqual(self.db.get_goals(), [])
+
+    def test_delete_unknown_id_returns_false(self):
+        self.assertFalse(self.db.delete_goal(99999))
+
+
 if __name__ == '__main__':
     unittest.main()
