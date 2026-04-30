@@ -2,12 +2,16 @@
 Strava authentication with OAuth support.
 """
 from typing import Optional
+import logging
 import webbrowser
 import http.server
 import socketserver
 import urllib.parse
 import requests
+import secrets
 import time
+
+logger = logging.getLogger(__name__)
 
 
 class SimpleStravaAuth:
@@ -69,11 +73,11 @@ class SimpleStravaAuth:
             True if refresh successful
         """
         if not self._refresh_token:
-            print("No refresh token available")
+            logger.warning("No refresh token available")
             return False
 
         if not self._client_id or not self._client_secret:
-            print("No client credentials available for token refresh")
+            logger.warning("No client credentials available for token refresh")
             return False
 
         try:
@@ -101,14 +105,15 @@ class SimpleStravaAuth:
                         'expires_at': self._expires_at
                     })
 
-                print("Token refreshed successfully!")
+                logger.info("Token refreshed successfully")
                 return True
             else:
-                print(f"Token refresh failed: {response.status_code} - {response.text}")
+                logger.error("Token refresh failed: %s - %s",
+                             response.status_code, response.text)
                 return False
 
-        except Exception as e:
-            print(f"Error refreshing token: {e}")
+        except Exception:
+            logger.exception("Error refreshing token")
             return False
 
     def is_authenticated(self) -> bool:
@@ -129,9 +134,9 @@ class SimpleStravaAuth:
         """
         # Check if token is expired and refresh if needed
         if self._access_token and self._is_token_expired():
-            print("Access token expired, refreshing...")
+            logger.info("Access token expired, refreshing")
             if not self._refresh_access_token():
-                print("Failed to refresh token")
+                logger.error("Failed to refresh token")
                 return None
 
         return self._access_token
@@ -152,13 +157,17 @@ class SimpleStravaAuth:
         self._client_id = client_id
         self._client_secret = client_secret
 
+        # CSRF protection: random state bound to this authorization request
+        expected_state = secrets.token_urlsafe(16)
+
         # Build authorization URL
         auth_params = {
             'client_id': client_id,
             'redirect_uri': self.REDIRECT_URI,
             'response_type': 'code',
             'scope': 'activity:read_all',
-            'approval_prompt': 'force'
+            'approval_prompt': 'force',
+            'state': expected_state,
         }
 
         auth_url = f"{self.AUTHORIZE_URL}?{urllib.parse.urlencode(auth_params)}"
@@ -171,6 +180,16 @@ class SimpleStravaAuth:
                 # Parse callback URL
                 parsed = urllib.parse.urlparse(self.path)
                 params = urllib.parse.parse_qs(parsed.query)
+
+                # Validate state (CSRF protection)
+                returned_state = params.get('state', [None])[0]
+                if returned_state != expected_state:
+                    authorization_code['error'] = 'state_mismatch'
+                    self.send_response(400)
+                    self.send_header('Content-type', 'text/html')
+                    self.end_headers()
+                    self.wfile.write(b"<html><body><h1>State mismatch</h1></body></html>")
+                    return
 
                 if 'code' in params:
                     authorization_code['code'] = params['code'][0]
@@ -206,25 +225,26 @@ class SimpleStravaAuth:
                 pass
 
         # Open browser
-        print(f"Opening browser for Strava authorization...")
+        logger.info("Opening browser for Strava authorization")
         webbrowser.open(auth_url)
 
         # Start server and wait for callback
         try:
             with socketserver.TCPServer(("", self.REDIRECT_PORT), CallbackHandler) as httpd:
-                print("Waiting for authorization...")
+                logger.info("Waiting for authorization callback on port %d",
+                            self.REDIRECT_PORT)
                 httpd.handle_request()
-        except OSError as e:
-            print(f"Error starting callback server: {e}")
+        except OSError:
+            logger.exception("Error starting callback server")
             return False
 
         # Check for authorization code
         if authorization_code['error']:
-            print(f"Authorization error: {authorization_code['error']}")
+            logger.error("Authorization error: %s", authorization_code['error'])
             return False
 
         if not authorization_code['code']:
-            print("No authorization code received")
+            logger.error("No authorization code received")
             return False
 
         # Exchange code for token
@@ -263,14 +283,15 @@ class SimpleStravaAuth:
                 if self.settings:
                     self.settings.set('strava_token_data', token_data)
 
-                print("Authorization successful!")
+                logger.info("Authorization successful")
                 return True
             else:
-                print(f"Token exchange failed: {response.status_code} - {response.text}")
+                logger.error("Token exchange failed: %s - %s",
+                             response.status_code, response.text)
                 return False
 
-        except Exception as e:
-            print(f"Error exchanging code: {e}")
+        except Exception:
+            logger.exception("Error exchanging authorization code")
             return False
 
     def revoke(self) -> bool:
@@ -290,11 +311,12 @@ class SimpleStravaAuth:
                 )
 
                 if response.status_code not in [200, 204]:
-                    print(f"Warning: Strava deauth returned {response.status_code}")
+                    logger.warning("Strava deauth returned status %s",
+                                   response.status_code)
                     success = False
                     # Continue anyway - still clear local tokens
-            except requests.RequestException as e:
-                print(f"Warning: Failed to deauthorize with Strava: {e}")
+            except Exception:
+                logger.exception("Failed to deauthorize with Strava")
                 success = False
                 # Continue anyway
 

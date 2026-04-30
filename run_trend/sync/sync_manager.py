@@ -1,10 +1,13 @@
 """
 Synchronization manager for Strava activities.
 """
+import logging
 from datetime import datetime, timedelta
 from typing import Optional, Callable
 from ..storage.database import Database
 from ..strava.client import StravaClient
+
+logger = logging.getLogger(__name__)
 
 
 class SyncManager:
@@ -78,16 +81,16 @@ class SyncManager:
                             f"Imported {stats['imported']} activities..."
                         )
 
-                except Exception as e:
-                    print(f"Error importing activity {activity.get('id')}: {e}")
+                except Exception:
+                    logger.exception("Error importing activity %s", activity.get('id'))
                     stats['errors'] += 1
 
             # Save sync timestamp
             self.db.set_setting('last_sync', datetime.utcnow().isoformat())
             self.db.set_setting('training_start_date', start_date.isoformat())
 
-        except Exception as e:
-            print(f"Sync error: {e}")
+        except Exception:
+            logger.exception("Initial sync failed")
             stats['errors'] += 1
 
         return stats
@@ -165,15 +168,15 @@ class SyncManager:
                             f"Synced {stats['imported'] + stats['updated']} activities..."
                         )
 
-                except Exception as e:
-                    print(f"Error syncing activity {activity.get('id')}: {e}")
+                except Exception:
+                    logger.exception("Error syncing activity %s", activity.get('id'))
                     stats['errors'] += 1
 
             # Save sync timestamp
             self.db.set_setting('last_sync', datetime.utcnow().isoformat())
 
-        except Exception as e:
-            print(f"Sync error: {e}")
+        except Exception:
+            logger.exception("Incremental sync failed")
             stats['errors'] += 1
 
         return stats

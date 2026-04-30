@@ -6,10 +6,28 @@ A desktop application for tracking running progress from Strava.
 """
 import sys
 import os
+import logging
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import QTranslator, QLocale
 from run_trend.ui.main_window import MainWindow
 from run_trend.settings.config import SettingsManager
+
+logger = logging.getLogger(__name__)
+
+
+def configure_logging():
+    """Initialise the root logger.
+
+    Honours the ``RUNTREND_LOG_LEVEL`` environment variable so users on
+    Flatpak / `.desktop` launches can raise verbosity without a code change.
+    """
+    level_name = os.environ.get('RUNTREND_LOG_LEVEL', 'INFO').upper()
+    level = getattr(logging, level_name, logging.INFO)
+    logging.basicConfig(
+        level=level,
+        format='%(asctime)s %(levelname)s %(name)s: %(message)s',
+        stream=sys.stderr,
+    )
 
 
 def load_translations(app, settings):
@@ -50,23 +68,26 @@ def load_translations(app, settings):
     if os.path.exists(translation_file):
         if translator.load(translation_file):
             app.installTranslator(translator)
-            print(f"Loaded translations: {lang_code}")
+            logger.info("Loaded translations: %s", lang_code)
         else:
-            print(f"Failed to load translation file: {translation_file}")
+            logger.warning("Failed to load translation file: %s", translation_file)
     else:
-        print(f"Translation file not found: {translation_file}")
-        print(f"Looking in: {translations_dir}")
+        logger.warning("Translation file not found: %s (searched %s)",
+                       translation_file, translations_dir)
 
     return lang_code, translator
 
 
 def main():
     """Main application entry point."""
+    configure_logging()
     app = QApplication(sys.argv)
 
-    app.setApplicationName("Running Progress Tracker")
+    app.setApplicationName("RunTrend")
+    app.setApplicationDisplayName("Running Progress Tracker")
     app.setOrganizationName("RunTrend")
     app.setOrganizationDomain("runtrend.local")
+    app.setDesktopFileName("de.arneweiss.RunTrend")
 
     # Load settings to check language preference
     settings = SettingsManager()

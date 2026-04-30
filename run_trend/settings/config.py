@@ -2,9 +2,12 @@
 Application settings and configuration management.
 """
 import os
+import logging
 from pathlib import Path
 from typing import Any, Optional
 import json
+
+logger = logging.getLogger(__name__)
 
 
 class AppSettings:
@@ -49,16 +52,16 @@ class AppSettings:
                 with open(self.config_file, 'r') as f:
                     loaded = json.load(f)
                     self.settings.update(loaded)
-        except Exception as e:
-            print(f"Error loading settings: {e}")
+        except Exception:
+            logger.exception("Error loading settings")
 
     def _save_settings(self):
         """Save settings to file."""
         try:
             with open(self.config_file, 'w') as f:
                 json.dump(self.settings, f, indent=2)
-        except Exception as e:
-            print(f"Error saving settings: {e}")
+        except Exception:
+            logger.exception("Error saving settings")
 
     def get(self, key: str, default: Any = None) -> Any:
         """
@@ -119,8 +122,8 @@ class AppSettings:
                 with open(token_file, 'r') as f:
                     creds = json.load(f)
                     return (creds.get('client_id'), creds.get('client_secret'))
-        except Exception as e:
-            print(f"Error loading credentials: {e}")
+        except Exception:
+            logger.exception("Error loading credentials")
 
         return (None, None)
 

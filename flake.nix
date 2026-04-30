@@ -20,14 +20,28 @@
         ]);
       in
       {
-        packages.default = pkgs.writeShellApplication {
-          name = "run-trend";
-          runtimeInputs = [ pythonEnv ];
-          text = ''
-            cd ${./.}
-            exec python -m run_trend.main "$@"
-          '';
-        };
+        packages.default =
+          let
+            src = ./.;
+            desktopFile = pkgs.runCommand "run-trend-desktop" { } ''
+              mkdir -p $out/share/applications
+              cp ${src}/de.arneweiss.RunTrend.desktop $out/share/applications/
+            '';
+          in
+          pkgs.writeShellApplication {
+            name = "run-trend";
+            runtimeInputs = [ pythonEnv ];
+            text = ''
+              # Make the .desktop file visible to xdg-desktop-portal so it can
+              # identify this app. GIO_LAUNCHED_DESKTOP_FILE is read by Qt before
+              # QApplication is constructed (before setDesktopFileName() can be called).
+              export XDG_DATA_DIRS="${desktopFile}/share:''${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+              export GIO_LAUNCHED_DESKTOP_FILE="${desktopFile}/share/applications/de.arneweiss.RunTrend.desktop"
+              export GIO_LAUNCHED_DESKTOP_FILE_PID=$$
+              cd ${src}
+              exec python -m run_trend.main "$@"
+            '';
+          };
 
         apps.default = {
           type = "app";

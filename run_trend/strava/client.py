@@ -1,10 +1,13 @@
 """
 Strava API client for fetching activity data.
 """
+import logging
 import requests
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 import time
+
+logger = logging.getLogger(__name__)
 
 
 class StravaClient:
@@ -34,7 +37,7 @@ class StravaClient:
         """
         access_token = self.auth.get_access_token()
         if not access_token:
-            print("No valid access token available")
+            logger.warning("No valid access token available")
             return None
 
         headers = {
@@ -50,19 +53,19 @@ class StravaClient:
 
             # Handle rate limiting
             if response.status_code == 429:
-                print("Rate limited by Strava API. Please wait...")
+                logger.warning("Rate limited by Strava API")
                 return None
 
             # Handle unauthorized
             if response.status_code == 401:
-                print("Unauthorized. Token may be invalid.")
+                logger.warning("Strava API returned 401 Unauthorized")
                 return None
 
             response.raise_for_status()
             return response.json()
 
-        except requests.exceptions.RequestException as e:
-            print(f"API request failed: {e}")
+        except requests.exceptions.RequestException:
+            logger.exception("Strava API request failed for endpoint %s", endpoint)
             return None
 
     def get_athlete(self) -> Optional[Dict[str, Any]]:
@@ -135,7 +138,7 @@ class StravaClient:
             'Swim',
         }
 
-        print(f"Fetching activities since {start_date.isoformat()}...")
+        logger.info("Fetching activities since %s", start_date.isoformat())
 
         while True:
             activities = self.get_activities(
@@ -154,7 +157,8 @@ class StravaClient:
             ]
             all_activities.extend(filtered)
 
-            print(f"Fetched page {page}: {len(filtered)} outdoor {activity_type} activities")
+            logger.debug("Fetched page %d: %d outdoor %s activities",
+                         page, len(filtered), activity_type)
 
             # Check if we got a full page (more might be available)
             if len(activities) < per_page:
@@ -165,7 +169,8 @@ class StravaClient:
             # Be nice to the API - small delay between requests
             time.sleep(0.2)
 
-        print(f"Total {activity_type} activities fetched: {len(all_activities)}")
+        logger.info("Total %s activities fetched: %d",
+                    activity_type, len(all_activities))
         return all_activities
 
     def get_activity_details(self, activity_id: int) -> Optional[Dict[str, Any]]:
@@ -204,5 +209,7 @@ class StravaClient:
             'elevation_gain': activity.get('total_elevation_gain'),
             'average_heartrate': activity.get('average_heartrate'),
             'max_heartrate': activity.get('max_heartrate'),
-            'has_heartrate': activity.get('has_heartrate', False)
+            'has_heartrate': activity.get('has_heartrate', False),
+            'trainer': bool(activity.get('trainer', False)),
+            'manual': bool(activity.get('manual', False)),
         }
