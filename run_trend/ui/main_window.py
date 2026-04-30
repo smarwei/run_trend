@@ -4,7 +4,8 @@ Main application window.
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QToolBar, QPushButton, QLabel, QComboBox, QDateEdit,
-    QStatusBar, QStyle, QTabWidget, QMessageBox, QProgressDialog, QSizePolicy
+    QStatusBar, QStyle, QTabWidget, QMessageBox, QProgressDialog, QSizePolicy,
+    QFileDialog,
 )
 from PySide6.QtCore import Qt, QDate, QThread, QTimer, Signal
 from PySide6.QtGui import QAction, QIcon
@@ -20,6 +21,7 @@ from ..analytics.data_manager import DataManager
 from ..analytics.smoothing import Smoother
 from ..analytics.race_predictor import RacePredictor
 from ..projection.forecaster import Forecaster
+from ..io.exporter import export_activities_csv, default_csv_filename
 
 from .summary_panel import SummaryPanel
 from .settings_dialog import SettingsDialog
@@ -110,6 +112,7 @@ class MainWindow(QMainWindow):
 
         # Setup UI
         self._setup_ui()
+        self._setup_menu()
         self._setup_toolbar()
         self._setup_statusbar()
 
@@ -194,6 +197,51 @@ class MainWindow(QMainWindow):
 
         # Charts open empty until data loads (or auth completes).
         self._show_charts_empty_state()
+
+    def _setup_menu(self):
+        """Set up the menubar with a File menu for export actions."""
+        menu_bar = self.menuBar()
+        file_menu = menu_bar.addMenu(self.tr("&File"))
+
+        export_csv_action = QAction(self.tr("Export Data as CSV…"), self)
+        export_csv_action.triggered.connect(self._export_activities_csv)
+        file_menu.addAction(export_csv_action)
+        self.export_csv_action = export_csv_action
+
+    def _export_activities_csv(self):
+        """Export the currently filtered activities to a user-chosen CSV file."""
+        if not self.activities:
+            QMessageBox.information(
+                self,
+                self.tr("Export Data as CSV"),
+                self.tr("There are no activities to export. Sync first."),
+            )
+            return
+
+        path, _ = QFileDialog.getSaveFileName(
+            self,
+            self.tr("Export Data as CSV"),
+            default_csv_filename(),
+            self.tr("CSV File (*.csv)"),
+        )
+        if not path:
+            return
+        if not path.lower().endswith(".csv"):
+            path += ".csv"
+
+        try:
+            count = export_activities_csv(self.activities, path)
+        except OSError as exc:
+            QMessageBox.warning(
+                self,
+                self.tr("Export failed"),
+                self.tr("Could not write CSV file: {}").format(exc),
+            )
+            return
+
+        self.statusbar.showMessage(
+            self.tr("Exported {} activities to {}").format(count, path), 5000
+        )
 
     def _setup_toolbar(self):
         """Set up the toolbar."""

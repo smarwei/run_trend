@@ -528,6 +528,38 @@ Pick an earlier start date or sync to fetch new activities.</source>
       <translation type="finished">Keine Läufe im gewählten Zeitraum.
 Wähle ein früheres Startdatum oder synchronisiere, um neue Aktivitäten zu laden.</translation>
     </message>
+    <message>
+      <source>&amp;File</source>
+      <translation type="finished">&amp;Datei</translation>
+    </message>
+    <message>
+      <source>Export Data as CSV…</source>
+      <translation type="finished">Daten als CSV exportieren…</translation>
+    </message>
+    <message>
+      <source>Export Data as CSV</source>
+      <translation type="finished">Daten als CSV exportieren</translation>
+    </message>
+    <message>
+      <source>There are no activities to export. Sync first.</source>
+      <translation type="finished">Keine Aktivitäten zum Exportieren vorhanden. Bitte zuerst synchronisieren.</translation>
+    </message>
+    <message>
+      <source>CSV File (*.csv)</source>
+      <translation type="finished">CSV-Datei (*.csv)</translation>
+    </message>
+    <message>
+      <source>Export failed</source>
+      <translation type="finished">Export fehlgeschlagen</translation>
+    </message>
+    <message>
+      <source>Could not write CSV file: {}</source>
+      <translation type="finished">CSV-Datei konnte nicht geschrieben werden: {}</translation>
+    </message>
+    <message>
+      <source>Exported {} activities to {}</source>
+      <translation type="finished">{} Aktivitäten nach {} exportiert</translation>
+    </message>
   </context>
   <context>
     <name>BaseChart</name>
@@ -535,6 +567,26 @@ Wähle ein früheres Startdatum oder synchronisiere, um neue Aktivitäten zu lad
       <location filename="../charts/base_chart.py" line="93" />
       <source>Connect to Strava</source>
       <translation type="finished">Mit Strava verbinden</translation>
+    </message>
+    <message>
+      <source>Export Chart as PNG…</source>
+      <translation type="finished">Diagramm als PNG exportieren…</translation>
+    </message>
+    <message>
+      <source>Export Chart as PNG</source>
+      <translation type="finished">Diagramm als PNG exportieren</translation>
+    </message>
+    <message>
+      <source>PNG Image (*.png)</source>
+      <translation type="finished">PNG-Bild (*.png)</translation>
+    </message>
+    <message>
+      <source>Export failed</source>
+      <translation type="finished">Export fehlgeschlagen</translation>
+    </message>
+    <message>
+      <source>Could not write the chart image to disk.</source>
+      <translation type="finished">Diagramm-Bild konnte nicht gespeichert werden.</translation>
     </message>
   </context>
   <context>

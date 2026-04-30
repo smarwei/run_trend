@@ -2,8 +2,10 @@
 Base chart widget with shared functionality for all chart classes.
 """
 import math
+from datetime import datetime
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QStackedWidget, QLabel, QPushButton,
+    QMenu, QFileDialog, QMessageBox,
 )
 from PySide6.QtCharts import (
     QChart, QChartView, QCategoryAxis, QDateTimeAxis, QValueAxis,
@@ -60,6 +62,49 @@ class BaseChart(QWidget):
         layout.addWidget(self._wrap_chart_view_with_empty_state(self.chart_view))
 
     # ------------------------------------------------------------------ #
+    # Chart export                                                         #
+    # ------------------------------------------------------------------ #
+
+    def _on_chart_context_menu(self, position) -> None:
+        """Show a right-click menu on the chart with an Export-as-PNG action."""
+        menu = QMenu(self.chart_view)
+        export_action = menu.addAction(
+            QCoreApplication.translate("BaseChart", "Export Chart as PNG…")
+        )
+        chosen = menu.exec(self.chart_view.mapToGlobal(position))
+        if chosen is export_action:
+            self._export_chart_png()
+
+    def _export_chart_png(self) -> None:
+        """Save the current chart to a PNG file chosen by the user."""
+        title = self.chart.title() or "chart"
+        # Filename-safe slug from the chart title.
+        slug = "".join(c if c.isalnum() or c in "-_" else "_" for c in title).strip("_") or "chart"
+        date = datetime.now().date().isoformat()
+        default_name = f"runtrend_{slug.lower()}_{date}.png"
+
+        path, _ = QFileDialog.getSaveFileName(
+            self,
+            QCoreApplication.translate("BaseChart", "Export Chart as PNG"),
+            default_name,
+            QCoreApplication.translate("BaseChart", "PNG Image (*.png)"),
+        )
+        if not path:
+            return
+        if not path.lower().endswith(".png"):
+            path += ".png"
+
+        pixmap = self.chart_view.grab()
+        if not pixmap.save(path, "PNG"):
+            QMessageBox.warning(
+                self,
+                QCoreApplication.translate("BaseChart", "Export failed"),
+                QCoreApplication.translate(
+                    "BaseChart", "Could not write the chart image to disk."
+                ),
+            )
+
+    # ------------------------------------------------------------------ #
     # Empty-state overlay                                                  #
     # ------------------------------------------------------------------ #
 
@@ -71,7 +116,14 @@ class BaseChart(QWidget):
 
         The empty-state page contains a centred message label and an optional
         "Connect to Strava" button that emits self.connect_requested when clicked.
+
+        Right-click on the chart opens an Export-as-PNG action; we wire it
+        here because every chart goes through this helper, so the menu is
+        available on the legacy charts that build their own QChartView too.
         """
+        chart_view.setContextMenuPolicy(Qt.CustomContextMenu)
+        chart_view.customContextMenuRequested.connect(self._on_chart_context_menu)
+
         stack = QStackedWidget()
         stack.addWidget(chart_view)
 
