@@ -27,6 +27,7 @@ from .summary_panel import SummaryPanel
 from .settings_dialog import SettingsDialog
 from .manual_dialog import ManualDialog
 from .about_dialog import AboutDialog
+from .onboarding_wizard import OnboardingWizard
 from ..charts.distance_chart import DistanceChart
 from ..charts.pace_chart import PaceChart
 from ..charts.frequency_chart import FrequencyChart
@@ -92,6 +93,11 @@ class _StravaAuthThread(QThread):
 
 class MainWindow(QMainWindow):
     """Main application window."""
+
+    # Emitted after every Strava OAuth attempt (success/failure).
+    # The onboarding wizard listens to this so it can update its connect
+    # page without subscribing directly to the throw-away auth thread.
+    auth_finished = Signal(bool)
 
     def __init__(self):
         super().__init__()
@@ -199,7 +205,7 @@ class MainWindow(QMainWindow):
         self._show_charts_empty_state()
 
     def _setup_menu(self):
-        """Set up the menubar with a File menu for export actions."""
+        """Set up the menubar with File and Help menus."""
         menu_bar = self.menuBar()
         file_menu = menu_bar.addMenu(self.tr("&File"))
 
@@ -207,6 +213,12 @@ class MainWindow(QMainWindow):
         export_csv_action.triggered.connect(self._export_activities_csv)
         file_menu.addAction(export_csv_action)
         self.export_csv_action = export_csv_action
+
+        help_menu = menu_bar.addMenu(self.tr("&Help"))
+        wizard_action = QAction(self.tr("First-Run Wizard"), self)
+        wizard_action.triggered.connect(self._show_onboarding_wizard)
+        help_menu.addAction(wizard_action)
+        self.wizard_action = wizard_action
 
     def _export_activities_csv(self):
         """Export the currently filtered activities to a user-chosen CSV file."""
@@ -426,10 +438,13 @@ class MainWindow(QMainWindow):
                 # Only do incremental sync if we already have data
                 self._run_silent_sync()
         else:
-            # Not authenticated - open settings dialog on first start
+            # Not authenticated. First-run (empty DB) gets the onboarding
+            # wizard; legacy installs without auth keep the settings shortcut.
             self.statusbar.showMessage(self.tr("Not connected - Please configure Strava connection"))
-            # Use QTimer to open settings after main window is shown
-            QTimer.singleShot(100, self._show_settings)
+            if self.db.get_activity_count() == 0:
+                QTimer.singleShot(100, self._show_onboarding_wizard)
+            else:
+                QTimer.singleShot(100, self._show_settings)
 
         self._update_persistent_status()
         self._update_toolbar_state()
@@ -525,24 +540,60 @@ class MainWindow(QMainWindow):
     def _on_auth_finished(self, success: bool):
         self._update_persistent_status()
         self._update_toolbar_state()
+        # Suppress the follow-up dialogs while the onboarding wizard is in
+        # the foreground — the wizard owns the sync trigger and shows its
+        # own status, so layering a QMessageBox on top would be jarring.
+        wizard_active = getattr(self, '_onboarding_active', False)
         if success:
             self._setup_strava_client()
             self.statusbar.showMessage(self.tr("Successfully connected to Strava!"))
-            reply = QMessageBox.question(
-                self, self.tr("Sync Activities"),
-                self.tr("Successfully connected to Strava!\n\n"
-                "Do you want to sync your activities now?"),
-                QMessageBox.Yes | QMessageBox.No
-            )
-            if reply == QMessageBox.Yes:
-                self._sync_activities()
+            if not wizard_active:
+                reply = QMessageBox.question(
+                    self, self.tr("Sync Activities"),
+                    self.tr("Successfully connected to Strava!\n\n"
+                    "Do you want to sync your activities now?"),
+                    QMessageBox.Yes | QMessageBox.No
+                )
+                if reply == QMessageBox.Yes:
+                    self._sync_activities()
         else:
             self.statusbar.showMessage(self.tr("Failed to connect to Strava"))
-            QMessageBox.warning(
-                self, self.tr("Authorization Failed"),
-                self.tr("Failed to authorize with Strava.\n\n"
-                "Please try again or check your API credentials in Settings.")
-            )
+            if not wizard_active:
+                QMessageBox.warning(
+                    self, self.tr("Authorization Failed"),
+                    self.tr("Failed to authorize with Strava.\n\n"
+                    "Please try again or check your API credentials in Settings.")
+                )
+        self.auth_finished.emit(success)
+
+    def _show_onboarding_wizard(self):
+        """Show the first-run onboarding wizard (also reachable via Help menu)."""
+        self._onboarding_active = True
+        try:
+            wizard = OnboardingWizard(self, parent=self)
+            accepted = bool(wizard.exec())
+            chosen_date = wizard.selected_start_date if accepted else None
+        finally:
+            self._onboarding_active = False
+
+        if not accepted or chosen_date is None:
+            return
+
+        self.start_date_edit.setDate(chosen_date)
+        date_str = (
+            f"{chosen_date.year()}-{chosen_date.month():02d}-{chosen_date.day():02d}"
+        )
+        self.settings.set('ui_start_date', date_str)
+
+        # Trigger an initial sync if we ended up authenticated and the DB is
+        # still empty — that completes the "after Finish: data appears" AC.
+        if (
+            self.auth and self.auth.is_authenticated()
+            and self.db.get_activity_count() == 0
+        ):
+            if not self.client:
+                self._setup_strava_client()
+            self._sync_activities()
 
     def _show_settings(self):
         """Show settings dialog."""

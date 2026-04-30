@@ -560,6 +560,77 @@ Pick an earlier start date or sync to fetch new activities.</translation>
       <source>Exported {} activities to {}</source>
       <translation type="finished">Exported {} activities to {}</translation>
     </message>
+    <message>
+      <source>&amp;Help</source>
+      <translation type="finished">&amp;Help</translation>
+    </message>
+    <message>
+      <source>First-Run Wizard</source>
+      <translation type="finished">First-Run Wizard</translation>
+    </message>
+  </context>
+  <context>
+    <name>OnboardingWizard</name>
+    <message>
+      <source>Welcome to RunTrend</source>
+      <translation type="finished">Welcome to RunTrend</translation>
+    </message>
+    <message>
+      <source>Track your running progress over time with charts, trends, and projections.</source>
+      <translation type="finished">Track your running progress over time with charts, trends, and projections.</translation>
+    </message>
+    <message>
+      <source>RunTrend reads activities from your Strava account and shows long-term trends in distance, pace, heart rate, and training load. Three quick steps will get you set up.</source>
+      <translation type="finished">RunTrend reads activities from your Strava account and shows long-term trends in distance, pace, heart rate, and training load. Three quick steps will get you set up.</translation>
+    </message>
+    <message>
+      <source>Connect to Strava</source>
+      <translation type="finished">Connect to Strava</translation>
+    </message>
+    <message>
+      <source>Authorize RunTrend to read your activities. Your browser will open the Strava authorization page.</source>
+      <translation type="finished">Authorize RunTrend to read your activities. Your browser will open the Strava authorization page.</translation>
+    </message>
+    <message>
+      <source>RunTrend only requests read-only access to your activities. You can disconnect at any time in Settings.</source>
+      <translation type="finished">RunTrend only requests read-only access to your activities. You can disconnect at any time in Settings.</translation>
+    </message>
+    <message>
+      <source>Not connected yet.</source>
+      <translation type="finished">Not connected yet.</translation>
+    </message>
+    <message>
+      <source>Waiting for Strava authorization…</source>
+      <translation type="finished">Waiting for Strava authorization…</translation>
+    </message>
+    <message>
+      <source>✓ Connected to Strava.</source>
+      <translation type="finished">✓ Connected to Strava.</translation>
+    </message>
+    <message>
+      <source>Connection failed. You can retry or skip this step.</source>
+      <translation type="finished">Connection failed. You can retry or skip this step.</translation>
+    </message>
+    <message>
+      <source>Choose Training Start</source>
+      <translation type="finished">Choose Training Start</translation>
+    </message>
+    <message>
+      <source>Pick the date from which RunTrend should import activities. You can change this later via the toolbar's Start Date picker.</source>
+      <translation type="finished">Pick the date from which RunTrend should import activities. You can change this later via the toolbar's Start Date picker.</translation>
+    </message>
+    <message>
+      <source>Training Start Date:</source>
+      <translation type="finished">Training Start Date:</translation>
+    </message>
+    <message>
+      <source>First-Run Setup</source>
+      <translation type="finished">First-Run Setup</translation>
+    </message>
+    <message>
+      <source>Skip</source>
+      <translation type="finished">Skip</translation>
+    </message>
   </context>
   <context>
     <name>BaseChart</name>
