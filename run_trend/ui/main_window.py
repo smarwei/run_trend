@@ -655,6 +655,8 @@ class MainWindow(QMainWindow):
         """Open the Goal-Manager dialog."""
         dialog = GoalManagerDialog(self.db, self)
         dialog.exec()
+        if getattr(self, 'aggregates', None):
+            self._update_charts()
 
     def _mark_activity_as_race(self, activity: dict):
         """Open RaceDialog prefilled from an activity and persist on accept."""
@@ -1038,6 +1040,7 @@ class MainWindow(QMainWindow):
         self.structure_overview_chart.update_chart(self.aggregates, smoothing_strength)
         self.score_chart.update_chart(self.aggregates, smoothing_strength)
         self.training_load_chart.update_chart(self.aggregates)
+        self.projection_chart.set_goals(self.db.get_goals(include_achieved=False))
         self.projection_chart.update_chart(self.aggregates, self.current_period)
         self.runs_table.update_table(self.activities)
         self.pace_distance_chart.update_chart(self.activities)

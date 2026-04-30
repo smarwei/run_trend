@@ -28,7 +28,86 @@ class ProjectionChart(BaseChart):
         self.projection_mode  = 'volume'
         self.periods_ahead    = 12
         self.settings_callback = None
+        self._goals: List[Dict[str, Any]] = []
         self._setup_ui()
+
+    def set_goals(self, goals: List[Dict[str, Any]]) -> None:
+        """Stash active goals; the next update_chart() draws them as targets."""
+        self._goals = [
+            g for g in (goals or []) if not g.get('achieved')
+        ]
+
+    def _render_goals(self, now, historical_value, projection,
+                      anchor_date, gap_periods, period_type):
+        """Overlay user-set targets on the long-run projection.
+
+        Returns a list of (target_datetime, target_distance_km) for axis
+        extension. Goals are skipped silently in volume mode because
+        target_distance_km is a race distance, not a weekly volume budget.
+        """
+        rendered: List[tuple] = []
+        if not self._goals or self.projection_mode != 'long_run':
+            return rendered
+
+        today_ms = int(now.timestamp() * 1000)
+        for goal in self._goals:
+            target_date_str = goal.get('target_date')
+            target_distance = goal.get('target_distance_km')
+            if not target_date_str or target_distance is None:
+                continue
+            try:
+                target_dt = datetime.strptime(target_date_str, '%Y-%m-%d')
+            except (TypeError, ValueError):
+                continue
+            if target_dt < now:
+                continue
+            target_ms = int(target_dt.timestamp() * 1000)
+
+            projected_at_target = historical_value
+            if projection.get('has_projection'):
+                proj_periods = projection.get('projected_periods') or []
+                matched = False
+                for proj_point in proj_periods:
+                    periods_from_anchor = proj_point['period_offset'] - gap_periods
+                    if periods_from_anchor < 0:
+                        continue
+                    if period_type == 'week':
+                        pdt = anchor_date + timedelta(weeks=periods_from_anchor)
+                    else:
+                        pdt = anchor_date + timedelta(days=30 * periods_from_anchor)
+                    if pdt >= target_dt:
+                        projected_at_target = proj_point['projected_value']
+                        matched = True
+                        break
+                if not matched and proj_periods:
+                    projected_at_target = proj_periods[-1]['projected_value']
+
+            on_track = projected_at_target >= target_distance
+            color = QColor("#27ae60") if on_track else QColor("#e74c3c")
+
+            line = QLineSeries()
+            line.setName(self.tr("Goal target ({} km)").format(round(target_distance, 1)))
+            line.append(today_ms, historical_value)
+            line.append(target_ms, target_distance)
+            line_pen = QPen(color)
+            line_pen.setWidth(2)
+            line_pen.setStyle(Qt.DotLine)
+            line.setPen(line_pen)
+            self.chart.addSeries(line)
+
+            marker = QScatterSeries()
+            status = self.tr("on track") if on_track else self.tr("off track")
+            marker.setName(self.tr("Goal {} km — {}").format(
+                round(target_distance, 1), status,
+            ))
+            marker.setMarkerSize(14)
+            marker.setColor(color)
+            marker.append(target_ms, target_distance)
+            self.chart.addSeries(marker)
+
+            rendered.append((target_dt, target_distance))
+
+        return rendered
 
     def _setup_ui(self):
         layout = QVBoxLayout(self)
@@ -194,6 +273,15 @@ class ProjectionChart(BaseChart):
                         self.chart.addSeries(ms)
                         break
 
+        goal_targets = self._render_goals(
+            now=now,
+            historical_value=historical_data[-1],
+            projection=projection,
+            anchor_date=anchor_date,
+            gap_periods=gap_periods,
+            period_type=period_type,
+        )
+
         # Axes — custom x range to include future window
         from PySide6.QtCharts import QDateTimeAxis
         from PySide6.QtCore import QDateTime
@@ -206,11 +294,16 @@ class ProjectionChart(BaseChart):
                 max_future = anchor_date + timedelta(weeks=self.periods_ahead)
             else:
                 max_future = anchor_date + timedelta(days=30 * self.periods_ahead)
+            for target_dt, _ in goal_targets:
+                if target_dt > max_future:
+                    max_future = target_dt
             axis_x.setRange(min_date, QDateTime.fromSecsSinceEpoch(int(max_future.timestamp())))
 
         max_dist = max(historical_data) if historical_data else 10
         if projection.get('has_projection'):
             max_dist = max(max_dist, max(p['projected_value'] for p in projection['projected_periods']))
+        if goal_targets:
+            max_dist = max(max_dist, *(g[1] for g in goal_targets))
         axis_y = self._create_value_axis(
             self.tr("Distance (km)"), min_val=0, max_val=max_dist * 1.2
         )

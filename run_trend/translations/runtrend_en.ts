@@ -1048,6 +1048,26 @@ Searched paths:
       <source>Distance (km)</source>
       <translation type="finished">Distance (km)</translation>
     </message>
+    <message>
+      <location filename="../charts/projection_chart.py" line="0" />
+      <source>Goal target ({} km)</source>
+      <translation type="finished">Goal target ({} km)</translation>
+    </message>
+    <message>
+      <location filename="../charts/projection_chart.py" line="0" />
+      <source>Goal {} km — {}</source>
+      <translation type="finished">Goal {} km — {}</translation>
+    </message>
+    <message>
+      <location filename="../charts/projection_chart.py" line="0" />
+      <source>on track</source>
+      <translation type="finished">on track</translation>
+    </message>
+    <message>
+      <location filename="../charts/projection_chart.py" line="0" />
+      <source>off track</source>
+      <translation type="finished">off track</translation>
+    </message>
   </context>
   <context>
     <name>ScoreChart</name>

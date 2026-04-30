@@ -1048,6 +1048,26 @@ Gesuchte Pfade:
       <source>Distance (km)</source>
       <translation type="finished">Distanz (km)</translation>
     </message>
+    <message>
+      <location filename="../charts/projection_chart.py" line="0" />
+      <source>Goal target ({} km)</source>
+      <translation type="finished">Ziel ({} km)</translation>
+    </message>
+    <message>
+      <location filename="../charts/projection_chart.py" line="0" />
+      <source>Goal {} km — {}</source>
+      <translation type="finished">Ziel {} km — {}</translation>
+    </message>
+    <message>
+      <location filename="../charts/projection_chart.py" line="0" />
+      <source>on track</source>
+      <translation type="finished">auf Kurs</translation>
+    </message>
+    <message>
+      <location filename="../charts/projection_chart.py" line="0" />
+      <source>off track</source>
+      <translation type="finished">nicht auf Kurs</translation>
+    </message>
   </context>
   <context>
     <name>ScoreChart</name>
