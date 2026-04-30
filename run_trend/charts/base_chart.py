@@ -2,7 +2,7 @@
 Base chart widget with shared functionality for all chart classes.
 """
 import math
-from PySide6.QtWidgets import QWidget, QVBoxLayout
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
 from PySide6.QtCharts import (
     QChart, QChartView, QCategoryAxis, QDateTimeAxis, QValueAxis,
 )
@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Optional
 
 from ..analytics.smoothing import Smoother
 from ..projection.forecaster import Forecaster
+from ..ui.help_label import make_help_icon
 
 
 def format_pace_minutes(value: float) -> str:
@@ -28,9 +29,19 @@ def format_pace_minutes(value: float) -> str:
 class BaseChart(QWidget):
     """Base class for all chart widgets. Provides shared helper methods."""
 
-    def _setup_chart_view(self, title: str) -> None:
-        """Create self.chart and self.chart_view. Call from subclass _setup_ui()."""
+    def _setup_chart_view(self, title: str, help_tooltip: Optional[str] = None) -> None:
+        """Create self.chart and self.chart_view. Call from subclass _setup_ui().
+
+        If help_tooltip is given, a small '?' badge is placed in a header row
+        above the chart so users can hover to read what the metric means.
+        """
         layout = QVBoxLayout(self)
+
+        if help_tooltip:
+            header = QHBoxLayout()
+            header.addStretch()
+            header.addWidget(make_help_icon(help_tooltip))
+            layout.addLayout(header)
 
         self.chart = QChart()
         self.chart.setTitle(title)

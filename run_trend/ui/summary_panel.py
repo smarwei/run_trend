@@ -1,9 +1,21 @@
 """
 Summary panel widget showing key performance indicators.
 """
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGroupBox, QFrame
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QGroupBox, QFrame
 from PySide6.QtCore import Qt
 from datetime import datetime
+
+from .help_label import make_help_icon
+
+
+def _row_with_help(label: QLabel, tooltip: str) -> QHBoxLayout:
+    """Wrap a metric label with a trailing '?' help-icon in a horizontal row."""
+    row = QHBoxLayout()
+    row.setContentsMargins(0, 0, 0, 0)
+    row.addWidget(label)
+    row.addWidget(make_help_icon(tooltip))
+    row.addStretch()
+    return row
 
 
 class SummaryPanel(QWidget):
@@ -44,8 +56,23 @@ class SummaryPanel(QWidget):
         self.consistency_label = QLabel(self.tr("Active Days: -"))
 
         current_layout.addWidget(self.current_distance_label)
-        current_layout.addWidget(self.current_pace_label)
-        current_layout.addWidget(self.consistency_label)
+        current_layout.addLayout(_row_with_help(
+            self.current_pace_label,
+            self.tr(
+                "Pace = minutes per kilometre.\n\n"
+                "Distance-weighted average across this period: longer runs "
+                "count more than short ones. Lower pace = faster running."
+            ),
+        ))
+        current_layout.addLayout(_row_with_help(
+            self.consistency_label,
+            self.tr(
+                "Active Days / Consistency Ratio.\n\n"
+                "Number of distinct days with at least one run, divided by "
+                "the days in this period. 50% means you ran on half the "
+                "days — higher = more regular training."
+            ),
+        ))
         current_group.setLayout(current_layout)
         layout.addWidget(current_group)
 
@@ -65,7 +92,15 @@ class SummaryPanel(QWidget):
 
         hr_layout.addWidget(self.avg_hr_label)
         hr_layout.addWidget(self.max_hr_label)
-        hr_layout.addWidget(self.efficiency_label)
+        hr_layout.addLayout(_row_with_help(
+            self.efficiency_label,
+            self.tr(
+                "Efficiency Factor (EF).\n\n"
+                "Formula: pace (m/s) ÷ heart-rate (bpm), shown ×1000.\n"
+                "Higher EF = same pace at lower HR = better aerobic fitness.\n"
+                "Needs HR-sensor data."
+            ),
+        ))
         hr_layout.addWidget(self.hrmax_suggestion_label)
         hr_group.setLayout(hr_layout)
         layout.addWidget(hr_group)
@@ -77,7 +112,19 @@ class SummaryPanel(QWidget):
         self.score_label = QLabel(self.tr("Score: -"))
         self.score_label.setStyleSheet("font-size: 24px; font-weight: bold;")
 
-        score_layout.addWidget(self.score_label)
+        score_layout.addLayout(_row_with_help(
+            self.score_label,
+            self.tr(
+                "Training Score (0-100).\n\n"
+                "Composite of recent training consistency, weekly distance, "
+                "and aerobic efficiency.\n\n"
+                "Typical ranges:\n"
+                "  • 0-29  red   – minimal training\n"
+                "  • 30-59 amber – building up\n"
+                "  • 60-79 green – good\n"
+                "  • 80+   green – strong"
+            ),
+        ))
         score_group.setLayout(score_layout)
         layout.addWidget(score_group)
 
@@ -97,7 +144,17 @@ class SummaryPanel(QWidget):
         self.load_warning_label.setStyleSheet("color: orange; font-size: 10px; margin-top: 5px;")
         self.load_warning_label.setVisible(False)
 
-        load_layout.addWidget(self.load_score_label)
+        load_layout.addLayout(_row_with_help(
+            self.load_score_label,
+            self.tr(
+                "ACWR — Acute:Chronic Workload Ratio.\n\n"
+                "Formula: TRIMP of last 7 days ÷ average TRIMP of last 28 days.\n"
+                "TRIMP (Banister, 1991) = duration × HR-zone intensity.\n\n"
+                "Sweet-spot: 0.8–1.3 (sustainable progression).\n"
+                "Caution:    1.3–1.5 (monitor recovery).\n"
+                "Danger:     ≥1.5    (elevated injury risk)."
+            ),
+        ))
         load_layout.addWidget(self.load_status_label)
         load_layout.addWidget(self.load_warning_label)
         load_group.setLayout(load_layout)
@@ -126,7 +183,16 @@ class SummaryPanel(QWidget):
         self.race_info_label.setStyleSheet("color: gray; font-size: 9px;")
         self.race_info_label.setWordWrap(True)
 
-        race_layout.addWidget(self.race_5k_label)
+        race_layout.addLayout(_row_with_help(
+            self.race_5k_label,
+            self.tr(
+                "Race-Time Predictor.\n\n"
+                "Predicts 5K / 10K / Half / Marathon times from your easy-run "
+                "pace using the McMillan formula and your HR zones.\n\n"
+                "⚠ Only an estimate — actual race performance depends on "
+                "tapering, course, weather, and pacing strategy."
+            ),
+        ))
         race_layout.addWidget(self.race_10k_label)
         race_layout.addWidget(self.race_half_label)
         race_layout.addWidget(self.race_marathon_label)

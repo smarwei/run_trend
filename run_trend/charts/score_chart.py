@@ -17,7 +17,19 @@ class ScoreChart(BaseChart):
         self._setup_ui()
 
     def _setup_ui(self):
-        self._setup_chart_view(self.tr("Training Status Score"))
+        self._setup_chart_view(
+            self.tr("Training Status Score"),
+            help_tooltip=self.tr(
+                "Training Score (0-100): a composite of recent training "
+                "consistency, weekly distance, and aerobic efficiency.\n\n"
+                "Typical ranges:\n"
+                "  • 0-29  red   – minimal training\n"
+                "  • 30-59 amber – building up\n"
+                "  • 60-79 green – good\n"
+                "  • 80+   green – strong\n\n"
+                "Source: RunTrend specification §6 Training Score."
+            ),
+        )
 
     def update_chart(self, aggregates: List[Dict[str, Any]], smoothing: str = 'off'):
         self._clear_chart()

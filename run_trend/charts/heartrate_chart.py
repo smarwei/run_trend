@@ -10,6 +10,7 @@ from typing import List, Dict, Any
 import math
 
 from .base_chart import BaseChart
+from ..ui.help_label import make_help_icon
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,14 @@ class HeartRateChart(BaseChart):
         self.roc_checkbox.stateChanged.connect(self._on_roc_toggle)
         toggle_layout.addWidget(self.roc_checkbox)
         toggle_layout.addStretch()
+        toggle_layout.addWidget(make_help_icon(self.tr(
+            "Heart-rate metrics:\n\n"
+            "• Average HR — mean heart rate across runs in this period.\n"
+            "• HR Range — min/max average HR per run, shown as a band.\n"
+            "• Efficiency Factor (EF) = pace (m/s) ÷ HR (bpm) × 1000.\n"
+            "  Higher EF = same pace at lower HR = better aerobic fitness.\n\n"
+            "Needs HR-sensor data; otherwise the chart stays empty."
+        )))
         layout.addLayout(toggle_layout)
 
         self.chart = QChart()

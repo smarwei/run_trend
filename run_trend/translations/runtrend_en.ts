@@ -132,6 +132,25 @@
       <source>Efficiency Factor (m/s per bpm ×1000)</source>
       <translation type="finished">Efficiency Factor (m/s per bpm ×1000)</translation>
     </message>
+    <message>
+      <location filename="../charts/heartrate_chart.py" line="33" />
+      <source>Heart-rate metrics:
+
+• Average HR — mean heart rate across runs in this period.
+• HR Range — min/max average HR per run, shown as a band.
+• Efficiency Factor (EF) = pace (m/s) ÷ HR (bpm) × 1000.
+  Higher EF = same pace at lower HR = better aerobic fitness.
+
+Needs HR-sensor data; otherwise the chart stays empty.</source>
+      <translation type="finished">Heart-rate metrics:
+
+• Average HR — mean heart rate across runs in this period.
+• HR Range — min/max average HR per run, shown as a band.
+• Efficiency Factor (EF) = pace (m/s) ÷ HR (bpm) × 1000.
+  Higher EF = same pace at lower HR = better aerobic fitness.
+
+Needs HR-sensor data; otherwise the chart stays empty.</translation>
+    </message>
   </context>
   <context>
     <name>MainWindow</name>
@@ -676,6 +695,27 @@ Searched paths:
       <source>Score (0-100)</source>
       <translation type="finished">Score (0-100)</translation>
     </message>
+    <message>
+      <location filename="../charts/score_chart.py" line="22" />
+      <source>Training Score (0-100): a composite of recent training consistency, weekly distance, and aerobic efficiency.
+
+Typical ranges:
+  • 0-29  red   – minimal training
+  • 30-59 amber – building up
+  • 60-79 green – good
+  • 80+   green – strong
+
+Source: RunTrend specification §6 Training Score.</source>
+      <translation type="finished">Training Score (0-100): a composite of recent training consistency, weekly distance, and aerobic efficiency.
+
+Typical ranges:
+  • 0-29  red   – minimal training
+  • 30-59 amber – building up
+  • 60-79 green – good
+  • 80+   green – strong
+
+Source: RunTrend specification §6 Training Score.</translation>
+    </message>
   </context>
   <context>
     <name>SettingsDialog</name>
@@ -947,6 +987,32 @@ Race predictions will be updated.</translation>
     </message>
   </context>
   <context>
+    <name>TrainingLoadChart</name>
+    <message>
+      <location filename="../charts/training_load_chart.py" line="22" />
+      <source>ACWR — Acute:Chronic Workload Ratio.
+
+Formula: TRIMP of last 7 days ÷ average TRIMP of last 28 days.
+TRIMP (Banister, 1991) = duration × HR-zone intensity.
+
+Sweet-spot: 0.8–1.3 (sustainable progression).
+Caution:    1.3–1.5 (monitor recovery).
+Danger:     ≥1.5    (elevated injury risk).
+
+Needs ≥5 weeks of data to be meaningful.</source>
+      <translation type="finished">ACWR — Acute:Chronic Workload Ratio.
+
+Formula: TRIMP of last 7 days ÷ average TRIMP of last 28 days.
+TRIMP (Banister, 1991) = duration × HR-zone intensity.
+
+Sweet-spot: 0.8–1.3 (sustainable progression).
+Caution:    1.3–1.5 (monitor recovery).
+Danger:     ≥1.5    (elevated injury risk).
+
+Needs ≥5 weeks of data to be meaningful.</translation>
+    </message>
+  </context>
+  <context>
     <name>SummaryPanel</name>
     <message>
       <location filename="../ui/summary_panel.py" line="22" />
@@ -1213,6 +1279,90 @@ Race predictions will be updated.</translation>
       <location filename="../ui/summary_panel.py" line="272" />
       <source>⚠️ {}</source>
       <translation type="finished">⚠️ {}</translation>
+    </message>
+    <message>
+      <location filename="../ui/summary_panel.py" line="49" />
+      <source>Pace = minutes per kilometre.
+
+Distance-weighted average across this period: longer runs count more than short ones. Lower pace = faster running.</source>
+      <translation type="finished">Pace = minutes per kilometre.
+
+Distance-weighted average across this period: longer runs count more than short ones. Lower pace = faster running.</translation>
+    </message>
+    <message>
+      <location filename="../ui/summary_panel.py" line="58" />
+      <source>Active Days / Consistency Ratio.
+
+Number of distinct days with at least one run, divided by the days in this period. 50% means you ran on half the days — higher = more regular training.</source>
+      <translation type="finished">Active Days / Consistency Ratio.
+
+Number of distinct days with at least one run, divided by the days in this period. 50% means you ran on half the days — higher = more regular training.</translation>
+    </message>
+    <message>
+      <location filename="../ui/summary_panel.py" line="79" />
+      <source>Efficiency Factor (EF).
+
+Formula: pace (m/s) ÷ heart-rate (bpm), shown ×1000.
+Higher EF = same pace at lower HR = better aerobic fitness.
+Needs HR-sensor data.</source>
+      <translation type="finished">Efficiency Factor (EF).
+
+Formula: pace (m/s) ÷ heart-rate (bpm), shown ×1000.
+Higher EF = same pace at lower HR = better aerobic fitness.
+Needs HR-sensor data.</translation>
+    </message>
+    <message>
+      <location filename="../ui/summary_panel.py" line="98" />
+      <source>Training Score (0-100).
+
+Composite of recent training consistency, weekly distance, and aerobic efficiency.
+
+Typical ranges:
+  • 0-29  red   – minimal training
+  • 30-59 amber – building up
+  • 60-79 green – good
+  • 80+   green – strong</source>
+      <translation type="finished">Training Score (0-100).
+
+Composite of recent training consistency, weekly distance, and aerobic efficiency.
+
+Typical ranges:
+  • 0-29  red   – minimal training
+  • 30-59 amber – building up
+  • 60-79 green – good
+  • 80+   green – strong</translation>
+    </message>
+    <message>
+      <location filename="../ui/summary_panel.py" line="116" />
+      <source>ACWR — Acute:Chronic Workload Ratio.
+
+Formula: TRIMP of last 7 days ÷ average TRIMP of last 28 days.
+TRIMP (Banister, 1991) = duration × HR-zone intensity.
+
+Sweet-spot: 0.8–1.3 (sustainable progression).
+Caution:    1.3–1.5 (monitor recovery).
+Danger:     ≥1.5    (elevated injury risk).</source>
+      <translation type="finished">ACWR — Acute:Chronic Workload Ratio.
+
+Formula: TRIMP of last 7 days ÷ average TRIMP of last 28 days.
+TRIMP (Banister, 1991) = duration × HR-zone intensity.
+
+Sweet-spot: 0.8–1.3 (sustainable progression).
+Caution:    1.3–1.5 (monitor recovery).
+Danger:     ≥1.5    (elevated injury risk).</translation>
+    </message>
+    <message>
+      <location filename="../ui/summary_panel.py" line="146" />
+      <source>Race-Time Predictor.
+
+Predicts 5K / 10K / Half / Marathon times from your easy-run pace using the McMillan formula and your HR zones.
+
+⚠ Only an estimate — actual race performance depends on tapering, course, weather, and pacing strategy.</source>
+      <translation type="finished">Race-Time Predictor.
+
+Predicts 5K / 10K / Half / Marathon times from your easy-run pace using the McMillan formula and your HR zones.
+
+⚠ Only an estimate — actual race performance depends on tapering, course, weather, and pacing strategy.</translation>
     </message>
   </context>
 </TS>

@@ -17,7 +17,18 @@ class TrainingLoadChart(BaseChart):
         self._setup_ui()
 
     def _setup_ui(self):
-        self._setup_chart_view(self.tr("Training Load (ACWR)"))
+        self._setup_chart_view(
+            self.tr("Training Load (ACWR)"),
+            help_tooltip=self.tr(
+                "ACWR — Acute:Chronic Workload Ratio.\n\n"
+                "Formula: TRIMP of last 7 days ÷ average TRIMP of last 28 days.\n"
+                "TRIMP (Banister, 1991) = duration × HR-zone intensity.\n\n"
+                "Sweet-spot: 0.8–1.3 (sustainable progression).\n"
+                "Caution:    1.3–1.5 (monitor recovery).\n"
+                "Danger:     ≥1.5    (elevated injury risk).\n\n"
+                "Needs ≥5 weeks of data to be meaningful."
+            ),
+        )
 
     def update_chart(self, aggregates: List[Dict[str, Any]]):
         self._clear_chart()
