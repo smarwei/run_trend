@@ -8,10 +8,10 @@ from PySide6.QtWidgets import (
     QMenu, QFileDialog, QMessageBox,
 )
 from PySide6.QtCharts import (
-    QChart, QChartView, QCategoryAxis, QDateTimeAxis, QValueAxis,
+    QChart, QChartView, QCategoryAxis, QDateTimeAxis, QValueAxis, QLineSeries,
 )
 from PySide6.QtCore import Qt, QDateTime, QCoreApplication, Signal
-from PySide6.QtGui import QPainter, QBrush, QColor
+from PySide6.QtGui import QPainter, QBrush, QColor, QPen
 from typing import Any, Dict, List, Optional
 
 from ..analytics.smoothing import Smoother
@@ -199,6 +199,46 @@ class BaseChart(QWidget):
         if smoothing == 'off':
             return data
         return Smoother.smooth_series(data, 'sma', smoothing)
+
+    def _add_previous_year_series(
+        self,
+        axis_x,
+        axis_y,
+        primary_name: str,
+        prev_year_aggregates: Optional[List[Dict[str, Any]]],
+        value_key: str,
+        smoothing: str,
+    ) -> None:
+        """Plot a dimmed dashed line for the previous-year version of a metric.
+
+        No-op when ``prev_year_aggregates`` is empty/None so charts can call
+        this unconditionally after their primary series is in place.
+
+        The aggregates are expected to already be aligned onto the current
+        x-axis (see :func:`DataManager.align_previous_year_aggregates`).
+        """
+        if not prev_year_aggregates:
+            return
+        dates = [a['period_date'] for a in prev_year_aggregates]
+        values = self._smooth_data(
+            [a.get(value_key, 0.0) for a in prev_year_aggregates], smoothing
+        )
+
+        series = QLineSeries()
+        series.setName(
+            QCoreApplication.translate(
+                "BaseChart", "{} (previous year)"
+            ).format(primary_name)
+        )
+        pen = QPen(QColor("#95a5a6"))
+        pen.setWidth(2)
+        pen.setStyle(Qt.DashLine)
+        series.setPen(pen)
+        for i, v in enumerate(values):
+            series.append(int(dates[i].timestamp() * 1000), v)
+        self.chart.addSeries(series)
+        series.attachAxis(axis_x)
+        series.attachAxis(axis_y)
 
     def _calculate_rate_of_change(
         self,

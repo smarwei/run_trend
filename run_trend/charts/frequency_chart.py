@@ -4,7 +4,7 @@ Training frequency chart widget.
 from PySide6.QtCharts import QLineSeries
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPen, QColor
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from .base_chart import BaseChart
 
@@ -19,7 +19,12 @@ class FrequencyChart(BaseChart):
     def _setup_ui(self):
         self._setup_chart_view(self.tr("Training Frequency"))
 
-    def update_chart(self, aggregates: List[Dict[str, Any]], smoothing: str = 'off'):
+    def update_chart(
+        self,
+        aggregates: List[Dict[str, Any]],
+        smoothing: str = 'off',
+        prev_year_aggregates: Optional[List[Dict[str, Any]]] = None,
+    ):
         self._clear_chart()
         if not aggregates:
             return
@@ -53,6 +58,13 @@ class FrequencyChart(BaseChart):
         for s in self.chart.series():
             s.attachAxis(axis_x)
             s.attachAxis(axis_y)
+
+        prev_complete = self._filter_complete_aggregates(prev_year_aggregates or [])
+        self._add_previous_year_series(
+            axis_x, axis_y,
+            self.tr("Runs per Period"),
+            prev_complete, 'num_runs', smoothing,
+        )
 
         self.chart.legend().setVisible(True)
         self.chart.legend().setAlignment(Qt.AlignBottom)

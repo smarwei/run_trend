@@ -160,6 +160,14 @@ Benötigt HF-Sensor-Daten; ansonsten bleibt das Chart leer.</translation>
       <translation type="finished">Lauffortschritt Tracker</translation>
     </message>
     <message>
+      <source>Compare to previous year</source>
+      <translation type="finished">Mit Vorjahr vergleichen</translation>
+    </message>
+    <message>
+      <source>Show a dimmed dashed line for the same metric one year ago. Requires at least one year of historical data.</source>
+      <translation type="finished">Zeigt eine gedämpfte gestrichelte Linie für denselben Wert vor einem Jahr. Benötigt mindestens ein Jahr historischer Daten.</translation>
+    </message>
+    <message>
       <location filename="../ui/main_window.py" line="139" />
       <source>Distance</source>
       <translation type="finished">Distanz</translation>
@@ -658,6 +666,10 @@ Wähle ein früheres Startdatum oder synchronisiere, um neue Aktivitäten zu lad
     <message>
       <source>Could not write the chart image to disk.</source>
       <translation type="finished">Diagramm-Bild konnte nicht gespeichert werden.</translation>
+    </message>
+    <message>
+      <source>{} (previous year)</source>
+      <translation type="finished">{} (Vorjahr)</translation>
     </message>
   </context>
   <context>

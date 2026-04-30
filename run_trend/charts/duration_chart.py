@@ -4,7 +4,7 @@ Duration analysis chart widget.
 from PySide6.QtCharts import QLineSeries
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPen, QColor
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from .base_chart import BaseChart
 
@@ -19,7 +19,12 @@ class DurationChart(BaseChart):
     def _setup_ui(self):
         self._setup_chart_view(self.tr("Training Duration Analysis"))
 
-    def update_chart(self, aggregates: List[Dict[str, Any]], smoothing: str = 'off'):
+    def update_chart(
+        self,
+        aggregates: List[Dict[str, Any]],
+        smoothing: str = 'off',
+        prev_year_aggregates: Optional[List[Dict[str, Any]]] = None,
+    ):
         self._clear_chart()
         if not aggregates:
             return
@@ -85,6 +90,16 @@ class DurationChart(BaseChart):
                 s.attachAxis(axis_y_hours)
             else:
                 s.attachAxis(axis_y_min)
+
+        prev_complete = self._filter_complete_aggregates(prev_year_aggregates or [])
+        # Compare avg duration per run (the primary solid line) so the
+        # dimmed prev-year line is visually distinguishable from the
+        # already-dashed total-time series.
+        self._add_previous_year_series(
+            axis_x, axis_y_min,
+            self.tr("Avg Duration per Run"),
+            prev_complete, 'avg_duration_per_run_min', smoothing,
+        )
 
         self.chart.legend().setVisible(True)
         self.chart.legend().setAlignment(Qt.AlignBottom)

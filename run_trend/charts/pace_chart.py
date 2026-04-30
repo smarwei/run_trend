@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QCheckBox
 from PySide6.QtCharts import QChart, QChartView, QLineSeries, QValueAxis
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPainter, QPen, QColor
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import math
 
 from .base_chart import BaseChart
@@ -42,10 +42,12 @@ class PaceChart(BaseChart):
         aggregates: List[Dict[str, Any]],
         smoothing: str = 'off',
         metric: str = 'pace',
+        prev_year_aggregates: Optional[List[Dict[str, Any]]] = None,
     ):
         self._last_aggregates = aggregates
         self._last_smoothing  = smoothing
         self._last_metric     = metric
+        self._last_prev_year  = prev_year_aggregates
 
         self._clear_chart()
         if not aggregates:
@@ -106,6 +108,14 @@ class PaceChart(BaseChart):
         series.attachAxis(axis_x)
         series.attachAxis(axis_y)
 
+        prev_complete = self._filter_complete_aggregates(prev_year_aggregates or [])
+        prev_value_key = (
+            'weighted_avg_pace_min_per_km' if metric == 'pace' else 'avg_speed_kmh'
+        )
+        self._add_previous_year_series(
+            axis_x, axis_y, series_name, prev_complete, prev_value_key, smoothing,
+        )
+
         if self.roc_checkbox.isChecked():
             roc_data = self._calculate_rate_of_change(complete_aggregates, roc_key)
             roc_series = QLineSeries()
@@ -137,4 +147,9 @@ class PaceChart(BaseChart):
 
     def _on_roc_toggle(self):
         if hasattr(self, '_last_aggregates'):
-            self.update_chart(self._last_aggregates, self._last_smoothing, self._last_metric)
+            self.update_chart(
+                self._last_aggregates,
+                self._last_smoothing,
+                self._last_metric,
+                prev_year_aggregates=getattr(self, '_last_prev_year', None),
+            )

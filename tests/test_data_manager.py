@@ -184,5 +184,50 @@ class TestDataManagerPrivateLoad(unittest.TestCase):
             self.assertIn('training_load', agg)
 
 
+class TestAlignPreviousYearAggregates(unittest.TestCase):
+    """Tests for DataManager.align_previous_year_aggregates."""
+
+    def test_empty_returns_empty(self):
+        self.assertEqual(DataManager.align_previous_year_aggregates([]), [])
+
+    def test_weekly_shifts_by_52_weeks(self):
+        aggs = [
+            {'period': '2024-W01', 'period_date': datetime(2024, 1, 1), 'total_distance_km': 30.0},
+            {'period': '2024-W02', 'period_date': datetime(2024, 1, 8), 'total_distance_km': 35.0},
+        ]
+        shifted = DataManager.align_previous_year_aggregates(aggs, period='week')
+        self.assertEqual(shifted[0]['period_date'], datetime(2024, 1, 1) + timedelta(weeks=52))
+        self.assertEqual(shifted[1]['period_date'], datetime(2024, 1, 8) + timedelta(weeks=52))
+        # Other fields preserved.
+        self.assertEqual(shifted[0]['total_distance_km'], 30.0)
+        self.assertEqual(shifted[0]['period'], '2024-W01')
+
+    def test_weekly_preserves_monday_alignment(self):
+        # 2024-01-01 is a Monday — 52 weeks later (2024-12-30) must also be Monday.
+        aggs = [{'period_date': datetime(2024, 1, 1)}]
+        shifted = DataManager.align_previous_year_aggregates(aggs, period='week')
+        self.assertEqual(shifted[0]['period_date'].weekday(), 0)
+
+    def test_monthly_jumps_to_next_calendar_year(self):
+        aggs = [
+            {'period_date': datetime(2023, 3, 1)},
+            {'period_date': datetime(2023, 11, 1)},
+        ]
+        shifted = DataManager.align_previous_year_aggregates(aggs, period='month')
+        self.assertEqual(shifted[0]['period_date'], datetime(2024, 3, 1))
+        self.assertEqual(shifted[1]['period_date'], datetime(2024, 11, 1))
+
+    def test_monthly_feb_29_falls_back_to_feb_28(self):
+        aggs = [{'period_date': datetime(2024, 2, 29)}]  # 2025 is not a leap year
+        shifted = DataManager.align_previous_year_aggregates(aggs, period='month')
+        self.assertEqual(shifted[0]['period_date'], datetime(2025, 2, 28))
+
+    def test_does_not_mutate_input(self):
+        original_date = datetime(2024, 1, 1)
+        aggs = [{'period_date': original_date, 'total_distance_km': 30.0}]
+        DataManager.align_previous_year_aggregates(aggs, period='week')
+        self.assertEqual(aggs[0]['period_date'], original_date)
+
+
 if __name__ == '__main__':
     unittest.main()

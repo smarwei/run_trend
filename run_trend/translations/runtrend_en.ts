@@ -160,6 +160,14 @@ Needs HR-sensor data; otherwise the chart stays empty.</translation>
       <translation type="finished">Running Progress Tracker</translation>
     </message>
     <message>
+      <source>Compare to previous year</source>
+      <translation type="finished">Compare to previous year</translation>
+    </message>
+    <message>
+      <source>Show a dimmed dashed line for the same metric one year ago. Requires at least one year of historical data.</source>
+      <translation type="finished">Show a dimmed dashed line for the same metric one year ago. Requires at least one year of historical data.</translation>
+    </message>
+    <message>
       <location filename="../ui/main_window.py" line="139" />
       <source>Distance</source>
       <translation type="finished">Distance</translation>
@@ -658,6 +666,10 @@ Pick an earlier start date or sync to fetch new activities.</translation>
     <message>
       <source>Could not write the chart image to disk.</source>
       <translation type="finished">Could not write the chart image to disk.</translation>
+    </message>
+    <message>
+      <source>{} (previous year)</source>
+      <translation type="finished">{} (previous year)</translation>
     </message>
   </context>
   <context>

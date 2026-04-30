@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QCheckBox
 from PySide6.QtCharts import QChart, QChartView, QLineSeries, QValueAxis
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPainter, QPen, QColor
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import math
 
 from .base_chart import BaseChart
@@ -37,9 +37,15 @@ class DistanceChart(BaseChart):
         self.chart_view.setRenderHint(QPainter.Antialiasing)
         layout.addWidget(self._wrap_chart_view_with_empty_state(self.chart_view))
 
-    def update_chart(self, aggregates: List[Dict[str, Any]], smoothing: str = 'off'):
+    def update_chart(
+        self,
+        aggregates: List[Dict[str, Any]],
+        smoothing: str = 'off',
+        prev_year_aggregates: Optional[List[Dict[str, Any]]] = None,
+    ):
         self._last_aggregates = aggregates
         self._last_smoothing  = smoothing
+        self._last_prev_year  = prev_year_aggregates
 
         self._clear_chart()
         if not aggregates:
@@ -87,6 +93,13 @@ class DistanceChart(BaseChart):
         _add(self.tr("Moving Time"),    "#9b59b6", moving_times, axis_y_time,  Qt.DashDotLine, visible=False)
         _add(self.tr("Run Count"),      "#27ae60", run_counts,   axis_y_dist,  Qt.DotLine,     visible=False)
 
+        prev_complete = self._filter_complete_aggregates(prev_year_aggregates or [])
+        self._add_previous_year_series(
+            axis_x, axis_y_dist,
+            self.tr("Total Distance"),
+            prev_complete, 'total_distance_km', smoothing,
+        )
+
         if self.roc_checkbox.isChecked():
             roc_data   = self._calculate_rate_of_change(complete_aggregates, 'total_distance_km')
             roc_series = QLineSeries()
@@ -118,4 +131,8 @@ class DistanceChart(BaseChart):
 
     def _on_roc_toggle(self):
         if hasattr(self, '_last_aggregates'):
-            self.update_chart(self._last_aggregates, self._last_smoothing)
+            self.update_chart(
+                self._last_aggregates,
+                self._last_smoothing,
+                prev_year_aggregates=getattr(self, '_last_prev_year', None),
+            )

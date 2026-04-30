@@ -3,7 +3,7 @@ Main application window.
 """
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QToolBar, QPushButton, QLabel, QComboBox, QDateEdit,
+    QToolBar, QPushButton, QLabel, QComboBox, QDateEdit, QCheckBox,
     QStatusBar, QStyle, QTabWidget, QMessageBox, QProgressDialog, QSizePolicy,
     QFileDialog,
 )
@@ -328,6 +328,22 @@ class MainWindow(QMainWindow):
         self.smoothing_combo.setCurrentText(self.tr("Medium"))
         self.smoothing_combo.currentTextChanged.connect(self._on_smoothing_changed)
         toolbar.addWidget(self.smoothing_combo)
+
+        toolbar.addSeparator()
+
+        # Year-over-year compare toggle. Disabled until _load_data confirms
+        # there's at least a year of historical data to compare against.
+        self.compare_prev_year_check = QCheckBox(self.tr("Compare to previous year"))
+        self.compare_prev_year_check.setChecked(
+            bool(self.settings.get('ui_compare_prev_year', False))
+        )
+        self.compare_prev_year_check.setToolTip(self.tr(
+            "Show a dimmed dashed line for the same metric one year ago. "
+            "Requires at least one year of historical data."
+        ))
+        self.compare_prev_year_check.setEnabled(False)
+        self.compare_prev_year_check.toggled.connect(self._on_compare_prev_year_toggled)
+        toolbar.addWidget(self.compare_prev_year_check)
 
         # Spacer to push Help and About to the right
         spacer = QWidget()
@@ -734,8 +750,37 @@ class MainWindow(QMainWindow):
             include_manual=include_manual,
         )
 
-        # Aggregate data
+        # Load activities from the year before the visible window for the
+        # year-over-year compare toggle. Filtered to strict prev-year window
+        # by dropping anything that overlaps the current visible range.
+        prev_start_q = start_date_q.addYears(-1)
+        prev_start_str = (
+            f"{prev_start_q.year()}-{prev_start_q.month():02d}-"
+            f"{prev_start_q.day():02d}"
+        )
+        prev_pool = self.db.get_activities_since(
+            prev_start_str,
+            include_treadmill=include_treadmill,
+            include_manual=include_manual,
+        )
+        self._prev_year_activities = [
+            a for a in prev_pool
+            if (a.get('start_date') or '') < start_date_str
+        ]
+
+        self._refresh_compare_toggle_state()
         self._refresh_data()
+
+    def _refresh_compare_toggle_state(self):
+        """Enable/disable the prev-year toggle based on data availability."""
+        if not hasattr(self, 'compare_prev_year_check'):
+            return
+        has_prev = bool(getattr(self, '_prev_year_activities', None))
+        self.compare_prev_year_check.setEnabled(has_prev)
+        if not has_prev and self.compare_prev_year_check.isChecked():
+            self.compare_prev_year_check.blockSignals(True)
+            self.compare_prev_year_check.setChecked(False)
+            self.compare_prev_year_check.blockSignals(False)
 
     def _refresh_data(self):
         """Refresh aggregations and charts."""
@@ -744,6 +789,15 @@ class MainWindow(QMainWindow):
             return
 
         self.aggregates = DataManager.build_aggregates(self.activities, self.current_period)
+
+        prev_activities = getattr(self, '_prev_year_activities', None)
+        if prev_activities:
+            prev_raw = DataManager.build_aggregates(prev_activities, self.current_period)
+            self.prev_year_aggregates = DataManager.align_previous_year_aggregates(
+                prev_raw, self.current_period
+            )
+        else:
+            self.prev_year_aggregates = []
 
         # Update summary panel
         self._update_summary()
@@ -891,11 +945,28 @@ class MainWindow(QMainWindow):
         metric_levels = ['pace', 'speed']
         metric = metric_levels[self.metric_combo.currentIndex()]
 
-        self.distance_chart.update_chart(self.aggregates, smoothing_strength)
-        self.pace_chart.update_chart(self.aggregates, smoothing_strength, metric)
-        self.frequency_chart.update_chart(self.aggregates, smoothing_strength)
+        prev = (
+            getattr(self, 'prev_year_aggregates', None)
+            if (
+                hasattr(self, 'compare_prev_year_check')
+                and self.compare_prev_year_check.isChecked()
+            )
+            else None
+        )
+
+        self.distance_chart.update_chart(
+            self.aggregates, smoothing_strength, prev_year_aggregates=prev,
+        )
+        self.pace_chart.update_chart(
+            self.aggregates, smoothing_strength, metric, prev_year_aggregates=prev,
+        )
+        self.frequency_chart.update_chart(
+            self.aggregates, smoothing_strength, prev_year_aggregates=prev,
+        )
         self.heartrate_chart.update_chart(self.aggregates, smoothing_strength)
-        self.duration_chart.update_chart(self.aggregates, smoothing_strength)
+        self.duration_chart.update_chart(
+            self.aggregates, smoothing_strength, prev_year_aggregates=prev,
+        )
         self.endurance_chart.update_chart(self.aggregates, smoothing_strength)
         self.structure_overview_chart.update_chart(self.aggregates, smoothing_strength)
         self.score_chart.update_chart(self.aggregates, smoothing_strength)
@@ -934,4 +1005,9 @@ class MainWindow(QMainWindow):
         # Save to settings
         self.settings.set('ui_smoothing', text)
 
+        self._update_charts()
+
+    def _on_compare_prev_year_toggled(self, checked: bool):
+        """Toggle the year-over-year compare line on the supported charts."""
+        self.settings.set('ui_compare_prev_year', bool(checked))
         self._update_charts()

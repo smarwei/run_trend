@@ -6,6 +6,7 @@ Responsibilities:
   2. Enrich with training scores
   3. Enrich with training load (ACWR) — O(n) algorithm
 """
+from datetime import timedelta
 from typing import Any, Dict, List
 
 from .aggregator import ActivityAggregator
@@ -42,6 +43,40 @@ class DataManager:
         aggregates = TrainingScoreCalculator.calculate_scores(aggregates)
         DataManager._calculate_all_training_loads(aggregates)
         return aggregates
+
+    @staticmethod
+    def align_previous_year_aggregates(
+        aggregates: List[Dict[str, Any]],
+        period: str = 'week',
+    ) -> List[Dict[str, Any]]:
+        """Shift aggregate ``period_date`` forward by ~1 year.
+
+        Used by the year-over-year comparison toggle: prev-year aggregates
+        are computed over the prior date window and then re-keyed onto the
+        current x-axis so the chart can plot them next to current-year data.
+
+        Weekly aggregates are shifted by 52 weeks (preserves Monday alignment);
+        monthly aggregates jump to the same month of the next calendar year.
+        """
+        if not aggregates:
+            return []
+
+        aligned: List[Dict[str, Any]] = []
+        for agg in aggregates:
+            shifted = dict(agg)
+            old_date = agg['period_date']
+            if period == 'week':
+                shifted['period_date'] = old_date + timedelta(weeks=52)
+            else:
+                try:
+                    shifted['period_date'] = old_date.replace(year=old_date.year + 1)
+                except ValueError:
+                    # Feb 29 → Feb 28 in a non-leap target year.
+                    shifted['period_date'] = old_date.replace(
+                        year=old_date.year + 1, day=28
+                    )
+            aligned.append(shifted)
+        return aligned
 
     @staticmethod
     def _calculate_all_training_loads(aggregates: List[Dict[str, Any]]) -> None:
