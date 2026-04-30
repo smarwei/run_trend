@@ -1441,5 +1441,85 @@ Schätzt 5K / 10K / Halb / Marathon aus deiner Easy-Run-Pace per McMillan-Formel
 
 ⚠ Nur eine Schätzung — die echte Leistung hängt von Taper, Strecke, Wetter und Renntaktik ab.</translation>
     </message>
+    <message>
+      <source>Breakdown:</source>
+      <translation type="finished">Aufschlüsselung:</translation>
+    </message>
+    <message>
+      <source>Distance: -</source>
+      <translation type="finished">Distanz: -</translation>
+    </message>
+    <message>
+      <source>Frequency: -</source>
+      <translation type="finished">Häufigkeit: -</translation>
+    </message>
+    <message>
+      <source>Pace: -</source>
+      <translation type="finished">Pace: -</translation>
+    </message>
+    <message>
+      <source>{}: {:.1f} / {:.0f}</source>
+      <translation type="finished">{}: {:.1f} / {:.0f}</translation>
+    </message>
+    <message>
+      <source>{}: No HR data</source>
+      <translation type="finished">{}: keine HF-Daten</translation>
+    </message>
+    <message>
+      <source>Distance</source>
+      <translation type="finished">Distanz</translation>
+    </message>
+    <message>
+      <source>Frequency</source>
+      <translation type="finished">Häufigkeit</translation>
+    </message>
+    <message>
+      <source>Pace</source>
+      <translation type="finished">Pace</translation>
+    </message>
+    <message>
+      <source>Efficiency</source>
+      <translation type="finished">Effizienz</translation>
+    </message>
+    <message>
+      <source>Distance contribution to the training score.
+
+Compares your period distance to a rolling baseline.
+Increase weekly distance sustainably to raise this value.</source>
+      <translation type="finished">Distanz-Beitrag zum Trainings-Score.
+
+Vergleicht die Distanz dieser Periode mit einem rollierenden Basiswert.
+Erhöhe die Wochendistanz nachhaltig, um diesen Wert zu steigern.</translation>
+    </message>
+    <message>
+      <source>Frequency contribution to the training score.
+
+Compares the number of runs in this period to a rolling baseline.
+Run more often to raise this value.</source>
+      <translation type="finished">Häufigkeits-Beitrag zum Trainings-Score.
+
+Vergleicht die Anzahl der Läufe in dieser Periode mit einem rollierenden Basiswert.
+Laufe häufiger, um diesen Wert zu steigern.</translation>
+    </message>
+    <message>
+      <source>Pace contribution to the training score.
+
+Compares your weighted average pace to a rolling baseline.
+Faster pace at the same effort raises this value.</source>
+      <translation type="finished">Pace-Beitrag zum Trainings-Score.
+
+Vergleicht deine gewichtete Durchschnitts-Pace mit einem rollierenden Basiswert.
+Schnellere Pace bei gleichem Aufwand steigert diesen Wert.</translation>
+    </message>
+    <message>
+      <source>Efficiency contribution to the training score.
+
+Based on Efficiency Factor (pace ÷ HR). Needs heart-rate data.
+Same pace at lower HR = better aerobic fitness raises this value.</source>
+      <translation type="finished">Effizienz-Beitrag zum Trainings-Score.
+
+Basiert auf dem Efficiency Factor (Pace ÷ HF). Benötigt Herzfrequenz-Daten.
+Gleiche Pace bei niedrigerer HF = bessere aerobe Fitness steigert diesen Wert.</translation>
+    </message>
   </context>
 </TS>

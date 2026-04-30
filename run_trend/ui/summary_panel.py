@@ -6,6 +6,7 @@ from PySide6.QtCore import Qt
 from datetime import datetime
 
 from .help_label import make_help_icon
+from ..analytics.training_score import TrainingScoreCalculator
 
 
 def _row_with_help(label: QLabel, tooltip: str) -> QHBoxLayout:
@@ -125,6 +126,57 @@ class SummaryPanel(QWidget):
                 "  • 80+   green – strong"
             ),
         ))
+
+        # Score breakdown — shows how each weighted component contributes
+        # so users can see what to improve to raise the score.
+        breakdown_label = QLabel(self.tr("Breakdown:"))
+        breakdown_label.setStyleSheet("font-size: 10px; color: gray; margin-top: 4px;")
+        score_layout.addWidget(breakdown_label)
+
+        self.score_distance_label = QLabel(self.tr("Distance: -"))
+        self.score_distance_label.setStyleSheet("font-size: 11px;")
+        score_layout.addLayout(_row_with_help(
+            self.score_distance_label,
+            self.tr(
+                "Distance contribution to the training score.\n\n"
+                "Compares your period distance to a rolling baseline.\n"
+                "Increase weekly distance sustainably to raise this value."
+            ),
+        ))
+
+        self.score_frequency_label = QLabel(self.tr("Frequency: -"))
+        self.score_frequency_label.setStyleSheet("font-size: 11px;")
+        score_layout.addLayout(_row_with_help(
+            self.score_frequency_label,
+            self.tr(
+                "Frequency contribution to the training score.\n\n"
+                "Compares the number of runs in this period to a rolling baseline.\n"
+                "Run more often to raise this value."
+            ),
+        ))
+
+        self.score_pace_label = QLabel(self.tr("Pace: -"))
+        self.score_pace_label.setStyleSheet("font-size: 11px;")
+        score_layout.addLayout(_row_with_help(
+            self.score_pace_label,
+            self.tr(
+                "Pace contribution to the training score.\n\n"
+                "Compares your weighted average pace to a rolling baseline.\n"
+                "Faster pace at the same effort raises this value."
+            ),
+        ))
+
+        self.score_efficiency_label = QLabel(self.tr("Efficiency: -"))
+        self.score_efficiency_label.setStyleSheet("font-size: 11px;")
+        score_layout.addLayout(_row_with_help(
+            self.score_efficiency_label,
+            self.tr(
+                "Efficiency contribution to the training score.\n\n"
+                "Based on Efficiency Factor (pace ÷ HR). Needs heart-rate data.\n"
+                "Same pace at lower HR = better aerobic fitness raises this value."
+            ),
+        ))
+
         score_group.setLayout(score_layout)
         layout.addWidget(score_group)
 
@@ -202,6 +254,17 @@ class SummaryPanel(QWidget):
 
         # Add stretch to push everything to the top
         layout.addStretch()
+
+    def _set_breakdown_label(self, label: QLabel, name: str, contribution: dict):
+        """Render one breakdown row as 'Name: contribution / max'."""
+        if not contribution.get('has_data', False):
+            label.setText(self.tr("{}: No HR data").format(name))
+            return
+        label.setText(
+            self.tr("{}: {:.1f} / {:.0f}").format(
+                name, contribution['contribution'], contribution['max']
+            )
+        )
 
     def update_summary(self, data: dict):
         """
@@ -294,6 +357,24 @@ class SummaryPanel(QWidget):
             color = "#2ecc71"  # Bright green
 
         self.score_label.setStyleSheet(f"font-size: 24px; font-weight: bold; color: {color};")
+
+        # Score breakdown
+        components = data.get('score_components')
+        contributions = TrainingScoreCalculator.get_score_contributions(components or {})
+        if contributions:
+            self._set_breakdown_label(self.score_distance_label, self.tr("Distance"),
+                                      contributions['distance'])
+            self._set_breakdown_label(self.score_frequency_label, self.tr("Frequency"),
+                                      contributions['frequency'])
+            self._set_breakdown_label(self.score_pace_label, self.tr("Pace"),
+                                      contributions['pace'])
+            self._set_breakdown_label(self.score_efficiency_label, self.tr("Efficiency"),
+                                      contributions['efficiency'])
+        else:
+            self.score_distance_label.setText(self.tr("Distance: -"))
+            self.score_frequency_label.setText(self.tr("Frequency: -"))
+            self.score_pace_label.setText(self.tr("Pace: -"))
+            self.score_efficiency_label.setText(self.tr("Efficiency: -"))
 
         # Marathon milestone
         marathon_estimate = data.get('marathon_estimate')

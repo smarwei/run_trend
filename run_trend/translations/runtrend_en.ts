@@ -1421,5 +1421,85 @@ Predicts 5K / 10K / Half / Marathon times from your easy-run pace using the McMi
 
 ⚠ Only an estimate — actual race performance depends on tapering, course, weather, and pacing strategy.</translation>
     </message>
+    <message>
+      <source>Breakdown:</source>
+      <translation type="finished">Breakdown:</translation>
+    </message>
+    <message>
+      <source>Distance: -</source>
+      <translation type="finished">Distance: -</translation>
+    </message>
+    <message>
+      <source>Frequency: -</source>
+      <translation type="finished">Frequency: -</translation>
+    </message>
+    <message>
+      <source>Pace: -</source>
+      <translation type="finished">Pace: -</translation>
+    </message>
+    <message>
+      <source>{}: {:.1f} / {:.0f}</source>
+      <translation type="finished">{}: {:.1f} / {:.0f}</translation>
+    </message>
+    <message>
+      <source>{}: No HR data</source>
+      <translation type="finished">{}: No HR data</translation>
+    </message>
+    <message>
+      <source>Distance</source>
+      <translation type="finished">Distance</translation>
+    </message>
+    <message>
+      <source>Frequency</source>
+      <translation type="finished">Frequency</translation>
+    </message>
+    <message>
+      <source>Pace</source>
+      <translation type="finished">Pace</translation>
+    </message>
+    <message>
+      <source>Efficiency</source>
+      <translation type="finished">Efficiency</translation>
+    </message>
+    <message>
+      <source>Distance contribution to the training score.
+
+Compares your period distance to a rolling baseline.
+Increase weekly distance sustainably to raise this value.</source>
+      <translation type="finished">Distance contribution to the training score.
+
+Compares your period distance to a rolling baseline.
+Increase weekly distance sustainably to raise this value.</translation>
+    </message>
+    <message>
+      <source>Frequency contribution to the training score.
+
+Compares the number of runs in this period to a rolling baseline.
+Run more often to raise this value.</source>
+      <translation type="finished">Frequency contribution to the training score.
+
+Compares the number of runs in this period to a rolling baseline.
+Run more often to raise this value.</translation>
+    </message>
+    <message>
+      <source>Pace contribution to the training score.
+
+Compares your weighted average pace to a rolling baseline.
+Faster pace at the same effort raises this value.</source>
+      <translation type="finished">Pace contribution to the training score.
+
+Compares your weighted average pace to a rolling baseline.
+Faster pace at the same effort raises this value.</translation>
+    </message>
+    <message>
+      <source>Efficiency contribution to the training score.
+
+Based on Efficiency Factor (pace ÷ HR). Needs heart-rate data.
+Same pace at lower HR = better aerobic fitness raises this value.</source>
+      <translation type="finished">Efficiency contribution to the training score.
+
+Based on Efficiency Factor (pace ÷ HR). Needs heart-rate data.
+Same pace at lower HR = better aerobic fitness raises this value.</translation>
+    </message>
   </context>
 </TS>

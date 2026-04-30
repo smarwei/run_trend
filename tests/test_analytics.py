@@ -322,6 +322,59 @@ class TestTrainingScoreCalculator(unittest.TestCase):
         self.assertGreater(len(explanation), 0)
         self.assertIn('training', explanation.lower())
 
+    def test_score_contributions_with_hr(self):
+        """Contributions sum to the training score; maxima sum to 100."""
+        scored = TrainingScoreCalculator.calculate_scores(self.aggregates)
+        agg = scored[-1]
+        contributions = TrainingScoreCalculator.get_score_contributions(
+            agg['score_components']
+        )
+
+        self.assertEqual(set(contributions.keys()),
+                         {'distance', 'frequency', 'pace', 'efficiency'})
+        for c in contributions.values():
+            self.assertTrue(c['has_data'])
+
+        max_total = sum(c['max'] for c in contributions.values())
+        self.assertAlmostEqual(max_total, 100.0)
+
+        contribution_total = sum(c['contribution'] for c in contributions.values())
+        self.assertAlmostEqual(contribution_total, agg['training_score'], places=4)
+
+    def test_score_contributions_without_hr(self):
+        """Without HR data, efficiency is flagged absent and max still totals 100."""
+        aggregates_no_hr = []
+        base_date = datetime(2024, 1, 1)
+        for week in range(5):
+            period_date = base_date + timedelta(weeks=week)
+            aggregates_no_hr.append({
+                'period': f'2024-W{week + 1:02d}',
+                'period_start': period_date.isoformat(),
+                'total_distance_km': 20.0 + week,
+                'num_runs': 3,
+                'weighted_avg_pace_min_per_km': 6.0 - (week * 0.05),
+                'avg_speed_kmh': 10.0,
+                'efficiency_factor': 0,
+            })
+        scored = TrainingScoreCalculator.calculate_scores(aggregates_no_hr)
+        contributions = TrainingScoreCalculator.get_score_contributions(
+            scored[-1]['score_components']
+        )
+
+        self.assertFalse(contributions['efficiency']['has_data'])
+        self.assertEqual(contributions['efficiency']['max'], 0)
+        self.assertAlmostEqual(
+            contributions['distance']['max']
+            + contributions['frequency']['max']
+            + contributions['pace']['max'],
+            100.0,
+        )
+
+    def test_score_contributions_empty(self):
+        """Empty input returns empty dict, not an exception."""
+        self.assertEqual(TrainingScoreCalculator.get_score_contributions({}), {})
+        self.assertEqual(TrainingScoreCalculator.get_score_contributions(None), {})
+
     def test_fallback_without_hr_data(self):
         """Test that score calculation works without HR data."""
         # Create aggregates without efficiency_factor

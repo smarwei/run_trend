@@ -780,6 +780,7 @@ class MainWindow(QMainWindow):
             'training_load': load_data,
             'active_days': latest_agg.get('active_days'),
             'consistency_ratio': latest_agg.get('consistency_ratio'),
+            'score_components': latest_agg.get('score_components'),
         })
 
     def _update_charts(self):

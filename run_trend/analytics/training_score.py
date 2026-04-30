@@ -143,6 +143,67 @@ class TrainingScoreCalculator:
         return scored_aggregates
 
     @staticmethod
+    def get_score_contributions(score_components: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+        """
+        Translate normalized score components into per-component contributions
+        on the same 0-100 scale as the final training score.
+
+        The score is computed as ``sum(weight_i * normalized_i) * 50``; this
+        helper exposes ``weight_i * normalized_i * 50`` (current contribution)
+        and ``weight_i * 2.0 * 50`` (maximum possible contribution given the
+        2x cap) for each component, so the UI can show a breakdown without
+        re-implementing the weighting rules.
+
+        Args:
+            score_components: dict produced in ``calculate_scores`` containing
+                ``normalized_distance``, ``normalized_frequency``,
+                ``normalized_pace``, ``normalized_efficiency``,
+                ``has_hr_data``.
+
+        Returns:
+            Mapping ``{name: {'contribution', 'max', 'has_data'}}`` for the
+            four components. When HR data is missing, the efficiency entry
+            has ``has_data=False`` and a max of 0; the remaining three carry
+            the rebalanced weights so their maxima still sum to 100.
+        """
+        if not score_components:
+            return {}
+
+        nd = score_components.get('normalized_distance', 0.0)
+        nf = score_components.get('normalized_frequency', 0.0)
+        np_ = score_components.get('normalized_pace', 0.0)
+        ne = score_components.get('normalized_efficiency', 0.0)
+        has_hr = bool(score_components.get('has_hr_data', False))
+
+        if has_hr:
+            weights = {'distance': 0.30, 'frequency': 0.20, 'pace': 0.30, 'efficiency': 0.20}
+        else:
+            weights = {'distance': 0.375, 'frequency': 0.250, 'pace': 0.375, 'efficiency': 0.0}
+
+        return {
+            'distance': {
+                'contribution': weights['distance'] * nd * 50,
+                'max': weights['distance'] * 2.0 * 50,
+                'has_data': True,
+            },
+            'frequency': {
+                'contribution': weights['frequency'] * nf * 50,
+                'max': weights['frequency'] * 2.0 * 50,
+                'has_data': True,
+            },
+            'pace': {
+                'contribution': weights['pace'] * np_ * 50,
+                'max': weights['pace'] * 2.0 * 50,
+                'has_data': True,
+            },
+            'efficiency': {
+                'contribution': weights['efficiency'] * ne * 50,
+                'max': weights['efficiency'] * 2.0 * 50,
+                'has_data': has_hr,
+            },
+        }
+
+    @staticmethod
     def get_score_explanation() -> str:
         """
         Get human-readable explanation of training score calculation.
