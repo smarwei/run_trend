@@ -26,7 +26,12 @@ class TrainingLoadChart(BaseChart):
                 "Sweet-spot: 0.8–1.3 (sustainable progression).\n"
                 "Caution:    1.3–1.5 (monitor recovery).\n"
                 "Danger:     ≥1.5    (elevated injury risk).\n\n"
-                "Needs ≥5 weeks of data to be meaningful."
+                "Needs ≥5 weeks of data to be meaningful.\n\n"
+                "Caveat: this app's composite ACWR includes a pace component "
+                "(faster pace = higher load). A sustained fitness-driven pace "
+                "improvement can therefore push the score upward even if your "
+                "volume and HR are stable — read elevated values in that "
+                "context, not as automatic overtraining warnings."
             ),
         )
 

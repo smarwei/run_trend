@@ -589,3 +589,66 @@ because it adds a major endurance dimension that is especially relevant for half
 
 If you want, I can now turn this into a **clean patch-style spec addendum** with sections like “Replace section X with …”, “Add new section Y …”, so it fits directly into your original specification document.
 
+---
+
+# 13. ACWR Composition — Pace as a Component (Ticket 20)
+
+## Background
+
+`run_trend/analytics/training_load.py` currently composes ACWR from three
+components: weekly distance, weighted average pace (inverted: faster pace =
+higher load), and average heart rate. The pace component is mathematically
+consistent with the rest of the formula but methodologically debatable:
+
+- A runner who steadily gets faster (a fitness gain) raises the ACWR pace
+  contribution and the UI eventually warns about overtraining.
+- That pathologizes progression, which is the opposite of what ACWR is meant
+  to flag.
+- Gabbett (2016) — the canonical ACWR reference — bases the ratio on
+  **volume** and **session load** (RPE × duration), not on pace.
+
+## Options reviewed
+
+1. **Drop pace entirely** — recompose ACWR from volume + duration (or HR).
+   Cleanest from a methodology standpoint; biggest behavior change. Would
+   shift the score for every existing user and require revisiting the score
+   thresholds in §10 of the spec.
+2. **Replace pace with a load-proxy** — e.g. `volume × (1/pace)` ≈ "equivalent
+   distance at threshold". Better than naked pace, but introduces a new metric
+   that needs its own tests, baseline, and tooltip.
+3. **Keep current composition; document the caveat** — leave the formula
+   untouched, surface the limitation prominently in the chart tooltip.
+
+## Decision (2026-04-30): Option 3 (document-only)
+
+**Rationale**
+
+- The pace inversion is not strictly wrong; it is a known trade-off. Calling
+  ACWR "broken" overstates the issue — most users will only meaningfully
+  improve their pace over many months, by which point distance has usually
+  moved more than pace.
+- Options 1 and 2 are both behavior-changing and ACWR is a central, visible
+  metric. The ticket explicitly notes "Vor Code-Change zwingend diskutieren"
+  ("must discuss before code change"). Until that discussion happens, the
+  safe path is to make the caveat visible and stop there.
+- The HR-fallback already absorbs the pace component when HR data is
+  missing (57/43 distance/pace split), which limits how much the pace
+  contribution can dominate in practice.
+
+**What this means in code**
+
+- No changes to `training_load.py`'s formula.
+- The chart tooltip in `charts/training_load_chart.py` is extended with a
+  short caveat paragraph explaining that sustained pace gains can elevate
+  the score and that this is a known limitation of the current composition.
+- Existing tests in `tests/test_analytics.py` are unchanged — behavior is
+  preserved.
+
+**Revisit when**
+
+- A user reports the pathologization in practice (e.g. several months of
+  fitness gains pushed them into the warning band without a corresponding
+  injury risk).
+- Spec §10 is reviewed for v2 and we have appetite to also re-tune the
+  ACWR-to-score mapping.
+

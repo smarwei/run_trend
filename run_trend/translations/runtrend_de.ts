@@ -1570,7 +1570,9 @@ Sweet-spot: 0.8–1.3 (sustainable progression).
 Caution:    1.3–1.5 (monitor recovery).
 Danger:     ≥1.5    (elevated injury risk).
 
-Needs ≥5 weeks of data to be meaningful.</source>
+Needs ≥5 weeks of data to be meaningful.
+
+Caveat: this app's composite ACWR includes a pace component (faster pace = higher load). A sustained fitness-driven pace improvement can therefore push the score upward even if your volume and HR are stable — read elevated values in that context, not as automatic overtraining warnings.</source>
       <translation type="finished">ACWR — Acute:Chronic Workload Ratio.
 
 Formel: TRIMP der letzten 7 Tage ÷ Durchschnitts-TRIMP der letzten 28 Tage.
@@ -1580,7 +1582,9 @@ Sweet-Spot: 0,8–1,3 (nachhaltige Steigerung).
 Vorsicht:   1,3–1,5 (Erholung beachten).
 Gefahr:     ≥1,5    (erhöhtes Verletzungsrisiko).
 
-Benötigt ≥5 Wochen Daten, um aussagekräftig zu sein.</translation>
+Benötigt ≥5 Wochen Daten, um aussagekräftig zu sein.
+
+Caveat: Der zusammengesetzte ACWR dieser App enthält eine Pace-Komponente (schnellere Pace = höhere Last). Eine fitnessbedingte, nachhaltige Pace-Verbesserung kann den Score also nach oben treiben, selbst wenn Volumen und HF stabil sind — erhöhte Werte in diesem Licht lesen, nicht automatisch als Übertrainings-Warnung.</translation>
     </message>
   </context>
   <context>
