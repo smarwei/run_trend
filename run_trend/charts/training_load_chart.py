@@ -88,6 +88,8 @@ class TrainingLoadChart(BaseChart):
         load_series.attachAxis(axis_x)
         load_series.attachAxis(axis_y)
 
+        self._add_race_markers(axis_x, axis_y)
+
         self.chart.legend().setVisible(True)
         self.chart.legend().setAlignment(Qt.AlignBottom)
         self._connect_legend_markers()

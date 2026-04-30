@@ -101,6 +101,8 @@ class DurationChart(BaseChart):
             prev_complete, 'avg_duration_per_run_min', smoothing,
         )
 
+        self._add_race_markers(axis_x, axis_y_hours)
+
         self.chart.legend().setVisible(True)
         self.chart.legend().setAlignment(Qt.AlignBottom)
         self._connect_legend_markers()

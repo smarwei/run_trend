@@ -37,7 +37,7 @@ CREATE TABLE race_markers (
 
 - [x] Race-Tabelle wird automatisch migriert (idempotent, wie für trainer/manual gemacht)
 - [x] Rechtsklick-Aktion in RunsTable
-- [ ] Marker auf allen Zeitachsen-Charts (Distance, Pace, Frequency, Duration, Score,
+- [x] Marker auf allen Zeitachsen-Charts (Distance, Pace, Frequency, Duration, Score,
       Training-Load)
 - [x] Race-Manager-Dialog für Edit/Delete
 - [x] Übersetzt (DE/EN) für alle UI-Teile außer Chart-Marker
@@ -51,7 +51,7 @@ CREATE TABLE race_markers (
 
 ## Status / Fortschritt
 
-**Teilweise umgesetzt — DB-Layer fertig, UI noch offen.**
+**Vollständig umgesetzt.**
 
 Da T15 mehrere Schichten umfasst (DB, Dialoge, Kontextmenü, Chart-Annotationen),
 wird die kleinste zwingende Vorstufe — der DB-Layer — als eigene Iteration
@@ -77,9 +77,16 @@ gemerged. Folgeiterationen ergänzen die UI-Teile:
 - ✅ Neue DB-Methode `replace_race_marker(id, ...)` schreibt alle Felder inkl.
   expliziter NULLs (für Edit-Dialog, der optionale Felder leeren kann);
   `update_race_marker` bleibt unverändert (kompatibel zu bisherigen Tests).
-- ⏳ Vertikale Marker auf allen Zeitachsen-Charts — Folge-Ticket
+- ✅ Vertikale gedimmte Linien auf allen sechs Zeitachsen-Charts (Distance,
+  Pace, Frequency, Duration, Score, Training-Load) via
+  `BaseChart.set_race_markers` + `_add_race_markers(axis_x, axis_y)`. Marker
+  werden als 1px-`QLineSeries` zwischen `axis_y.min()` und `axis_y.max()`
+  gezeichnet — der Race-Name landet automatisch in der Legende, Klick auf
+  den Legenden-Eintrag blendet die Linie aus.
+- ✅ MainWindow pusht aktuelle Marker bei jedem `_update_charts()` und
+  refresht die Charts nach Mark-as-Race / Race-Manager-Aktionen.
 - ✅ Übersetzungen für RaceDialog + Kontextmenü + Manager-Dialog (DE/EN,
-  `.ts` + `.qm`)
+  `.ts` + `.qm`). Race-Namen sind DB-Inhalt, nicht zu übersetzen.
 
 ### Annahmen DB-Layer
 

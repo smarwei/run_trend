@@ -100,6 +100,8 @@ class DistanceChart(BaseChart):
             prev_complete, 'total_distance_km', smoothing,
         )
 
+        self._add_race_markers(axis_x, axis_y_dist)
+
         if self.roc_checkbox.isChecked():
             roc_data   = self._calculate_rate_of_change(complete_aggregates, 'total_distance_km')
             roc_series = QLineSeries()

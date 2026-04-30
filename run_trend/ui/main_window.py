@@ -641,6 +641,9 @@ class MainWindow(QMainWindow):
         """Open the Race-Manager dialog."""
         dialog = RaceManagerDialog(self.db, self)
         dialog.exec()
+        # Markers may have changed (add/edit/delete); redraw charts.
+        if getattr(self, 'aggregates', None):
+            self._update_charts()
 
     def _mark_activity_as_race(self, activity: dict):
         """Open RaceDialog prefilled from an activity and persist on accept."""
@@ -666,6 +669,8 @@ class MainWindow(QMainWindow):
         self.statusbar.showMessage(
             self.tr("Saved race: {}").format(data["name"]), 5000
         )
+        if getattr(self, 'aggregates', None):
+            self._update_charts()
 
     def _show_manual(self):
         """Show manual/help dialog."""
@@ -976,8 +981,19 @@ class MainWindow(QMainWindow):
             'score_components': latest_agg.get('score_components'),
         })
 
+    def _apply_race_markers_to_charts(self):
+        """Push current race markers from DB into the time-axis charts."""
+        races = self.db.get_race_markers()
+        for chart in (
+            self.distance_chart, self.pace_chart, self.frequency_chart,
+            self.duration_chart, self.score_chart, self.training_load_chart,
+        ):
+            chart.set_race_markers(races)
+
     def _update_charts(self):
         """Update all charts."""
+        self._apply_race_markers_to_charts()
+
         # Use index instead of localized text so non-English UIs work correctly
         smoothing_levels = ['off', 'light', 'medium', 'strong']
         smoothing_strength = smoothing_levels[self.smoothing_combo.currentIndex()]

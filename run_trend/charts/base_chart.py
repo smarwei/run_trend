@@ -240,6 +240,50 @@ class BaseChart(QWidget):
         series.attachAxis(axis_x)
         series.attachAxis(axis_y)
 
+    def set_race_markers(self, markers: List[Dict[str, Any]]) -> None:
+        """Stash race markers; the next update_chart() call will draw them."""
+        self._race_markers = list(markers or [])
+
+    def _add_race_markers(self, axis_x, axis_y) -> None:
+        """Draw a thin dashed vertical line at each race date.
+
+        The lines are added as one QLineSeries per race so each carries the
+        race name in the legend and survives a chart refresh. Lines outside
+        the visible x-range are clipped by Qt automatically. Reads from
+        ``self._race_markers`` (default empty list).
+        """
+        races = getattr(self, "_race_markers", None) or []
+        if not races:
+            return
+        try:
+            y_min = float(axis_y.min())
+            y_max = float(axis_y.max())
+        except (AttributeError, TypeError):
+            return
+        if y_max <= y_min:
+            return
+
+        pen_color = QColor(120, 120, 120, 200)
+        for race in races:
+            date_str = race.get("date") or ""
+            try:
+                dt = datetime.fromisoformat(date_str)
+            except (ValueError, TypeError):
+                continue
+
+            line = QLineSeries()
+            line.setName(race.get("name", "") or "")
+            pen = QPen(pen_color)
+            pen.setStyle(Qt.DashLine)
+            pen.setWidth(1)
+            line.setPen(pen)
+            ts_ms = int(dt.timestamp() * 1000)
+            line.append(ts_ms, y_min)
+            line.append(ts_ms, y_max)
+            self.chart.addSeries(line)
+            line.attachAxis(axis_x)
+            line.attachAxis(axis_y)
+
     def _calculate_rate_of_change(
         self,
         aggregates: List[Dict[str, Any]],

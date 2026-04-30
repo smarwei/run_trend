@@ -116,6 +116,8 @@ class PaceChart(BaseChart):
             axis_x, axis_y, series_name, prev_complete, prev_value_key, smoothing,
         )
 
+        self._add_race_markers(axis_x, axis_y)
+
         if self.roc_checkbox.isChecked():
             roc_data = self._calculate_rate_of_change(complete_aggregates, roc_key)
             roc_series = QLineSeries()
