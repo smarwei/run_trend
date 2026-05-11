@@ -486,7 +486,6 @@ class MainWindow(QMainWindow):
             # Stored as naive UTC ISO string by sync_manager.
             now = datetime.now(timezone.utc).replace(tzinfo=None)
         else:
-            from datetime import timezone
             now = datetime.now(timezone.utc)
 
         delta = now - ts

@@ -145,6 +145,47 @@ class TestTabShortcuts(unittest.TestCase, _MainWindowFixture):
         self.assertEqual(self.window.tab_widget.currentIndex(), 4)
 
 
+class TestRelativeTimeFormatter(unittest.TestCase, _MainWindowFixture):
+    """Regression guard for the UnboundLocalError that bit a fresh `nix
+    run` after T28: a stray ``from datetime import timezone`` inside the
+    else-branch of ``_format_relative_time`` shadowed the module-level
+    import, so the if-branch crashed with UnboundLocalError when called
+    with a naive UTC ISO string (the format sync_manager actually stores)."""
+
+    def setUp(self):
+        self._make_main_window()
+
+    def tearDown(self):
+        self._cleanup_main_window()
+
+    def test_naive_utc_iso_does_not_raise(self):
+        # naive UTC ISO, as written by sync_manager.set_setting('last_sync', …).
+        from datetime import datetime, timezone, timedelta
+        five_min_ago = (
+            datetime.now(timezone.utc).replace(tzinfo=None)
+            - timedelta(minutes=5)
+        ).isoformat()
+        result = self.window._format_relative_time(five_min_ago)
+        self.assertIsInstance(result, str)
+        self.assertNotEqual(result, five_min_ago)  # actually formatted
+
+    def test_aware_iso_with_z_suffix_does_not_raise(self):
+        # Tz-aware via Strava-style Z suffix.
+        from datetime import datetime, timezone, timedelta
+        five_min_ago = (
+            datetime.now(timezone.utc) - timedelta(minutes=5)
+        ).isoformat().replace('+00:00', 'Z')
+        result = self.window._format_relative_time(five_min_ago)
+        self.assertIsInstance(result, str)
+        self.assertNotEqual(result, five_min_ago)
+
+    def test_malformed_iso_returns_input(self):
+        self.assertEqual(
+            self.window._format_relative_time("not an iso string"),
+            "not an iso string",
+        )
+
+
 class TestChartAccessibility(unittest.TestCase, _MainWindowFixture):
 
     def setUp(self):
