@@ -4,9 +4,9 @@ Settings dialog for application configuration.
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QFormLayout,
     QLineEdit, QPushButton, QLabel, QGroupBox, QMessageBox, QSpinBox, QComboBox,
-    QCheckBox, QTabWidget, QWidget,
+    QCheckBox, QTabWidget, QWidget, QDateEdit,
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QDate
 
 
 class SettingsDialog(QDialog):
@@ -78,6 +78,40 @@ class SettingsDialog(QDialog):
 
         language_group.setLayout(language_layout)
         tab_layout.addWidget(language_group)
+
+        # Profile (Ticket 37 — age-graded performance needs date of birth + gender)
+        profile_group = QGroupBox(self.tr("Profile"))
+        profile_layout = QFormLayout()
+
+        # Sentinel for "unset" birth date — 1900-01-01 paired with
+        # setSpecialValueText shows "Not set" instead of the date.
+        self._birth_date_unset = QDate(1900, 1, 1)
+
+        self.birth_date_input = QDateEdit()
+        self.birth_date_input.setCalendarPopup(True)
+        self.birth_date_input.setDisplayFormat("yyyy-MM-dd")
+        self.birth_date_input.setMinimumDate(self._birth_date_unset)
+        self.birth_date_input.setMaximumDate(QDate.currentDate())
+        self.birth_date_input.setSpecialValueText(self.tr("Not set"))
+        self.birth_date_input.setDate(self._birth_date_unset)
+        self.birth_date_input.setToolTip(self.tr(
+            "Date of birth — used to compute your age for the Performance "
+            "tab (age-graded race percentage and personal-peak EF decline)."
+        ))
+        profile_layout.addRow(self.tr("Date of Birth:"), self.birth_date_input)
+
+        self.gender_combo = QComboBox()
+        self.gender_combo.addItem(self.tr("Prefer not to say"), userData='')
+        self.gender_combo.addItem(self.tr("Male"), userData='male')
+        self.gender_combo.addItem(self.tr("Female"), userData='female')
+        self.gender_combo.setToolTip(self.tr(
+            "Required for WMA age-graded performance — the tables are "
+            "gender-specific. The HF-physiology variant does not need it."
+        ))
+        profile_layout.addRow(self.tr("Gender:"), self.gender_combo)
+
+        profile_group.setLayout(profile_layout)
+        tab_layout.addWidget(profile_group)
 
         # Heart Rate Settings Group
         hr_group = QGroupBox(self.tr("Heart Rate Configuration"))
@@ -292,6 +326,8 @@ class SettingsDialog(QDialog):
         language = self.settings.get('language', 'auto')
         include_treadmill = bool(self.settings.get('include_treadmill', True))
         include_manual = bool(self.settings.get('include_manual', True))
+        birth_date_iso = self.settings.get('birth_date', '') or ''
+        gender = self.settings.get('gender', '') or ''
 
         self.client_id_input.setText(client_id)
         self.client_secret_input.setText(client_secret)
@@ -301,6 +337,18 @@ class SettingsDialog(QDialog):
         self.hr_zone_scheme_combo.setCurrentIndex(scheme_idx if scheme_idx >= 0 else 0)
         self.include_treadmill_checkbox.setChecked(include_treadmill)
         self.include_manual_checkbox.setChecked(include_manual)
+
+        # Profile fields — empty string => "Not set" sentinel date.
+        if birth_date_iso:
+            parsed = QDate.fromString(birth_date_iso, "yyyy-MM-dd")
+            if parsed.isValid() and parsed >= self._birth_date_unset:
+                self.birth_date_input.setDate(parsed)
+            else:
+                self.birth_date_input.setDate(self._birth_date_unset)
+        else:
+            self.birth_date_input.setDate(self._birth_date_unset)
+        gender_idx = self.gender_combo.findData(gender)
+        self.gender_combo.setCurrentIndex(gender_idx if gender_idx >= 0 else 0)
 
         # Set language combo box
         language_map = {'auto': 0, 'de': 1, 'en': 2}
@@ -326,6 +374,11 @@ class SettingsDialog(QDialog):
         )
         include_treadmill = self.include_treadmill_checkbox.isChecked()
         include_manual = self.include_manual_checkbox.isChecked()
+
+        # Profile (T37): empty string == unset (sentinel date 1900-01-01).
+        bd = self.birth_date_input.date()
+        birth_date_iso = '' if bd == self._birth_date_unset else bd.toString("yyyy-MM-dd")
+        gender = self.gender_combo.currentData() or ''
 
         # Validate Karvonen requirements before persisting.
         if hr_zone_scheme == 'karvonen':
@@ -369,6 +422,10 @@ class SettingsDialog(QDialog):
         # Save credentials
         self.settings.set('strava_client_id', client_id)
         self.settings.set('strava_client_secret', client_secret)
+
+        # Save profile (T37)
+        self.settings.set('birth_date', birth_date_iso)
+        self.settings.set('gender', gender)
 
         # Save manual HRmax + HR-zone config
         self.settings.set('manual_hrmax', manual_hrmax)
