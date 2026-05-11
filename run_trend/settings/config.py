@@ -3,6 +3,8 @@ Application settings and configuration management.
 """
 import os
 import logging
+import tempfile
+import threading
 from pathlib import Path
 from typing import Any, Optional
 import json
@@ -26,6 +28,11 @@ class AppSettings:
         'include_manual': True,
         'theme': 'light',  # 'light' or 'dark'
     }
+
+    # Class-level lock — AppSettings is a de-facto singleton (one instance
+    # in MainWindow), but the OAuth refresh thread can race the UI thread
+    # on `set(...)`. The lock serialises _save_settings across threads.
+    _lock = threading.Lock()
 
     def __init__(self, config_file: Optional[str] = None):
         """
@@ -56,12 +63,41 @@ class AppSettings:
             logger.exception("Error loading settings")
 
     def _save_settings(self):
-        """Save settings to file."""
-        try:
-            with open(self.config_file, 'w') as f:
-                json.dump(self.settings, f, indent=2)
-        except Exception:
-            logger.exception("Error saving settings")
+        """Save settings to file atomically.
+
+        Writes JSON to a tempfile in the same directory and renames over
+        the target via os.replace, which is atomic on POSIX and Windows.
+        A crash mid-write leaves the previous config.json intact instead
+        of clobbering it with a partial file. Best-effort chmod 0o600
+        protects the contained OAuth tokens on shared systems.
+        """
+        with self._lock:
+            path = Path(self.config_file)
+            tmp_path: Optional[Path] = None
+            try:
+                with tempfile.NamedTemporaryFile(
+                    mode='w',
+                    dir=path.parent,
+                    delete=False,
+                    prefix='.config-',
+                    suffix='.tmp',
+                    encoding='utf-8',
+                ) as f:
+                    json.dump(self.settings, f, indent=2)
+                    tmp_path = Path(f.name)
+                os.replace(tmp_path, path)
+                tmp_path = None  # replace succeeded — nothing to clean up
+                try:
+                    os.chmod(path, 0o600)
+                except OSError:
+                    pass  # best effort (Windows etc.)
+            except Exception:
+                logger.exception("Error saving settings")
+                if tmp_path is not None and tmp_path.exists():
+                    try:
+                        tmp_path.unlink()
+                    except OSError:
+                        pass
 
     def get(self, key: str, default: Any = None) -> Any:
         """
@@ -100,32 +136,6 @@ class AppSettings:
         """Reset all settings to defaults."""
         self.settings = self.DEFAULT_SETTINGS.copy()
         self._save_settings()
-
-    @staticmethod
-    def load_strava_credentials_from_file(token_file: Optional[str] = None) -> tuple:
-        """
-        Load Strava client ID and secret from file.
-
-        Args:
-            token_file: Path to file containing credentials
-
-        Returns:
-            Tuple of (client_id, client_secret) or (None, None)
-        """
-        if token_file is None:
-            # Try default location (use XDG_CONFIG_HOME for Flatpak compatibility)
-            config_home = os.environ.get('XDG_CONFIG_HOME', str(Path.home() / ".config"))
-            token_file = str(Path(config_home) / "run_trend" / "strava_credentials.json")
-
-        try:
-            if Path(token_file).exists():
-                with open(token_file, 'r') as f:
-                    creds = json.load(f)
-                    return (creds.get('client_id'), creds.get('client_secret'))
-        except Exception:
-            logger.exception("Error loading credentials")
-
-        return (None, None)
 
 
 # Backward compatibility alias

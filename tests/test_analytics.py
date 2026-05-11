@@ -632,5 +632,71 @@ class TestIncompletePeriodDetection(unittest.TestCase):
         self.assertTrue(marked[0]['is_complete'])
 
 
+class TestAggregatorEdgeCases(unittest.TestCase):
+    """Ticket 34 — fill remaining gaps in aggregator coverage."""
+
+    def test_iso_week_year_boundary_2019_2020(self):
+        """Dec 30 2019 is ISO week 2020-W01, not 2019-W53. The aggregator
+        must use ISO calendar rules, not naive `year-week` formatting."""
+        activities = [
+            {
+                'strava_id': 1,
+                'name': 'Late-December run',
+                'type': 'Run',
+                'start_date': '2019-12-30T10:00:00Z',  # Monday of ISO 2020-W01
+                'distance': 5000.0,
+                'moving_time': 1800,
+                'average_speed': 2.78,
+            }
+        ]
+
+        aggregates = ActivityAggregator.aggregate_by_week(activities)
+
+        self.assertEqual(len(aggregates), 1)
+        self.assertEqual(aggregates[0]['period'], '2020-W01')
+
+    def test_consistency_ratio_full_week(self):
+        """Seven runs on seven distinct days → ratio 1.0."""
+        activities = [
+            {
+                'strava_id': i,
+                'name': f'Run {i}',
+                'type': 'Run',
+                # ISO week 2024-W02 starts Mon 2024-01-08; one run per day Mon-Sun.
+                'start_date': f'2024-01-{8 + i:02d}T10:00:00Z',
+                'distance': 5000.0,
+                'moving_time': 1800,
+                'average_speed': 2.78,
+            }
+            for i in range(7)
+        ]
+        aggregates = ActivityAggregator.aggregate_by_week(activities)
+        self.assertEqual(len(aggregates), 1)
+        self.assertAlmostEqual(aggregates[0]['consistency_ratio'], 1.0)
+
+    def test_consistency_ratio_multiple_runs_same_day(self):
+        """Three runs spread across two distinct days inside one week →
+        2 / 7 (active days / week-length), not 3 / 7."""
+        activities = [
+            {
+                'strava_id': i,
+                'name': f'Run {i}',
+                'type': 'Run',
+                'start_date': start,
+                'distance': 5000.0,
+                'moving_time': 1800,
+                'average_speed': 2.78,
+            }
+            for i, start in enumerate([
+                '2024-01-08T07:00:00Z',  # Mon morning
+                '2024-01-08T18:00:00Z',  # Mon evening — same active day
+                '2024-01-10T07:00:00Z',  # Wed
+            ])
+        ]
+        aggregates = ActivityAggregator.aggregate_by_week(activities)
+        self.assertEqual(aggregates[0]['active_days'], 2)
+        self.assertAlmostEqual(aggregates[0]['consistency_ratio'], 2 / 7)
+
+
 if __name__ == '__main__':
     unittest.main()

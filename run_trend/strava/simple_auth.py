@@ -13,6 +13,27 @@ import time
 
 logger = logging.getLogger(__name__)
 
+# (connect, read) seconds for all Strava OAuth HTTP calls. Without this,
+# requests defaults to no timeout and a stalled TCP connection blocks the
+# refresh / auth thread until kernel TCP_USER_TIMEOUT (~2h on Linux).
+_HTTP_TIMEOUT = (5.0, 30.0)
+
+
+def _validate_callback_state(
+    query_params: dict, expected_state: str,
+) -> Optional[str]:
+    """Validate the OAuth callback's `state` parameter against the one
+    we generated. Returns ``None`` on match, ``'state_mismatch'`` on any
+    mismatch (including missing `state`).
+
+    Lifted out of the inner CallbackHandler so the CSRF branch is unit-
+    testable without spinning up an HTTP server (T34).
+    """
+    returned_state = query_params.get('state', [None])[0]
+    if returned_state != expected_state:
+        return 'state_mismatch'
+    return None
+
 
 class SimpleStravaAuth:
     """
@@ -88,7 +109,8 @@ class SimpleStravaAuth:
                     'client_secret': self._client_secret,
                     'refresh_token': self._refresh_token,
                     'grant_type': 'refresh_token'
-                }
+                },
+                timeout=_HTTP_TIMEOUT,
             )
 
             if response.status_code == 200:
@@ -181,10 +203,10 @@ class SimpleStravaAuth:
                 parsed = urllib.parse.urlparse(self.path)
                 params = urllib.parse.parse_qs(parsed.query)
 
-                # Validate state (CSRF protection)
-                returned_state = params.get('state', [None])[0]
-                if returned_state != expected_state:
-                    authorization_code['error'] = 'state_mismatch'
+                # Validate state (CSRF protection — T34: extracted helper)
+                state_error = _validate_callback_state(params, expected_state)
+                if state_error:
+                    authorization_code['error'] = state_error
                     self.send_response(400)
                     self.send_header('Content-type', 'text/html')
                     self.end_headers()
@@ -228,9 +250,14 @@ class SimpleStravaAuth:
         logger.info("Opening browser for Strava authorization")
         webbrowser.open(auth_url)
 
-        # Start server and wait for callback
+        # Start server and wait for callback. Bind to loopback only so the
+        # OAuth-callback port isn't reachable from the LAN during the
+        # ~30s flow (T29). Strava redirects to http://localhost:PORT, so
+        # this is transparent for the user.
         try:
-            with socketserver.TCPServer(("", self.REDIRECT_PORT), CallbackHandler) as httpd:
+            with socketserver.TCPServer(
+                ("127.0.0.1", self.REDIRECT_PORT), CallbackHandler,
+            ) as httpd:
                 logger.info("Waiting for authorization callback on port %d",
                             self.REDIRECT_PORT)
                 httpd.handle_request()
@@ -270,7 +297,8 @@ class SimpleStravaAuth:
                     'client_secret': client_secret,
                     'code': code,
                     'grant_type': 'authorization_code'
-                }
+                },
+                timeout=_HTTP_TIMEOUT,
             )
 
             if response.status_code == 200:
@@ -307,7 +335,8 @@ class SimpleStravaAuth:
             try:
                 response = requests.post(
                     'https://www.strava.com/oauth/deauthorize',
-                    headers={'Authorization': f'Bearer {self._access_token}'}
+                    headers={'Authorization': f'Bearer {self._access_token}'},
+                    timeout=_HTTP_TIMEOUT,
                 )
 
                 if response.status_code not in [200, 204]:

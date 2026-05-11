@@ -2,9 +2,11 @@
 Tests for StravaClient.get_activity_streams (Ticket 19 — streams slice).
 """
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
-from run_trend.strava.client import StravaClient
+import requests
+
+from run_trend.strava.client import StravaClient, _HTTP_TIMEOUT
 
 
 class _FakeAuth:
@@ -72,6 +74,31 @@ class TestGetActivityStreams(unittest.TestCase):
         self._patch_request(payload)
         streams = self.client.get_activity_streams(42)
         self.assertEqual(streams, {'time': [0, 30]})
+
+
+class TestMakeRequestTimeout(unittest.TestCase):
+    """Ticket 23 — _make_request must pass a timeout to requests.get and
+    convert Timeout exceptions to a None return (no propagation)."""
+
+    def setUp(self):
+        self.client = StravaClient(_FakeAuth())
+
+    @patch('run_trend.strava.client.requests.get')
+    def test_passes_http_timeout(self, mock_get):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'ok': True}
+        mock_get.return_value = mock_response
+
+        self.client._make_request("athlete")
+
+        self.assertEqual(mock_get.call_args.kwargs['timeout'], _HTTP_TIMEOUT)
+
+    @patch('run_trend.strava.client.requests.get')
+    def test_timeout_returns_none(self, mock_get):
+        mock_get.side_effect = requests.Timeout("read timeout")
+
+        self.assertIsNone(self.client._make_request("athlete"))
 
 
 if __name__ == '__main__':

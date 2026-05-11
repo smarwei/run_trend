@@ -6,7 +6,7 @@ import os
 import logging
 from pathlib import Path
 from typing import Optional, List, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 
 logger = logging.getLogger(__name__)
@@ -169,7 +169,7 @@ class Database:
             True if inserted/updated successfully
         """
         cursor = self.conn.cursor()
-        now = datetime.utcnow().isoformat()
+        now = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
 
         try:
             cursor.execute('''
@@ -330,7 +330,7 @@ class Database:
             value: Setting value (will be JSON serialized)
         """
         cursor = self.conn.cursor()
-        now = datetime.utcnow().isoformat()
+        now = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
         value_str = json.dumps(value)
 
         cursor.execute('''
@@ -408,7 +408,7 @@ class Database:
             notes: Free-form notes, optional.
         """
         cursor = self.conn.cursor()
-        now = datetime.utcnow().isoformat()
+        now = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
         cursor.execute('''
             INSERT INTO race_markers (
                 date, name, distance_km, result_time, notes,
@@ -448,7 +448,7 @@ class Database:
         if not updates:
             return False
 
-        updates['updated_at'] = datetime.utcnow().isoformat()
+        updates['updated_at'] = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
         set_clause = ', '.join(f'{k} = ?' for k in updates)
         values = list(updates.values()) + [marker_id]
 
@@ -477,7 +477,7 @@ class Database:
         Returns True if a row was updated.
         """
         cursor = self.conn.cursor()
-        now = datetime.utcnow().isoformat()
+        now = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
         cursor.execute(
             '''
             UPDATE race_markers
@@ -515,7 +515,7 @@ class Database:
             target_date: ISO date string of the target race day.
         """
         cursor = self.conn.cursor()
-        now = datetime.utcnow().isoformat()
+        now = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
         cursor.execute('''
             INSERT INTO goals (
                 target_distance_km, target_time_seconds, target_date,
@@ -564,7 +564,7 @@ class Database:
         if not updates:
             return False
 
-        updates['updated_at'] = datetime.utcnow().isoformat()
+        updates['updated_at'] = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
         set_clause = ', '.join(f'{k} = ?' for k in updates)
         values = list(updates.values()) + [goal_id]
 
@@ -601,7 +601,7 @@ class Database:
         """
         if len(zone_seconds) != 5:
             raise ValueError("zone_seconds must have exactly 5 entries")
-        now = datetime.utcnow().isoformat()
+        now = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
         cursor = self.conn.cursor()
         cursor.execute('''
             INSERT INTO activity_hr_zones (
@@ -638,6 +638,38 @@ class Database:
         )
         row = cursor.fetchone()
         return dict(row) if row else None
+
+    def get_activity_hr_zones_bulk(
+        self, strava_ids: List[int]
+    ) -> Dict[int, Dict[str, Any]]:
+        """Return cached HR-zone rows for many activities in one shot.
+
+        Replaces the N+1 pattern of looping ``get_activity_hr_zones`` per
+        activity (Ticket 32). IDs without a cache entry are simply absent
+        from the returned dict — callers should check membership before
+        indexing.
+
+        Chunks the IN clause to 900 IDs at a time to stay well under
+        SQLite's SQLITE_MAX_VARIABLE_NUMBER (999 prior to 3.32, 32766 on
+        newer builds).
+        """
+        if not strava_ids:
+            return {}
+        result: Dict[int, Dict[str, Any]] = {}
+        cursor = self.conn.cursor()
+        chunk_size = 900
+        for start in range(0, len(strava_ids), chunk_size):
+            chunk = strava_ids[start:start + chunk_size]
+            placeholders = ','.join('?' for _ in chunk)
+            cursor.execute(
+                f'SELECT * FROM activity_hr_zones '
+                f'WHERE strava_id IN ({placeholders})',
+                tuple(chunk),
+            )
+            for row in cursor.fetchall():
+                row_dict = dict(row)
+                result[int(row_dict['strava_id'])] = row_dict
+        return result
 
     def invalidate_activity_hr_zones(
         self,

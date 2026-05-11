@@ -2,12 +2,11 @@
 Heart rate analysis chart widget with efficiency factor.
 """
 import logging
-from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QCheckBox
+from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout
 from PySide6.QtCharts import QChart, QChartView, QLineSeries, QAreaSeries, QValueAxis
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPainter, QPen, QColor, QBrush
 from typing import List, Dict, Any
-import math
 
 from .base_chart import BaseChart
 from ..ui.help_label import make_help_icon
@@ -26,9 +25,7 @@ class HeartRateChart(BaseChart):
         layout = QVBoxLayout(self)
 
         toggle_layout = QHBoxLayout()
-        self.roc_checkbox = QCheckBox(self.tr("Show Rate of Change"))
-        self.roc_checkbox.setChecked(False)
-        self.roc_checkbox.stateChanged.connect(self._on_roc_toggle)
+        self.roc_checkbox = self._make_roc_checkbox()
         toggle_layout.addWidget(self.roc_checkbox)
         toggle_layout.addStretch()
         toggle_layout.addWidget(make_help_icon(self.tr(
@@ -43,7 +40,9 @@ class HeartRateChart(BaseChart):
 
         self.chart = QChart()
         self.chart.setTitle(self.tr("Heart Rate Analysis"))
-        self.chart.setAnimationOptions(QChart.SeriesAnimations)
+        # QAreaSeries + SeriesAnimations races on series-replace and crashes
+        # in AreaBoundItem::updateGeometry — see tickets/22-*.md.
+        self.chart.setAnimationOptions(QChart.NoAnimation)
 
         self.chart_view = QChartView(self.chart)
         self.chart_view.setRenderHint(QPainter.Antialiasing)
@@ -114,21 +113,15 @@ class HeartRateChart(BaseChart):
             self.chart.addSeries(ef_series)
 
         roc_series = None
+        roc_valid: List[float] = []
         if self.roc_checkbox.isChecked():
-            roc_data = self._calculate_rate_of_change(hr_aggregates, 'avg_heartrate')
-            roc_series = QLineSeries()
-            roc_series.setName(self.tr("HR RoC (bpm/week)"))
-            pen = QPen(QColor("#9b59b6"))
-            pen.setWidth(2)
-            pen.setStyle(Qt.DashLine)
-            roc_series.setPen(pen)
-            for i, v in enumerate(roc_data):
-                if not math.isnan(v):
-                    roc_series.append(int(period_dates[i].timestamp() * 1000), v)
-            if roc_series.count() > 0:
+            roc_built = self._build_roc_series(
+                hr_aggregates, 'avg_heartrate', period_dates,
+                label=self.tr("HR RoC (bpm/week)"),
+            )
+            if roc_built is not None:
+                roc_series, roc_valid = roc_built
                 self.chart.addSeries(roc_series)
-            else:
-                roc_series = None
 
         if not self.chart.series():
             return
@@ -153,13 +146,8 @@ class HeartRateChart(BaseChart):
 
         axis_y_roc = None
         if roc_series is not None:
-            roc_data   = self._calculate_rate_of_change(hr_aggregates, 'avg_heartrate')
-            valid_roc  = [v for v in roc_data if not math.isnan(v)]
-            lo_r, hi_r = min(valid_roc), max(valid_roc)
-            margin     = (hi_r - lo_r) * 0.2 if hi_r != lo_r else 0.1
-            axis_y_roc = self._create_value_axis(
-                self.tr("HR Rate of Change (bpm/week)"), fmt="%.2f",
-                min_val=lo_r - margin, max_val=hi_r + margin,
+            axis_y_roc = self._create_roc_axis(
+                roc_valid, self.tr("HR Rate of Change (bpm/week)"), fmt="%.2f",
             )
 
         self.chart.addAxis(axis_x,    Qt.AlignBottom)

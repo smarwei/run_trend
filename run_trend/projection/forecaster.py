@@ -170,8 +170,12 @@ class Forecaster:
         # milestone = slope * x + intercept
         # x = (milestone - intercept) / slope
 
-        if slope <= 0:
-            # No positive trend, milestone won't be reached
+        # Treat near-zero slopes as flat (numpy.polyfit on flat-y can return
+        # ±1e-17 due to floating-point noise — without the epsilon, a tiny
+        # positive slope blows up periods_until_milestone below to ~1e18
+        # and overflows timedelta in C-int range).
+        if slope <= 1e-9:
+            # No meaningful positive trend, milestone won't be reached.
             return {
                 'reachable': False,
                 'message': 'Current trend is not increasing. Milestone may not be reached.'

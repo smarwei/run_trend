@@ -1,7 +1,7 @@
 """
 Training Load (ACWR) chart widget with safe zones.
 """
-from PySide6.QtCharts import QLineSeries, QAreaSeries
+from PySide6.QtCharts import QChart, QLineSeries, QAreaSeries
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPen, QColor, QBrush
 from typing import List, Dict, Any
@@ -34,6 +34,9 @@ class TrainingLoadChart(BaseChart):
                 "context, not as automatic overtraining warnings."
             ),
         )
+        # QAreaSeries + SeriesAnimations races on series-replace and crashes
+        # in AreaBoundItem::updateGeometry — see tickets/22-*.md.
+        self.chart.setAnimationOptions(QChart.NoAnimation)
 
     def update_chart(self, aggregates: List[Dict[str, Any]]):
         self._clear_chart()
@@ -60,8 +63,10 @@ class TrainingLoadChart(BaseChart):
         self.chart.addAxis(axis_x, Qt.AlignBottom)
         self.chart.addAxis(axis_y, Qt.AlignLeft)
 
-        # Zone backgrounds — instance vars required to prevent GC (PYSIDE-1285)
-        def _zone(lo, hi, color_rgba, name):
+        # Zone backgrounds — instance vars required to prevent GC (PYSIDE-1285).
+        # Name passed in already-translated form so pylupdate6 sees the source
+        # string as a static literal at the call site (T25).
+        def _zone(lo, hi, color_rgba, translated_name):
             lower = QLineSeries()
             upper = QLineSeries()
             for date in [period_dates[0], period_dates[-1]]:
@@ -69,7 +74,7 @@ class TrainingLoadChart(BaseChart):
                 lower.append(ts, lo)
                 upper.append(ts, hi)
             area = QAreaSeries(upper, lower)
-            area.setName(self.tr(name))
+            area.setName(translated_name)
             area.setBrush(QBrush(QColor(*color_rgba)))
             area.setPen(QPen(Qt.NoPen))
             self.chart.addSeries(area)
@@ -77,9 +82,9 @@ class TrainingLoadChart(BaseChart):
             area.attachAxis(axis_y)
             return lower, upper, area
 
-        self._safe_lower,    self._safe_upper,    self._safe_area    = _zone(40, 65,  (39, 174,  96, 30), "Safe Zone (40-65)")
-        self._caution_lower, self._caution_upper, self._caution_area = _zone(65, 80,  (243, 156, 18, 30), "Caution Zone (65-80)")
-        self._danger_lower,  self._danger_upper,  self._danger_area  = _zone(80, 100, (231,  76, 60, 30), "Danger Zone (80+)")
+        self._safe_lower,    self._safe_upper,    self._safe_area    = _zone(40, 65,  (39, 174,  96, 30), self.tr("Safe Zone (40-65)"))
+        self._caution_lower, self._caution_upper, self._caution_area = _zone(65, 80,  (243, 156, 18, 30), self.tr("Caution Zone (65-80)"))
+        self._danger_lower,  self._danger_upper,  self._danger_area  = _zone(80, 100, (231,  76, 60, 30), self.tr("Danger Zone (80+)"))
 
         # Load line
         load_series = QLineSeries()

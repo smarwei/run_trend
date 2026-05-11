@@ -9,6 +9,11 @@ import time
 
 logger = logging.getLogger(__name__)
 
+# (connect, read) seconds. Strava typically answers in < 1s; values are
+# generous enough to tolerate slow home internet without leaving the
+# worker thread blocked indefinitely on a half-open TCP connection.
+_HTTP_TIMEOUT = (5.0, 30.0)
+
 
 class StravaClient:
     """Client for Strava API v3."""
@@ -48,7 +53,8 @@ class StravaClient:
             response = requests.get(
                 f"{self.BASE_URL}/{endpoint}",
                 headers=headers,
-                params=params or {}
+                params=params or {},
+                timeout=_HTTP_TIMEOUT,
             )
 
             # Handle rate limiting

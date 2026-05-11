@@ -5,7 +5,11 @@ import unittest
 from unittest.mock import patch, MagicMock
 import urllib.parse
 
-from run_trend.strava.simple_auth import SimpleStravaAuth
+import requests
+
+from run_trend.strava.simple_auth import (
+    SimpleStravaAuth, _HTTP_TIMEOUT, _validate_callback_state,
+)
 
 
 class TestSimpleStravaAuth(unittest.TestCase):
@@ -154,6 +158,133 @@ class TestSimpleStravaAuth(unittest.TestCase):
         }
         auth = SimpleStravaAuth(settings=mock_settings)
         self.assertEqual(auth._access_token, 'stored_token')
+
+    @patch('run_trend.strava.simple_auth.requests.post')
+    def test_refresh_passes_http_timeout(self, mock_post):
+        self.auth._refresh_token = 'refresh'
+        self.auth._client_id = 'cid'
+        self.auth._client_secret = 'cs'
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            'access_token': 'a', 'refresh_token': 'r', 'expires_at': 9999999999,
+        }
+        mock_post.return_value = mock_response
+
+        self.auth._refresh_access_token()
+
+        self.assertEqual(mock_post.call_args.kwargs['timeout'], _HTTP_TIMEOUT)
+
+    @patch('run_trend.strava.simple_auth.requests.post')
+    def test_refresh_timeout_returns_false(self, mock_post):
+        self.auth._refresh_token = 'refresh'
+        self.auth._client_id = 'cid'
+        self.auth._client_secret = 'cs'
+        mock_post.side_effect = requests.Timeout("connect timeout")
+
+        self.assertFalse(self.auth._refresh_access_token())
+
+    @patch('run_trend.strava.simple_auth.requests.post')
+    def test_exchange_code_timeout_returns_false(self, mock_post):
+        mock_post.side_effect = requests.Timeout("read timeout")
+
+        self.assertFalse(
+            self.auth._exchange_code('code', 'cid', 'cs')
+        )
+
+
+class TestOAuthCallbackBindLocalhost(unittest.TestCase):
+    """Ticket 29 — the OAuth callback server must bind to loopback only,
+    not all interfaces. Verified by inspecting source text rather than
+    actually starting a server (which would race with the OS port table).
+    """
+
+    def _module_source(self) -> str:
+        import inspect
+        from run_trend.strava import simple_auth
+        return inspect.getsource(simple_auth)
+
+    def test_loopback_address_appears_in_tcp_server_call(self):
+        src = self._module_source()
+        # Normalize newlines+indent so the test isn't sensitive to formatting.
+        compact = ' '.join(src.split())
+        self.assertIn(
+            'socketserver.TCPServer( ("127.0.0.1", self.REDIRECT_PORT)',
+            compact,
+            "OAuth callback must bind to 127.0.0.1, not '' (all interfaces).",
+        )
+
+    def test_no_all_interfaces_bind_remains(self):
+        compact = ' '.join(self._module_source().split())
+        self.assertNotIn(
+            'TCPServer(("",',
+            compact,
+            "All-interfaces bind ('') should no longer appear.",
+        )
+
+
+class TestCsrfStateValidation(unittest.TestCase):
+    """Ticket 34 — the OAuth callback handler rejects any response whose
+    `state` parameter doesn't match the token we generated. Tests cover
+    the extracted ``_validate_callback_state`` helper directly so the
+    CSRF branch is exercised without an HTTP server."""
+
+    def test_matching_state_returns_none(self):
+        params = {'state': ['abc123'], 'code': ['auth-code']}
+        self.assertIsNone(_validate_callback_state(params, 'abc123'))
+
+    def test_mismatched_state_returns_state_mismatch(self):
+        params = {'state': ['evil'], 'code': ['auth-code']}
+        self.assertEqual(
+            _validate_callback_state(params, 'expected'),
+            'state_mismatch',
+        )
+
+    def test_missing_state_returns_state_mismatch(self):
+        params = {'code': ['auth-code']}  # no state key at all
+        self.assertEqual(
+            _validate_callback_state(params, 'expected'),
+            'state_mismatch',
+        )
+
+    def test_empty_state_returns_state_mismatch(self):
+        params = {'state': [''], 'code': ['auth-code']}
+        self.assertEqual(
+            _validate_callback_state(params, 'expected'),
+            'state_mismatch',
+        )
+
+    def test_authorize_generates_state_parameter(self):
+        """Smoke-check: the OAuth flow actually passes a state token in
+        the auth URL. We patch webbrowser to capture the URL and
+        TCPServer to raise immediately so the callback server never
+        starts. The OSError handler inside authorize() catches that and
+        returns False."""
+        import urllib.parse
+        from unittest.mock import patch
+
+        auth = SimpleStravaAuth(settings=None)
+        captured = {}
+
+        def capture_open(url):
+            captured['url'] = url
+
+        with patch(
+            'run_trend.strava.simple_auth.webbrowser.open',
+            side_effect=capture_open,
+        ), patch(
+            'run_trend.strava.simple_auth.socketserver.TCPServer',
+            side_effect=OSError("test: skip server start"),
+        ):
+            result = auth.authorize('cid', 'cs')
+
+        self.assertFalse(result)  # Server didn't start; auth aborts.
+        self.assertIn('url', captured, "authorize() never opened a URL")
+        parsed = urllib.parse.urlparse(captured['url'])
+        params = urllib.parse.parse_qs(parsed.query)
+        self.assertIn('state', params)
+        # secrets.token_urlsafe(16) returns ≥ 16 url-safe chars.
+        self.assertGreaterEqual(len(params['state'][0]), 16)
 
 
 class TestAppConfiguration(unittest.TestCase):

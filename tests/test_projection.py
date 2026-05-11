@@ -172,5 +172,63 @@ class TestProjectionEdgeCases(unittest.TestCase):
         self.assertAlmostEqual(projection['slope'], 0.0, places=1)
 
 
+class TestForecasterMilestoneEdges(unittest.TestCase):
+    """Ticket 34 — additional gaps in milestone-estimation coverage."""
+
+    def _ramp(self, n_periods=12, start=10.0, step=2.0):
+        base = datetime(2024, 1, 1)
+        return [
+            {
+                'period': f'2024-W{w + 1:02d}',
+                'period_start': (base + timedelta(weeks=w)).isoformat(),
+                'total_distance_km': start + w * step,
+                'num_runs': 3,
+            }
+            for w in range(n_periods)
+        ]
+
+    def test_milestone_estimate_returns_none_on_insufficient_data(self):
+        single = self._ramp(n_periods=1)
+        self.assertIsNone(
+            Forecaster.estimate_milestone_date(single, 100.0, 'week')
+        )
+
+    def test_milestone_estimate_marks_unreachable_on_flat_trend(self):
+        """Slope = 0 → milestone never reachable, even if positive trend."""
+        flat = [
+            {
+                'period': f'2024-W{w + 1:02d}',
+                'period_start': (datetime(2024, 1, 1) + timedelta(weeks=w)).isoformat(),
+                'total_distance_km': 30.0,  # flat
+                'num_runs': 3,
+            }
+            for w in range(12)
+        ]
+        result = Forecaster.estimate_milestone_date(flat, 100.0, 'week')
+        self.assertIsNotNone(result)
+        self.assertFalse(result['reachable'])
+
+    def test_milestone_estimate_marks_unreachable_on_declining_trend(self):
+        declining = self._ramp(n_periods=10, start=50.0, step=-2.0)
+        result = Forecaster.estimate_milestone_date(declining, 100.0, 'week')
+        self.assertIsNotNone(result)
+        self.assertFalse(result['reachable'])
+
+    def test_milestone_estimate_monthly_period_type(self):
+        """Monthly milestone gives a date offset by ~30 days per period."""
+        result = Forecaster.estimate_milestone_date(
+            self._ramp(n_periods=12, start=10.0, step=5.0),
+            150.0, period_type='month',
+        )
+        self.assertIsNotNone(result)
+        self.assertTrue(result['reachable'])
+        self.assertIn('estimated_date', result)
+
+    def test_linear_regression_mismatched_lengths_returns_zero(self):
+        slope, intercept = Forecaster.linear_regression([0, 1, 2], [10, 20])
+        self.assertEqual(slope, 0.0)
+        self.assertEqual(intercept, 0.0)
+
+
 if __name__ == '__main__':
     unittest.main()

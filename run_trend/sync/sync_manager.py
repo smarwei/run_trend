@@ -2,7 +2,7 @@
 Synchronization manager for Strava activities.
 """
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional, Callable
 from ..storage.database import Database
 from ..strava.client import StravaClient
@@ -86,7 +86,7 @@ class SyncManager:
                     stats['errors'] += 1
 
             # Save sync timestamp
-            self.db.set_setting('last_sync', datetime.utcnow().isoformat())
+            self.db.set_setting('last_sync', datetime.now(timezone.utc).replace(tzinfo=None).isoformat())
             self.db.set_setting('training_start_date', start_date.isoformat())
 
         except Exception:
@@ -135,7 +135,7 @@ class SyncManager:
                     sync_from = datetime.fromisoformat(start_date_str)
                 else:
                     # Default to 30 days ago
-                    sync_from = datetime.utcnow() - timedelta(days=30)
+                    sync_from = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=30)
 
             # Fetch activities
             activities = self.client.get_all_activities_since(sync_from, activity_type)
@@ -173,7 +173,7 @@ class SyncManager:
                     stats['errors'] += 1
 
             # Save sync timestamp
-            self.db.set_setting('last_sync', datetime.utcnow().isoformat())
+            self.db.set_setting('last_sync', datetime.now(timezone.utc).replace(tzinfo=None).isoformat())
 
         except Exception:
             logger.exception("Incremental sync failed")
