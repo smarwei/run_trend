@@ -1,12 +1,11 @@
 """
 Distance progress chart widget.
 """
-from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QCheckBox
-from PySide6.QtCharts import QChart, QChartView, QLineSeries, QValueAxis
+from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout
+from PySide6.QtCharts import QChart, QChartView, QLineSeries
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPainter, QPen, QColor
 from typing import List, Dict, Any, Optional
-import math
 
 from .base_chart import BaseChart
 
@@ -22,9 +21,7 @@ class DistanceChart(BaseChart):
         layout = QVBoxLayout(self)
 
         toggle_layout = QHBoxLayout()
-        self.roc_checkbox = QCheckBox(self.tr("Show Rate of Change"))
-        self.roc_checkbox.setChecked(False)
-        self.roc_checkbox.stateChanged.connect(self._on_roc_toggle)
+        self.roc_checkbox = self._make_roc_checkbox()
         toggle_layout.addWidget(self.roc_checkbox)
         toggle_layout.addStretch()
         layout.addLayout(toggle_layout)
@@ -103,25 +100,15 @@ class DistanceChart(BaseChart):
         self._add_race_markers(axis_x, axis_y_dist)
 
         if self.roc_checkbox.isChecked():
-            roc_data   = self._calculate_rate_of_change(complete_aggregates, 'total_distance_km')
-            roc_series = QLineSeries()
-            roc_series.setName(self.tr("Distance RoC (km/week)"))
-            pen = QPen(QColor("#9b59b6"))
-            pen.setWidth(2)
-            pen.setStyle(Qt.DashLine)
-            roc_series.setPen(pen)
-            for i, v in enumerate(roc_data):
-                if not math.isnan(v):
-                    roc_series.append(int(period_dates[i].timestamp() * 1000), v)
-
-            if roc_series.count() > 0:
+            roc_built = self._build_roc_series(
+                complete_aggregates, 'total_distance_km', period_dates,
+                label=self.tr("Distance RoC (km/week)"),
+            )
+            if roc_built is not None:
+                roc_series, valid_roc = roc_built
                 self.chart.addSeries(roc_series)
-                valid_roc = [v for v in roc_data if not math.isnan(v)]
-                lo, hi    = min(valid_roc), max(valid_roc)
-                margin    = (hi - lo) * 0.2
-                axis_y_roc = self._create_value_axis(
-                    self.tr("Rate of Change (km/week)"), fmt="%.2f",
-                    min_val=lo - margin, max_val=hi + margin,
+                axis_y_roc = self._create_roc_axis(
+                    valid_roc, self.tr("Rate of Change (km/week)"), fmt="%.2f",
                 )
                 self.chart.addAxis(axis_y_roc, Qt.AlignRight)
                 roc_series.attachAxis(axis_x)

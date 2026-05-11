@@ -5,14 +5,14 @@ import math
 from datetime import datetime
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QStackedWidget, QLabel, QPushButton,
-    QMenu, QFileDialog, QMessageBox,
+    QMenu, QFileDialog, QMessageBox, QCheckBox,
 )
 from PySide6.QtCharts import (
     QChart, QChartView, QCategoryAxis, QDateTimeAxis, QValueAxis, QLineSeries,
 )
 from PySide6.QtCore import Qt, QDateTime, QCoreApplication, Signal
 from PySide6.QtGui import QPainter, QBrush, QColor, QPen
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from ..analytics.smoothing import Smoother
 from ..projection.forecaster import Forecaster
@@ -304,6 +304,74 @@ class BaseChart(QWidget):
                 roc_values.append(slope)
 
         return roc_values
+
+    # ------------------------------------------------------------------ #
+    # Rate-of-Change helpers (T33 — deduplicate identical code that lived #
+    # in DistanceChart, PaceChart and HeartRateChart).                    #
+    # ------------------------------------------------------------------ #
+
+    def _make_roc_checkbox(self, label_override: Optional[str] = None) -> QCheckBox:
+        """Build a 'Show Rate of Change' checkbox wired to ``_on_roc_toggle``.
+
+        Subclasses must implement ``_on_roc_toggle`` — its body varies
+        (each chart re-invokes ``update_chart`` with chart-specific args).
+        """
+        cb = QCheckBox(label_override or self.tr("Show Rate of Change"))
+        cb.setChecked(False)
+        cb.stateChanged.connect(self._on_roc_toggle)
+        return cb
+
+    def _build_roc_series(
+        self,
+        aggregates: List[Dict[str, Any]],
+        metric_key: str,
+        period_dates: List[datetime],
+        *,
+        label: str,
+        color: str = "#9b59b6",
+    ) -> Optional[Tuple[QLineSeries, List[float]]]:
+        """Build a dashed RoC ``QLineSeries`` plus the non-NaN values that
+        went into it. Returns ``None`` if every RoC point is NaN (window
+        not yet reached).
+
+        The caller is responsible for ``chart.addSeries`` and
+        ``attachAxis`` — this keeps the helper agnostic to chart-specific
+        axis-routing decisions (e.g. HeartRateChart shares the right axis
+        between RoC and Efficiency Factor).
+        """
+        roc_data = self._calculate_rate_of_change(aggregates, metric_key)
+        valid = [(i, v) for i, v in enumerate(roc_data) if not math.isnan(v)]
+        if not valid:
+            return None
+
+        series = QLineSeries()
+        series.setName(label)
+        pen = QPen(QColor(color))
+        pen.setWidth(2)
+        pen.setStyle(Qt.DashLine)
+        series.setPen(pen)
+        for i, v in valid:
+            series.append(int(period_dates[i].timestamp() * 1000), v)
+        return series, [v for _, v in valid]
+
+    def _create_roc_axis(
+        self,
+        valid_values: List[float],
+        title: str,
+        fmt: str = "%.2f",
+        margin_floor: float = 0.1,
+    ) -> QValueAxis:
+        """Create the right-side RoC axis with auto-margin.
+
+        ``margin_floor`` is the minimum half-margin applied when every
+        value is identical (range collapsed). Prevents a degenerate
+        zero-height axis.
+        """
+        lo, hi = min(valid_values), max(valid_values)
+        margin = (hi - lo) * 0.2 if hi != lo else margin_floor
+        return self._create_value_axis(
+            title, fmt=fmt, min_val=lo - margin, max_val=hi + margin,
+        )
 
     # ------------------------------------------------------------------ #
     # Axis factory helpers                                                 #
