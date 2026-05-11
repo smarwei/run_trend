@@ -23,6 +23,25 @@ class ProjectionChart(BaseChart):
         'Marathon Ready': 32.0,
     }
 
+    def _tr_milestone(self, name: str) -> str:
+        """Translate a milestone name.
+
+        pylupdate6 only extracts static literals, so each known milestone
+        from ``Forecaster.MILESTONES`` and ``LONG_RUN_MILESTONES`` must
+        appear here as a static ``self.tr("…")`` literal. Unknown names
+        fall through untranslated.
+        """
+        table = {
+            '5K': self.tr('5K'),
+            '10K': self.tr('10K'),
+            '10K Run': self.tr('10K Run'),
+            '15K Run': self.tr('15K Run'),
+            'Half Marathon': self.tr('Half Marathon'),
+            '30K Run': self.tr('30K Run'),
+            'Marathon Ready': self.tr('Marathon Ready'),
+        }
+        return table.get(name, name)
+
     def __init__(self):
         super().__init__()
         self.projection_mode  = 'volume'
@@ -261,7 +280,7 @@ class ProjectionChart(BaseChart):
                         continue
                     if abs(proj_point['projected_value'] - milestone_value) < 2.0:
                         ms = QScatterSeries()
-                        ms.setName(self.tr(milestone_name))
+                        ms.setName(self._tr_milestone(milestone_name))
                         ms.setMarkerSize(12)
                         ms.setColor(QColor("#f39c12"))
                         periods_from_anchor = proj_point['period_offset'] - gap_periods

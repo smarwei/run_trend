@@ -7,9 +7,9 @@ from PySide6.QtWidgets import (
     QStatusBar, QStyle, QTabWidget, QMessageBox, QProgressDialog, QSizePolicy,
     QFileDialog,
 )
-from PySide6.QtCore import Qt, QDate, QThread, QTimer, Signal
-from PySide6.QtGui import QAction, QIcon
-from datetime import datetime
+from PySide6.QtCore import Qt, QDate, QTimer, Signal
+from PySide6.QtGui import QAction, QIcon, QKeySequence, QShortcut
+from datetime import datetime, timezone
 from typing import Optional
 import logging
 
@@ -48,108 +48,7 @@ from ..charts.duration_chart import DurationChart
 from ..charts.training_load_chart import TrainingLoadChart
 from .runs_table import RunsTable
 from ..charts.pace_distance_chart import PaceDistanceChart
-
-
-class SyncThread(QThread):
-    """Thread for running sync operations."""
-    progress = Signal(int, int, str)
-    finished = Signal(dict)
-
-    def __init__(self, db_path, client, sync_type, start_date=None):
-        super().__init__()
-        self.db_path = db_path
-        self.client = client
-        self.sync_type = sync_type
-        self.start_date = start_date
-
-    def run(self):
-        # Create database connection in this thread
-        from ..storage.database import Database
-        from ..sync.sync_manager import SyncManager
-
-        db = Database(self.db_path)
-        sync_manager = SyncManager(db, self.client)
-
-        try:
-            if self.sync_type == 'initial':
-                stats = sync_manager.initial_sync(
-                    self.start_date,
-                    progress_callback=self.progress.emit
-                )
-            else:
-                stats = sync_manager.incremental_sync(
-                    progress_callback=self.progress.emit
-                )
-            self.finished.emit(stats)
-        finally:
-            db.close()
-
-
-class HrZoneFetchThread(QThread):
-    """Fetch HR-streams for a list of activities and cache the resulting zones.
-
-    Runs in its own thread so the UI stays responsive during the (potentially
-    many) Strava API calls. Each iteration emits ``progress(current, total)``;
-    callers refresh the chart on ``finished_signal``.
-    """
-    progress = Signal(int, int)
-    finished_signal = Signal()
-
-    def __init__(self, db_path, client, settings_snapshot, activity_ids):
-        super().__init__()
-        self._db_path = db_path
-        self._client = client
-        self._settings_snapshot = dict(settings_snapshot)
-        self._activity_ids = list(activity_ids)
-        self._cancel = False
-
-    def cancel(self):
-        self._cancel = True
-
-    def run(self):
-        from ..storage.database import Database
-        from ..analytics.hr_zone_service import HrZoneService
-
-        class _DictSettings:
-            def __init__(self, d):
-                self._d = d
-
-            def get(self, key, default=None):
-                return self._d.get(key, default)
-
-        db = Database(self._db_path)
-        try:
-            svc = HrZoneService(
-                db,
-                _DictSettings(self._settings_snapshot),
-                lambda aid: self._client.get_activity_streams(aid),
-            )
-            total = len(self._activity_ids)
-            for i, aid in enumerate(self._activity_ids):
-                if self._cancel:
-                    break
-                try:
-                    svc.get_zone_seconds(aid)
-                except Exception:  # noqa: BLE001 — never let one bad call kill the loop
-                    logger.exception("HR-zone fetch failed for activity %s", aid)
-                self.progress.emit(i + 1, total)
-        finally:
-            db.close()
-        self.finished_signal.emit()
-
-
-class _StravaAuthThread(QThread):
-    finished = Signal(bool)
-
-    def __init__(self, auth, client_id, client_secret):
-        super().__init__()
-        self._auth = auth
-        self._client_id = client_id
-        self._client_secret = client_secret
-
-    def run(self):
-        result = self._auth.authorize(self._client_id, self._client_secret)
-        self.finished.emit(result)
+from .threads import SyncThread, HrZoneFetchThread, StravaAuthThread
 
 
 class MainWindow(QMainWindow):
@@ -182,6 +81,8 @@ class MainWindow(QMainWindow):
         self._setup_menu()
         self._setup_toolbar()
         self._setup_statusbar()
+        self._setup_tab_shortcuts()
+        self._setup_chart_a11y()
 
         # Set up projection chart settings callback
         self.projection_chart.settings_callback = self.settings.set
@@ -283,19 +184,29 @@ class MainWindow(QMainWindow):
         file_menu = menu_bar.addMenu(self.tr("&File"))
 
         export_csv_action = QAction(self.tr("Export Data as CSV…"), self)
+        export_csv_action.setShortcut(QKeySequence("Ctrl+E"))
         export_csv_action.triggered.connect(self._export_activities_csv)
         file_menu.addAction(export_csv_action)
         self.export_csv_action = export_csv_action
 
         manage_races_action = QAction(self.tr("Manage Races…"), self)
+        manage_races_action.setShortcut(QKeySequence("Ctrl+R"))
         manage_races_action.triggered.connect(self._show_race_manager)
         file_menu.addAction(manage_races_action)
         self.manage_races_action = manage_races_action
 
         manage_goals_action = QAction(self.tr("Manage Goals…"), self)
+        manage_goals_action.setShortcut(QKeySequence("Ctrl+G"))
         manage_goals_action.triggered.connect(self._show_goal_manager)
         file_menu.addAction(manage_goals_action)
         self.manage_goals_action = manage_goals_action
+
+        file_menu.addSeparator()
+        quit_action = QAction(self.tr("&Quit"), self)
+        quit_action.setShortcut(QKeySequence.Quit)  # Ctrl+Q on Linux/Win, Cmd+Q on Mac
+        quit_action.triggered.connect(self.close)
+        file_menu.addAction(quit_action)
+        self.quit_action = quit_action
 
         help_menu = menu_bar.addMenu(self.tr("&Help"))
         wizard_action = QAction(self.tr("First-Run Wizard"), self)
@@ -351,8 +262,11 @@ class MainWindow(QMainWindow):
             "preferences-system",
             style.standardIcon(QStyle.SP_FileDialogDetailedView),
         ))
+        settings_action.setShortcut(QKeySequence("Ctrl+,"))
+        settings_action.setToolTip(self.tr("Settings (Ctrl+,)"))
         settings_action.triggered.connect(self._show_settings)
         toolbar.addAction(settings_action)
+        self.settings_action = settings_action
 
         # Connect button (visible only while not authenticated; spec §13.1)
         self.connect_action = QAction(self.tr("Connect to Strava"), self)
@@ -370,6 +284,8 @@ class MainWindow(QMainWindow):
             "view-refresh",
             style.standardIcon(QStyle.SP_BrowserReload),
         ))
+        self.sync_action.setShortcut(QKeySequence("F5"))
+        self.sync_action.setToolTip(self.tr("Sync (F5)"))
         self.sync_action.triggered.connect(self._sync_activities)
         toolbar.addAction(self.sync_action)
 
@@ -435,14 +351,79 @@ class MainWindow(QMainWindow):
 
         # Help button (right)
         help_action = QAction(self.tr("Help"), self)
+        help_action.setShortcut(QKeySequence("F1"))
+        help_action.setToolTip(self.tr("Help (F1)"))
         help_action.triggered.connect(self._show_manual)
         toolbar.addAction(help_action)
+        self.help_action = help_action
 
         # About button (far right)
         about_action = QAction(self.tr("About"), self)
         about_action.triggered.connect(self._show_about)
         toolbar.addAction(about_action)
 
+
+    def _setup_tab_shortcuts(self):
+        """Wire Ctrl+1..9 / Ctrl+0 to jump to the corresponding top-level tab.
+
+        Mirrors browser-style navigation expectations. Ctrl+0 maps to the
+        tenth tab (Runs) — Ctrl+10 isn't representable as a key sequence.
+        """
+        keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
+        for index, key in enumerate(keys):
+            if index >= self.tab_widget.count():
+                break
+            shortcut = QShortcut(QKeySequence(f"Ctrl+{key}"), self)
+            # Capture index by default arg; otherwise the lambda would
+            # close over the last loop value.
+            shortcut.activated.connect(
+                lambda i=index: self.tab_widget.setCurrentIndex(i)
+            )
+
+    def _setup_chart_a11y(self):
+        """Set accessible name + description on each chart view so screen
+        readers announce something more useful than 'QChartView 4'.
+
+        Tabs already get their accessible label from QTabWidget.addTab(text),
+        so we only need to label the chart inside each tab.
+        """
+        labels = [
+            (self.distance_chart, self.tr("Distance progress chart"),
+             self.tr("Weekly or monthly total distance from training start to today")),
+            (self.pace_chart, self.tr("Pace and speed chart"),
+             self.tr("Average pace per kilometre or speed in kilometres per hour")),
+            (self.frequency_chart, self.tr("Training frequency chart"),
+             self.tr("Number of runs per period, with active-days indicator")),
+            (self.heartrate_chart, self.tr("Heart rate chart"),
+             self.tr("Average HR, min-max range, and Efficiency Factor over time")),
+            (self.hr_zone_chart, self.tr("Heart rate zones chart"),
+             self.tr("Time spent in each HR zone, per run or aggregated")),
+            (self.endurance_chart, self.tr("Endurance chart"),
+             self.tr("Longest run and average distance per run over time")),
+            (self.duration_chart, self.tr("Duration chart"),
+             self.tr("Average and longest run duration per period")),
+            (self.structure_overview_chart, self.tr("Training structure chart"),
+             self.tr("Normalized comparison of distance, frequency, and longest run")),
+            (self.score_chart, self.tr("Training score chart"),
+             self.tr("Composite training-status score from 0 to 100 over time")),
+            (self.training_load_chart, self.tr("Training load chart"),
+             self.tr("Acute-to-chronic workload ratio with safe and caution zones")),
+            (self.projection_chart, self.tr("Projection chart"),
+             self.tr("Future trend extrapolation and milestone target markers")),
+            (self.pace_distance_chart, self.tr("Pace vs distance scatter plot"),
+             self.tr("Per-run pace plotted against distance to find run profiles")),
+        ]
+        for chart, name, description in labels:
+            # Always set a11y on the chart widget itself so it's available
+            # before any focus event reaches the inner view.
+            chart.setAccessibleName(name)
+            chart.setAccessibleDescription(description)
+            # Mirror onto chart_view when present — screen readers may
+            # announce based on the actually-focused descendant.
+            view = getattr(chart, 'chart_view', None)
+            if view is not None:
+                view.setAccessibleName(name)
+                view.setAccessibleDescription(description)
 
     def _setup_statusbar(self):
         """Set up the status bar.
@@ -502,8 +483,8 @@ class MainWindow(QMainWindow):
             return iso_str
 
         if ts.tzinfo is None:
-            # Stored as naive UTC by sync_manager (datetime.utcnow().isoformat()).
-            now = datetime.utcnow()
+            # Stored as naive UTC ISO string by sync_manager.
+            now = datetime.now(timezone.utc).replace(tzinfo=None)
         else:
             from datetime import timezone
             now = datetime.now(timezone.utc)
@@ -631,7 +612,7 @@ class MainWindow(QMainWindow):
         self.statusbar.showMessage(self.tr("Opening browser for Strava authorization..."))
 
         # Run OAuth flow in background thread so the Qt event loop stays alive
-        self._auth_thread = _StravaAuthThread(self.auth, client_id, client_secret)
+        self._auth_thread = StravaAuthThread(self.auth, client_id, client_secret)
         self._auth_thread.finished.connect(self._on_auth_finished)
         self._auth_thread.finished.connect(self._auth_thread.deleteLater)
         self._auth_thread.start()
@@ -1125,9 +1106,14 @@ class MainWindow(QMainWindow):
         hr_activities = [a for a in self.activities if a.get('has_heartrate')]
         any_hr_activities = bool(hr_activities)
 
+        # Single bulk query instead of one SELECT per activity (T32).
+        zone_rows = self.db.get_activity_hr_zones_bulk(
+            [a['strava_id'] for a in hr_activities]
+        )
+
         per_activity = []
         for a in hr_activities:
-            cached = self.db.get_activity_hr_zones(a['strava_id'])
+            cached = zone_rows.get(a['strava_id'])
             if not cached:
                 continue
             try:
@@ -1169,12 +1155,11 @@ class MainWindow(QMainWindow):
         if not self.client or not self.activities:
             return
 
-        targets = []
-        for a in self.activities:
-            if not a.get('has_heartrate'):
-                continue
-            if self.db.get_activity_hr_zones(a['strava_id']) is None:
-                targets.append(a['strava_id'])
+        hr_activity_ids = [
+            a['strava_id'] for a in self.activities if a.get('has_heartrate')
+        ]
+        cached_ids = set(self.db.get_activity_hr_zones_bulk(hr_activity_ids))
+        targets = [sid for sid in hr_activity_ids if sid not in cached_ids]
         if not targets:
             self._hr_zone_autofetch_done = True
             return

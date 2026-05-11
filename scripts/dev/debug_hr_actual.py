@@ -2,7 +2,7 @@
 """
 Show actual HR values of recent runs.
 """
-from app.storage.database import Database
+from run_trend.storage.database import Database
 from datetime import datetime, timedelta, timezone
 
 # Initialize database

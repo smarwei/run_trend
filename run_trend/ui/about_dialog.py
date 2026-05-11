@@ -1,9 +1,25 @@
 """
 About dialog for application information.
 """
+from importlib.metadata import version, PackageNotFoundError
+
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
+
+
+def _read_app_version() -> str:
+    """Read the installed package version.
+
+    Falls back to "dev" when the package isn't installed (e.g. running
+    straight from a source checkout without ``pip install .``). Keeping
+    this outside the class avoids re-reading metadata on every dialog
+    open, and gives tests an easy hook to patch.
+    """
+    try:
+        return version("run-trend")
+    except PackageNotFoundError:
+        return "dev"
 
 
 class AboutDialog(QDialog):
@@ -11,7 +27,7 @@ class AboutDialog(QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("About Run Trend")
+        self.setWindowTitle(self.tr("About Run Trend"))
         self.setMinimumWidth(400)
         self._setup_ui()
 
@@ -20,7 +36,7 @@ class AboutDialog(QDialog):
         layout = QVBoxLayout(self)
         layout.setSpacing(15)
 
-        # App name
+        # App name — kept as untranslated brand string.
         app_name = QLabel("Running Progress Tracker")
         app_name_font = QFont()
         app_name_font.setPointSize(16)
@@ -29,76 +45,67 @@ class AboutDialog(QDialog):
         app_name.setAlignment(Qt.AlignCenter)
         layout.addWidget(app_name)
 
-        # Version
-        version = QLabel("Version 0.1.0")
-        version.setAlignment(Qt.AlignCenter)
-        version.setStyleSheet("color: gray;")
-        layout.addWidget(version)
+        version_label = QLabel(self.tr("Version {}").format(_read_app_version()))
+        version_label.setAlignment(Qt.AlignCenter)
+        version_label.setStyleSheet("color: gray;")
+        layout.addWidget(version_label)
 
-        # Spacing
         layout.addSpacing(10)
 
-        # Description
-        description = QLabel(
-            "A desktop application for tracking and analyzing\n"
+        description = QLabel(self.tr(
+            "A desktop application for tracking and analyzing "
             "running progress from Strava."
-        )
+        ))
         description.setAlignment(Qt.AlignCenter)
         description.setWordWrap(True)
         layout.addWidget(description)
 
-        # Spacing
         layout.addSpacing(10)
 
-        # Author
-        author = QLabel("Entwickelt von Arne Weiß")
+        author = QLabel(self.tr("Developed by Arne Weiß"))
         author.setAlignment(Qt.AlignCenter)
         layout.addWidget(author)
 
-        # Email
-        email = QLabel('<a href="mailto:run-trend@arne-weiss.de">run-trend@arne-weiss.de</a>')
+        # Mailto link kept as markup (no tr() — would translate the URL).
+        email = QLabel(
+            '<a href="mailto:run-trend@arne-weiss.de">run-trend@arne-weiss.de</a>'
+        )
         email.setAlignment(Qt.AlignCenter)
         email.setOpenExternalLinks(True)
         layout.addWidget(email)
 
-        # Spacing
         layout.addSpacing(10)
 
-        # License
-        license_label = QLabel("Lizenz: MIT + Commons Clause")
+        license_label = QLabel(self.tr("License: MIT + Commons Clause"))
         license_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(license_label)
 
-        # License info
-        license_info = QLabel(
-            "Freie Nutzung für private und nicht-kommerzielle Zwecke.\n"
-            "Kommerzielle Vermarktung nicht erlaubt."
-        )
+        license_info = QLabel(self.tr(
+            "Free for private, non-commercial use. "
+            "Commercial distribution is not allowed."
+        ))
         license_info.setAlignment(Qt.AlignCenter)
         license_info.setStyleSheet("color: gray; font-size: 10px;")
         license_info.setWordWrap(True)
         layout.addWidget(license_info)
 
-        # GitHub
         github = QLabel(
-            'Repository: <a href="https://github.com/smarwei/run_trend">'
-            'github.com/smarwei/run_trend</a>'
+            self.tr("Repository: ")
+            + '<a href="https://github.com/smarwei/run_trend">'
+              'github.com/smarwei/run_trend</a>'
         )
         github.setAlignment(Qt.AlignCenter)
         github.setOpenExternalLinks(True)
         github.setStyleSheet("font-size: 10px;")
         layout.addWidget(github)
 
-        # Spacing
         layout.addSpacing(10)
 
-        # Close button
-        close_btn = QPushButton("Schließen")
+        close_btn = QPushButton(self.tr("Close"))
         close_btn.clicked.connect(self.accept)
         close_btn.setMaximumWidth(100)
         close_btn.setDefault(True)
 
-        # Center the button
         button_layout = QVBoxLayout()
         button_layout.addWidget(close_btn, alignment=Qt.AlignCenter)
         layout.addLayout(button_layout)

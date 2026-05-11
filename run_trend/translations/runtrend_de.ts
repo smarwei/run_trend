@@ -612,6 +612,118 @@ Wähle ein früheres Startdatum oder synchronisiere, um neue Aktivitäten zu lad
       <source>Heart-rate zones updated</source>
       <translation type="finished">Herzfrequenz-Zonen aktualisiert</translation>
     </message>
+    <message>
+      <source>Sync (F5)</source>
+      <translation type="finished">Sync (F5)</translation>
+    </message>
+    <message>
+      <source>Settings (Ctrl+,)</source>
+      <translation type="finished">Einstellungen (Strg+,)</translation>
+    </message>
+    <message>
+      <source>Help (F1)</source>
+      <translation type="finished">Hilfe (F1)</translation>
+    </message>
+    <message>
+      <source>&amp;Quit</source>
+      <translation type="finished">&amp;Beenden</translation>
+    </message>
+    <message>
+      <source>Distance progress chart</source>
+      <translation type="finished">Distanz-Fortschrittsdiagramm</translation>
+    </message>
+    <message>
+      <source>Weekly or monthly total distance from training start to today</source>
+      <translation type="finished">Wöchentliche oder monatliche Gesamtdistanz seit Trainingsbeginn</translation>
+    </message>
+    <message>
+      <source>Pace and speed chart</source>
+      <translation type="finished">Pace- und Geschwindigkeitsdiagramm</translation>
+    </message>
+    <message>
+      <source>Average pace per kilometre or speed in kilometres per hour</source>
+      <translation type="finished">Durchschnittliche Pace pro Kilometer oder Geschwindigkeit in km/h</translation>
+    </message>
+    <message>
+      <source>Training frequency chart</source>
+      <translation type="finished">Trainingsfrequenz-Diagramm</translation>
+    </message>
+    <message>
+      <source>Number of runs per period, with active-days indicator</source>
+      <translation type="finished">Anzahl Läufe pro Periode mit Aktiv-Tage-Anzeige</translation>
+    </message>
+    <message>
+      <source>Heart rate chart</source>
+      <translation type="finished">Herzfrequenz-Diagramm</translation>
+    </message>
+    <message>
+      <source>Average HR, min-max range, and Efficiency Factor over time</source>
+      <translation type="finished">Durchschnitts-HF, Min/Max-Band und Effizienzfaktor über Zeit</translation>
+    </message>
+    <message>
+      <source>Heart rate zones chart</source>
+      <translation type="finished">Herzfrequenz-Zonen-Diagramm</translation>
+    </message>
+    <message>
+      <source>Time spent in each HR zone, per run or aggregated</source>
+      <translation type="finished">Zeit in jeder HF-Zone, pro Lauf oder aggregiert</translation>
+    </message>
+    <message>
+      <source>Endurance chart</source>
+      <translation type="finished">Ausdauer-Diagramm</translation>
+    </message>
+    <message>
+      <source>Longest run and average distance per run over time</source>
+      <translation type="finished">Längster Lauf und Durchschnittsdistanz pro Lauf über Zeit</translation>
+    </message>
+    <message>
+      <source>Duration chart</source>
+      <translation type="finished">Dauer-Diagramm</translation>
+    </message>
+    <message>
+      <source>Average and longest run duration per period</source>
+      <translation type="finished">Durchschnittliche und längste Lauf-Dauer pro Periode</translation>
+    </message>
+    <message>
+      <source>Training structure chart</source>
+      <translation type="finished">Trainings-Strukturdiagramm</translation>
+    </message>
+    <message>
+      <source>Normalized comparison of distance, frequency, and longest run</source>
+      <translation type="finished">Normalisierter Vergleich von Distanz, Frequenz und längstem Lauf</translation>
+    </message>
+    <message>
+      <source>Training score chart</source>
+      <translation type="finished">Trainings-Score-Diagramm</translation>
+    </message>
+    <message>
+      <source>Composite training-status score from 0 to 100 over time</source>
+      <translation type="finished">Zusammengesetzter Trainingsstatus-Score von 0 bis 100 über Zeit</translation>
+    </message>
+    <message>
+      <source>Training load chart</source>
+      <translation type="finished">Trainingslast-Diagramm</translation>
+    </message>
+    <message>
+      <source>Acute-to-chronic workload ratio with safe and caution zones</source>
+      <translation type="finished">Acute-to-Chronic-Workload-Ratio mit sicheren und Vorsichts-Zonen</translation>
+    </message>
+    <message>
+      <source>Projection chart</source>
+      <translation type="finished">Prognose-Diagramm</translation>
+    </message>
+    <message>
+      <source>Future trend extrapolation and milestone target markers</source>
+      <translation type="finished">Trend-Extrapolation in die Zukunft und Meilenstein-Marker</translation>
+    </message>
+    <message>
+      <source>Pace vs distance scatter plot</source>
+      <translation type="finished">Pace-vs-Distanz-Streudiagramm</translation>
+    </message>
+    <message>
+      <source>Per-run pace plotted against distance to find run profiles</source>
+      <translation type="finished">Pace pro Lauf gegen Distanz aufgetragen zur Identifikation von Lauf-Profilen</translation>
+    </message>
   </context>
   <context>
     <name>HrZoneChart</name>
@@ -1159,6 +1271,41 @@ Gesuchte Pfade:
       <source>off track</source>
       <translation type="finished">nicht auf Kurs</translation>
     </message>
+    <message>
+      <location filename="../charts/projection_chart.py" line="46" />
+      <source>5K</source>
+      <translation type="finished">5K</translation>
+    </message>
+    <message>
+      <location filename="../charts/projection_chart.py" line="47" />
+      <source>10K</source>
+      <translation type="finished">10K</translation>
+    </message>
+    <message>
+      <location filename="../charts/projection_chart.py" line="48" />
+      <source>10K Run</source>
+      <translation type="finished">10-km-Lauf</translation>
+    </message>
+    <message>
+      <location filename="../charts/projection_chart.py" line="49" />
+      <source>15K Run</source>
+      <translation type="finished">15-km-Lauf</translation>
+    </message>
+    <message>
+      <location filename="../charts/projection_chart.py" line="50" />
+      <source>Half Marathon</source>
+      <translation type="finished">Halbmarathon</translation>
+    </message>
+    <message>
+      <location filename="../charts/projection_chart.py" line="51" />
+      <source>30K Run</source>
+      <translation type="finished">30-km-Lauf</translation>
+    </message>
+    <message>
+      <location filename="../charts/projection_chart.py" line="52" />
+      <source>Marathon Ready</source>
+      <translation type="finished">Marathon-bereit</translation>
+    </message>
   </context>
   <context>
     <name>ScoreChart</name>
@@ -1585,6 +1732,21 @@ Gefahr:     ≥1,5    (erhöhtes Verletzungsrisiko).
 Benötigt ≥5 Wochen Daten, um aussagekräftig zu sein.
 
 Caveat: Der zusammengesetzte ACWR dieser App enthält eine Pace-Komponente (schnellere Pace = höhere Last). Eine fitnessbedingte, nachhaltige Pace-Verbesserung kann den Score also nach oben treiben, selbst wenn Volumen und HF stabil sind — erhöhte Werte in diesem Licht lesen, nicht automatisch als Übertrainings-Warnung.</translation>
+    </message>
+    <message>
+      <location filename="../charts/training_load_chart.py" line="83" />
+      <source>Safe Zone (40-65)</source>
+      <translation type="finished">Sichere Zone (40-65)</translation>
+    </message>
+    <message>
+      <location filename="../charts/training_load_chart.py" line="84" />
+      <source>Caution Zone (65-80)</source>
+      <translation type="finished">Vorsichtszone (65-80)</translation>
+    </message>
+    <message>
+      <location filename="../charts/training_load_chart.py" line="85" />
+      <source>Danger Zone (80+)</source>
+      <translation type="finished">Gefahrenzone (80+)</translation>
     </message>
   </context>
   <context>
@@ -2038,6 +2200,49 @@ Same pace at lower HR = better aerobic fitness raises this value.</source>
 
 Basiert auf dem Efficiency Factor (Pace ÷ HF). Benötigt Herzfrequenz-Daten.
 Gleiche Pace bei niedrigerer HF = bessere aerobe Fitness steigert diesen Wert.</translation>
+    </message>
+  </context>
+  <context>
+    <name>AboutDialog</name>
+    <message>
+      <location filename="../ui/about_dialog.py" line="30" />
+      <source>About Run Trend</source>
+      <translation type="finished">Über Run Trend</translation>
+    </message>
+    <message>
+      <location filename="../ui/about_dialog.py" line="49" />
+      <source>Version {}</source>
+      <translation type="finished">Version {}</translation>
+    </message>
+    <message>
+      <location filename="../ui/about_dialog.py" line="56" />
+      <source>A desktop application for tracking and analyzing running progress from Strava.</source>
+      <translation type="finished">Eine Desktop-Anwendung zum Verfolgen und Analysieren des Lauftrainings-Fortschritts aus Strava.</translation>
+    </message>
+    <message>
+      <location filename="../ui/about_dialog.py" line="66" />
+      <source>Developed by Arne Weiß</source>
+      <translation type="finished">Entwickelt von Arne Weiß</translation>
+    </message>
+    <message>
+      <location filename="../ui/about_dialog.py" line="79" />
+      <source>License: MIT + Commons Clause</source>
+      <translation type="finished">Lizenz: MIT + Commons Clause</translation>
+    </message>
+    <message>
+      <location filename="../ui/about_dialog.py" line="83" />
+      <source>Free for private, non-commercial use. Commercial distribution is not allowed.</source>
+      <translation type="finished">Freie Nutzung für private und nicht-kommerzielle Zwecke. Kommerzielle Vermarktung nicht erlaubt.</translation>
+    </message>
+    <message>
+      <location filename="../ui/about_dialog.py" line="93" />
+      <source>Repository: </source>
+      <translation type="finished">Repository: </translation>
+    </message>
+    <message>
+      <location filename="../ui/about_dialog.py" line="104" />
+      <source>Close</source>
+      <translation type="finished">Schließen</translation>
     </message>
   </context>
 </TS>

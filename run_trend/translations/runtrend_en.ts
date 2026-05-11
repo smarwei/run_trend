@@ -612,6 +612,118 @@ Pick an earlier start date or sync to fetch new activities.</translation>
       <source>Heart-rate zones updated</source>
       <translation type="finished">Heart-rate zones updated</translation>
     </message>
+    <message>
+      <source>Sync (F5)</source>
+      <translation type="finished">Sync (F5)</translation>
+    </message>
+    <message>
+      <source>Settings (Ctrl+,)</source>
+      <translation type="finished">Settings (Ctrl+,)</translation>
+    </message>
+    <message>
+      <source>Help (F1)</source>
+      <translation type="finished">Help (F1)</translation>
+    </message>
+    <message>
+      <source>&amp;Quit</source>
+      <translation type="finished">&amp;Quit</translation>
+    </message>
+    <message>
+      <source>Distance progress chart</source>
+      <translation type="finished">Distance progress chart</translation>
+    </message>
+    <message>
+      <source>Weekly or monthly total distance from training start to today</source>
+      <translation type="finished">Weekly or monthly total distance from training start to today</translation>
+    </message>
+    <message>
+      <source>Pace and speed chart</source>
+      <translation type="finished">Pace and speed chart</translation>
+    </message>
+    <message>
+      <source>Average pace per kilometre or speed in kilometres per hour</source>
+      <translation type="finished">Average pace per kilometre or speed in kilometres per hour</translation>
+    </message>
+    <message>
+      <source>Training frequency chart</source>
+      <translation type="finished">Training frequency chart</translation>
+    </message>
+    <message>
+      <source>Number of runs per period, with active-days indicator</source>
+      <translation type="finished">Number of runs per period, with active-days indicator</translation>
+    </message>
+    <message>
+      <source>Heart rate chart</source>
+      <translation type="finished">Heart rate chart</translation>
+    </message>
+    <message>
+      <source>Average HR, min-max range, and Efficiency Factor over time</source>
+      <translation type="finished">Average HR, min-max range, and Efficiency Factor over time</translation>
+    </message>
+    <message>
+      <source>Heart rate zones chart</source>
+      <translation type="finished">Heart rate zones chart</translation>
+    </message>
+    <message>
+      <source>Time spent in each HR zone, per run or aggregated</source>
+      <translation type="finished">Time spent in each HR zone, per run or aggregated</translation>
+    </message>
+    <message>
+      <source>Endurance chart</source>
+      <translation type="finished">Endurance chart</translation>
+    </message>
+    <message>
+      <source>Longest run and average distance per run over time</source>
+      <translation type="finished">Longest run and average distance per run over time</translation>
+    </message>
+    <message>
+      <source>Duration chart</source>
+      <translation type="finished">Duration chart</translation>
+    </message>
+    <message>
+      <source>Average and longest run duration per period</source>
+      <translation type="finished">Average and longest run duration per period</translation>
+    </message>
+    <message>
+      <source>Training structure chart</source>
+      <translation type="finished">Training structure chart</translation>
+    </message>
+    <message>
+      <source>Normalized comparison of distance, frequency, and longest run</source>
+      <translation type="finished">Normalized comparison of distance, frequency, and longest run</translation>
+    </message>
+    <message>
+      <source>Training score chart</source>
+      <translation type="finished">Training score chart</translation>
+    </message>
+    <message>
+      <source>Composite training-status score from 0 to 100 over time</source>
+      <translation type="finished">Composite training-status score from 0 to 100 over time</translation>
+    </message>
+    <message>
+      <source>Training load chart</source>
+      <translation type="finished">Training load chart</translation>
+    </message>
+    <message>
+      <source>Acute-to-chronic workload ratio with safe and caution zones</source>
+      <translation type="finished">Acute-to-chronic workload ratio with safe and caution zones</translation>
+    </message>
+    <message>
+      <source>Projection chart</source>
+      <translation type="finished">Projection chart</translation>
+    </message>
+    <message>
+      <source>Future trend extrapolation and milestone target markers</source>
+      <translation type="finished">Future trend extrapolation and milestone target markers</translation>
+    </message>
+    <message>
+      <source>Pace vs distance scatter plot</source>
+      <translation type="finished">Pace vs distance scatter plot</translation>
+    </message>
+    <message>
+      <source>Per-run pace plotted against distance to find run profiles</source>
+      <translation type="finished">Per-run pace plotted against distance to find run profiles</translation>
+    </message>
   </context>
   <context>
     <name>HrZoneChart</name>
@@ -1159,6 +1271,41 @@ Searched paths:
       <source>off track</source>
       <translation type="finished">off track</translation>
     </message>
+    <message>
+      <location filename="../charts/projection_chart.py" line="46" />
+      <source>5K</source>
+      <translation type="finished">5K</translation>
+    </message>
+    <message>
+      <location filename="../charts/projection_chart.py" line="47" />
+      <source>10K</source>
+      <translation type="finished">10K</translation>
+    </message>
+    <message>
+      <location filename="../charts/projection_chart.py" line="48" />
+      <source>10K Run</source>
+      <translation type="finished">10K Run</translation>
+    </message>
+    <message>
+      <location filename="../charts/projection_chart.py" line="49" />
+      <source>15K Run</source>
+      <translation type="finished">15K Run</translation>
+    </message>
+    <message>
+      <location filename="../charts/projection_chart.py" line="50" />
+      <source>Half Marathon</source>
+      <translation type="finished">Half Marathon</translation>
+    </message>
+    <message>
+      <location filename="../charts/projection_chart.py" line="51" />
+      <source>30K Run</source>
+      <translation type="finished">30K Run</translation>
+    </message>
+    <message>
+      <location filename="../charts/projection_chart.py" line="52" />
+      <source>Marathon Ready</source>
+      <translation type="finished">Marathon Ready</translation>
+    </message>
   </context>
   <context>
     <name>ScoreChart</name>
@@ -1585,6 +1732,21 @@ Danger:     ≥1.5    (elevated injury risk).
 Needs ≥5 weeks of data to be meaningful.
 
 Caveat: this app's composite ACWR includes a pace component (faster pace = higher load). A sustained fitness-driven pace improvement can therefore push the score upward even if your volume and HR are stable — read elevated values in that context, not as automatic overtraining warnings.</translation>
+    </message>
+    <message>
+      <location filename="../charts/training_load_chart.py" line="83" />
+      <source>Safe Zone (40-65)</source>
+      <translation type="finished">Safe Zone (40-65)</translation>
+    </message>
+    <message>
+      <location filename="../charts/training_load_chart.py" line="84" />
+      <source>Caution Zone (65-80)</source>
+      <translation type="finished">Caution Zone (65-80)</translation>
+    </message>
+    <message>
+      <location filename="../charts/training_load_chart.py" line="85" />
+      <source>Danger Zone (80+)</source>
+      <translation type="finished">Danger Zone (80+)</translation>
     </message>
   </context>
   <context>
@@ -2018,6 +2180,49 @@ Same pace at lower HR = better aerobic fitness raises this value.</source>
 
 Based on Efficiency Factor (pace ÷ HR). Needs heart-rate data.
 Same pace at lower HR = better aerobic fitness raises this value.</translation>
+    </message>
+  </context>
+  <context>
+    <name>AboutDialog</name>
+    <message>
+      <location filename="../ui/about_dialog.py" line="30" />
+      <source>About Run Trend</source>
+      <translation type="finished">About Run Trend</translation>
+    </message>
+    <message>
+      <location filename="../ui/about_dialog.py" line="49" />
+      <source>Version {}</source>
+      <translation type="finished">Version {}</translation>
+    </message>
+    <message>
+      <location filename="../ui/about_dialog.py" line="56" />
+      <source>A desktop application for tracking and analyzing running progress from Strava.</source>
+      <translation type="finished">A desktop application for tracking and analyzing running progress from Strava.</translation>
+    </message>
+    <message>
+      <location filename="../ui/about_dialog.py" line="66" />
+      <source>Developed by Arne Weiß</source>
+      <translation type="finished">Developed by Arne Weiß</translation>
+    </message>
+    <message>
+      <location filename="../ui/about_dialog.py" line="79" />
+      <source>License: MIT + Commons Clause</source>
+      <translation type="finished">License: MIT + Commons Clause</translation>
+    </message>
+    <message>
+      <location filename="../ui/about_dialog.py" line="83" />
+      <source>Free for private, non-commercial use. Commercial distribution is not allowed.</source>
+      <translation type="finished">Free for private, non-commercial use. Commercial distribution is not allowed.</translation>
+    </message>
+    <message>
+      <location filename="../ui/about_dialog.py" line="93" />
+      <source>Repository: </source>
+      <translation type="finished">Repository: </translation>
+    </message>
+    <message>
+      <location filename="../ui/about_dialog.py" line="104" />
+      <source>Close</source>
+      <translation type="finished">Close</translation>
     </message>
   </context>
 </TS>

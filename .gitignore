@@ -1,3 +1,7 @@
+# Developer scratchpads (Ticket 31) — Claude Code resume commands
+resume
+tmp_resume
+
 # Python
 __pycache__/
 *.py[cod]

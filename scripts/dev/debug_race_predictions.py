@@ -2,8 +2,8 @@
 """
 Debug script to check why race predictions are not showing.
 """
-from app.storage.database import Database
-from app.analytics.race_predictor import RacePredictor
+from run_trend.storage.database import Database
+from run_trend.analytics.race_predictor import RacePredictor
 
 # Initialize database
 db = Database()
