@@ -724,6 +724,163 @@ Wähle ein früheres Startdatum oder synchronisiere, um neue Aktivitäten zu lad
       <source>Per-run pace plotted against distance to find run profiles</source>
       <translation type="finished">Pace pro Lauf gegen Distanz aufgetragen zur Identifikation von Lauf-Profilen</translation>
     </message>
+    <message>
+      <source>Performance</source>
+      <translation type="finished">Performance</translation>
+    </message>
+    <message>
+      <source>Age-graded performance chart</source>
+      <translation type="finished">Age-Graded Performance Chart</translation>
+    </message>
+    <message>
+      <source>WMA age-graded percentage per race distance and EF vs age-adjusted personal peak</source>
+      <translation type="finished">WMA-Age-Graded-Prozent pro Wettkampfdistanz und EF vs altersangepasster persönlicher Peak</translation>
+    </message>
+  </context>
+  <context>
+    <name>AgeGradingChart</name>
+    <message>
+      <source>WMA Age-Graded Performance</source>
+      <translation type="finished">WMA Age-Graded Performance</translation>
+    </message>
+    <message>
+      <source>WMA age-graded percentage = (world record × age factor) ÷ your time × 100.
+
+Source: World Masters Athletics 2023 factor tables (per-year, all distances).
+
+Reference bands:
+  ≥ 90 %: international class
+  80–90 %: national class
+  70–80 %: regional class
+  60–70 %: local class
+  &lt; 60 %: recreational
+
+Each line is a 3-month rolling prediction (5K/10K/HM/Marathon) from your HR-classified easy-run pace. Real races marked via right-click on a run appear as larger scatter points on top of their line.</source>
+      <translation type="finished">WMA-Age-graded-Prozent = (Weltrekord × Altersfaktor) ÷ deine Zeit × 100.
+
+Quelle: World Masters Athletics 2023 Faktortabellen (pro Jahr, alle Distanzen).
+
+Referenzbänder:
+  ≥ 90 %: international class
+  80–90 %: national class
+  70–80 %: regional class
+  60–70 %: local class
+  &lt; 60 %: recreational
+
+Jede Linie ist eine 3-Monats-rollende Vorhersage (5K/10K/HM/Marathon) aus deinem HF-klassifizierten Easy-Run-Pace. Reale Rennen (rechter Klick auf einen Lauf) erscheinen als größere Scatter-Punkte auf ihrer jeweiligen Linie.</translation>
+    </message>
+    <message>
+      <source>Aerobic Capacity vs Age</source>
+      <translation type="finished">Aerobic Capacity vs. Alter</translation>
+    </message>
+    <message>
+      <source>Efficiency Factor (EF) over time compared to your own personal peak in the last 12 months, adjusted for age.
+
+We do NOT compare your EF to other athletes — Friel and TrainingPeaks explicitly warn against that. Instead the reference line is your best 4-week EF mean in the past year, extrapolated forward using the age-driven decline rate from the literature (Coppola et al. 2022): 0.55 %/yr at full training volume, rising to ~3 %/yr at sedentary.
+
+Linear decline is a first approximation; real decline accelerates past age 70 as mitochondrial mechanisms take over. Treat the gap between measured and expected as a training-response indicator, not a diagnosis.</source>
+      <translation type="finished">Efficiency Factor (EF) im Zeitverlauf, verglichen mit deinem persönlichen Peak der letzten 12 Monate — altersbereinigt.
+
+Wir vergleichen deinen EF NICHT mit anderen Athleten — Friel und TrainingPeaks warnen ausdrücklich davor. Stattdessen ist die Referenzlinie dein bester 4-Wochen-Mittel-EF im letzten Jahr, fortgeschrieben mit der alters-bedingten Decline-Rate aus der Literatur (Coppola et al. 2022): 0,55 %/Jahr bei vollem Trainingsvolumen, ansteigend auf ca. 3 %/Jahr bei sedentärem Lebensstil.
+
+Linearer Decline ist eine erste Näherung; der reale Decline beschleunigt nach Alter 70, weil mitochondriale Mechanismen dominanter werden. Lies die Lücke zwischen Messung und Erwartung als Trainings-Response-Indikator, nicht als Diagnose.</translation>
+    </message>
+    <message>
+      <source>WMA Age-Graded %</source>
+      <translation type="finished">WMA Age-Graded %</translation>
+    </message>
+    <message>
+      <source>Aerobic Capacity %</source>
+      <translation type="finished">Aerobic Capacity %</translation>
+    </message>
+    <message>
+      <source>Set your date of birth in Settings → General to enable the Performance charts.</source>
+      <translation type="finished">Setze dein Geburtsdatum unter Einstellungen → Allgemein, um die Performance-Charts zu aktivieren.</translation>
+    </message>
+    <message>
+      <source>Gender required for WMA — set it in Settings → General.</source>
+      <translation type="finished">Geschlecht für WMA erforderlich — setze es unter Einstellungen → Allgemein.</translation>
+    </message>
+    <message>
+      <source>Not enough complete periods yet.</source>
+      <translation type="finished">Noch nicht genug abgeschlossene Perioden.</translation>
+    </message>
+    <message>
+      <source>Not enough HR-classified easy runs yet for race predictions. The chart fills in as you log more runs.</source>
+      <translation type="finished">Noch nicht genug HF-klassifizierte Easy-Runs für Wettkampfvorhersagen. Der Chart füllt sich, sobald du mehr Läufe loggst.</translation>
+    </message>
+    <message>
+      <source>Date</source>
+      <translation type="finished">Datum</translation>
+    </message>
+    <message>
+      <source>Age-graded %</source>
+      <translation type="finished">Age-graded %</translation>
+    </message>
+    <message>
+      <source>Ref {} %</source>
+      <translation type="finished">Ref {} %</translation>
+    </message>
+    <message>
+      <source>5K</source>
+      <translation type="finished">5K</translation>
+    </message>
+    <message>
+      <source>10K</source>
+      <translation type="finished">10K</translation>
+    </message>
+    <message>
+      <source>Half Marathon</source>
+      <translation type="finished">Halbmarathon</translation>
+    </message>
+    <message>
+      <source>Marathon</source>
+      <translation type="finished">Marathon</translation>
+    </message>
+    <message>
+      <source>Race: {}</source>
+      <translation type="finished">Rennen: {}</translation>
+    </message>
+    <message>
+      <source>Latest age-graded %</source>
+      <translation type="finished">Aktueller Age-graded %</translation>
+    </message>
+    <message>
+      <source>{} real races overlaid</source>
+      <translation type="finished">{} reale Rennen überlagert</translation>
+    </message>
+    <message>
+      <source>No predictions yet.</source>
+      <translation type="finished">Noch keine Vorhersagen.</translation>
+    </message>
+    <message>
+      <source>Need at least 4 periods with HR-derived EF to build the personal peak. Keep logging runs with heart-rate data.</source>
+      <translation type="finished">Mindestens 4 Perioden mit HF-basiertem EF nötig, um den persönlichen Peak zu bilden. Logge weitere Läufe mit Herzfrequenz-Daten.</translation>
+    </message>
+    <message>
+      <source>Not enough history in the last 12 months for a personal peak.</source>
+      <translation type="finished">Nicht genug Daten in den letzten 12 Monaten für einen persönlichen Peak.</translation>
+    </message>
+    <message>
+      <source>Measured EF × 1000</source>
+      <translation type="finished">Gemessener EF × 1000</translation>
+    </message>
+    <message>
+      <source>Expected (age-adjusted personal peak)</source>
+      <translation type="finished">Erwartet (altersbereinigter persönlicher Peak)</translation>
+    </message>
+    <message>
+      <source>Personal peak (best 4 wk)</source>
+      <translation type="finished">Persönlicher Peak (beste 4 Wo.)</translation>
+    </message>
+    <message>
+      <source>Efficiency Factor (m/s per bpm × 1000)</source>
+      <translation type="finished">Efficiency Factor (m/s pro bpm × 1000)</translation>
+    </message>
+    <message>
+      <source>Current EF: {:.1f}  •  {:.0f}% of age-adjusted peak  •  Decline rate ~{:.1f}%/yr (vol ratio {:.2f})</source>
+      <translation type="finished">Aktueller EF: {:.1f}  •  {:.0f}% des alters-adjustierten Peaks  •  Decline-Rate ~{:.1f}%/Jahr (Vol-Ratio {:.2f})</translation>
+    </message>
   </context>
   <context>
     <name>HrZoneChart</name>
@@ -1659,6 +1816,38 @@ Wettkampf-Vorhersagen werden aktualisiert.</translation>
       <location filename="../ui/settings_dialog.py" line="221" />
       <source>Removes the Strava authorization for RunTrend and erases all locally stored activities. This cannot be undone.</source>
       <translation type="finished">Entfernt die Strava-Autorisierung für RunTrend und löscht alle lokal gespeicherten Aktivitäten. Diese Aktion ist nicht rückgängig zu machen.</translation>
+    </message>
+    <message>
+      <source>Profile</source>
+      <translation type="finished">Profil</translation>
+    </message>
+    <message>
+      <source>Date of Birth:</source>
+      <translation type="finished">Geburtsdatum:</translation>
+    </message>
+    <message>
+      <source>Date of birth — used to compute your age for the Performance tab (age-graded race percentage and personal-peak EF decline).</source>
+      <translation type="finished">Geburtsdatum — daraus berechnet sich dein Alter für den Performance-Tab (Age-graded-Prozent und Personal-Peak-EF-Decline).</translation>
+    </message>
+    <message>
+      <source>Gender:</source>
+      <translation type="finished">Geschlecht:</translation>
+    </message>
+    <message>
+      <source>Prefer not to say</source>
+      <translation type="finished">Keine Angabe</translation>
+    </message>
+    <message>
+      <source>Male</source>
+      <translation type="finished">Männlich</translation>
+    </message>
+    <message>
+      <source>Female</source>
+      <translation type="finished">Weiblich</translation>
+    </message>
+    <message>
+      <source>Required for WMA age-graded performance — the tables are gender-specific. The HF-physiology variant does not need it.</source>
+      <translation type="finished">Erforderlich für WMA-Age-Grading — die Tabellen sind geschlechtsspezifisch. Die HF-Physiologie-Variante braucht es nicht.</translation>
     </message>
   </context>
   <context>

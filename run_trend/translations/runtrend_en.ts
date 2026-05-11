@@ -724,6 +724,163 @@ Pick an earlier start date or sync to fetch new activities.</translation>
       <source>Per-run pace plotted against distance to find run profiles</source>
       <translation type="finished">Per-run pace plotted against distance to find run profiles</translation>
     </message>
+    <message>
+      <source>Performance</source>
+      <translation type="finished">Performance</translation>
+    </message>
+    <message>
+      <source>Age-graded performance chart</source>
+      <translation type="finished">Age-graded performance chart</translation>
+    </message>
+    <message>
+      <source>WMA age-graded percentage per race distance and EF vs age-adjusted personal peak</source>
+      <translation type="finished">WMA age-graded percentage per race distance and EF vs age-adjusted personal peak</translation>
+    </message>
+  </context>
+  <context>
+    <name>AgeGradingChart</name>
+    <message>
+      <source>WMA Age-Graded Performance</source>
+      <translation type="finished">WMA Age-Graded Performance</translation>
+    </message>
+    <message>
+      <source>WMA age-graded percentage = (world record × age factor) ÷ your time × 100.
+
+Source: World Masters Athletics 2023 factor tables (per-year, all distances).
+
+Reference bands:
+  ≥ 90 %: international class
+  80–90 %: national class
+  70–80 %: regional class
+  60–70 %: local class
+  &lt; 60 %: recreational
+
+Each line is a 3-month rolling prediction (5K/10K/HM/Marathon) from your HR-classified easy-run pace. Real races marked via right-click on a run appear as larger scatter points on top of their line.</source>
+      <translation type="finished">WMA age-graded percentage = (world record × age factor) ÷ your time × 100.
+
+Source: World Masters Athletics 2023 factor tables (per-year, all distances).
+
+Reference bands:
+  ≥ 90 %: international class
+  80–90 %: national class
+  70–80 %: regional class
+  60–70 %: local class
+  &lt; 60 %: recreational
+
+Each line is a 3-month rolling prediction (5K/10K/HM/Marathon) from your HR-classified easy-run pace. Real races marked via right-click on a run appear as larger scatter points on top of their line.</translation>
+    </message>
+    <message>
+      <source>Aerobic Capacity vs Age</source>
+      <translation type="finished">Aerobic Capacity vs Age</translation>
+    </message>
+    <message>
+      <source>Efficiency Factor (EF) over time compared to your own personal peak in the last 12 months, adjusted for age.
+
+We do NOT compare your EF to other athletes — Friel and TrainingPeaks explicitly warn against that. Instead the reference line is your best 4-week EF mean in the past year, extrapolated forward using the age-driven decline rate from the literature (Coppola et al. 2022): 0.55 %/yr at full training volume, rising to ~3 %/yr at sedentary.
+
+Linear decline is a first approximation; real decline accelerates past age 70 as mitochondrial mechanisms take over. Treat the gap between measured and expected as a training-response indicator, not a diagnosis.</source>
+      <translation type="finished">Efficiency Factor (EF) over time compared to your own personal peak in the last 12 months, adjusted for age.
+
+We do NOT compare your EF to other athletes — Friel and TrainingPeaks explicitly warn against that. Instead the reference line is your best 4-week EF mean in the past year, extrapolated forward using the age-driven decline rate from the literature (Coppola et al. 2022): 0.55 %/yr at full training volume, rising to ~3 %/yr at sedentary.
+
+Linear decline is a first approximation; real decline accelerates past age 70 as mitochondrial mechanisms take over. Treat the gap between measured and expected as a training-response indicator, not a diagnosis.</translation>
+    </message>
+    <message>
+      <source>WMA Age-Graded %</source>
+      <translation type="finished">WMA Age-Graded %</translation>
+    </message>
+    <message>
+      <source>Aerobic Capacity %</source>
+      <translation type="finished">Aerobic Capacity %</translation>
+    </message>
+    <message>
+      <source>Set your date of birth in Settings → General to enable the Performance charts.</source>
+      <translation type="finished">Set your date of birth in Settings → General to enable the Performance charts.</translation>
+    </message>
+    <message>
+      <source>Gender required for WMA — set it in Settings → General.</source>
+      <translation type="finished">Gender required for WMA — set it in Settings → General.</translation>
+    </message>
+    <message>
+      <source>Not enough complete periods yet.</source>
+      <translation type="finished">Not enough complete periods yet.</translation>
+    </message>
+    <message>
+      <source>Not enough HR-classified easy runs yet for race predictions. The chart fills in as you log more runs.</source>
+      <translation type="finished">Not enough HR-classified easy runs yet for race predictions. The chart fills in as you log more runs.</translation>
+    </message>
+    <message>
+      <source>Date</source>
+      <translation type="finished">Date</translation>
+    </message>
+    <message>
+      <source>Age-graded %</source>
+      <translation type="finished">Age-graded %</translation>
+    </message>
+    <message>
+      <source>Ref {} %</source>
+      <translation type="finished">Ref {} %</translation>
+    </message>
+    <message>
+      <source>5K</source>
+      <translation type="finished">5K</translation>
+    </message>
+    <message>
+      <source>10K</source>
+      <translation type="finished">10K</translation>
+    </message>
+    <message>
+      <source>Half Marathon</source>
+      <translation type="finished">Half Marathon</translation>
+    </message>
+    <message>
+      <source>Marathon</source>
+      <translation type="finished">Marathon</translation>
+    </message>
+    <message>
+      <source>Race: {}</source>
+      <translation type="finished">Race: {}</translation>
+    </message>
+    <message>
+      <source>Latest age-graded %</source>
+      <translation type="finished">Latest age-graded %</translation>
+    </message>
+    <message>
+      <source>{} real races overlaid</source>
+      <translation type="finished">{} real races overlaid</translation>
+    </message>
+    <message>
+      <source>No predictions yet.</source>
+      <translation type="finished">No predictions yet.</translation>
+    </message>
+    <message>
+      <source>Need at least 4 periods with HR-derived EF to build the personal peak. Keep logging runs with heart-rate data.</source>
+      <translation type="finished">Need at least 4 periods with HR-derived EF to build the personal peak. Keep logging runs with heart-rate data.</translation>
+    </message>
+    <message>
+      <source>Not enough history in the last 12 months for a personal peak.</source>
+      <translation type="finished">Not enough history in the last 12 months for a personal peak.</translation>
+    </message>
+    <message>
+      <source>Measured EF × 1000</source>
+      <translation type="finished">Measured EF × 1000</translation>
+    </message>
+    <message>
+      <source>Expected (age-adjusted personal peak)</source>
+      <translation type="finished">Expected (age-adjusted personal peak)</translation>
+    </message>
+    <message>
+      <source>Personal peak (best 4 wk)</source>
+      <translation type="finished">Personal peak (best 4 wk)</translation>
+    </message>
+    <message>
+      <source>Efficiency Factor (m/s per bpm × 1000)</source>
+      <translation type="finished">Efficiency Factor (m/s per bpm × 1000)</translation>
+    </message>
+    <message>
+      <source>Current EF: {:.1f}  •  {:.0f}% of age-adjusted peak  •  Decline rate ~{:.1f}%/yr (vol ratio {:.2f})</source>
+      <translation type="finished">Current EF: {:.1f}  •  {:.0f}% of age-adjusted peak  •  Decline rate ~{:.1f}%/yr (vol ratio {:.2f})</translation>
+    </message>
   </context>
   <context>
     <name>HrZoneChart</name>
@@ -1659,6 +1816,38 @@ Race predictions will be updated.</translation>
       <location filename="../ui/settings_dialog.py" line="221" />
       <source>Removes the Strava authorization for RunTrend and erases all locally stored activities. This cannot be undone.</source>
       <translation type="finished">Removes the Strava authorization for RunTrend and erases all locally stored activities. This cannot be undone.</translation>
+    </message>
+    <message>
+      <source>Profile</source>
+      <translation type="finished">Profile</translation>
+    </message>
+    <message>
+      <source>Date of Birth:</source>
+      <translation type="finished">Date of Birth:</translation>
+    </message>
+    <message>
+      <source>Date of birth — used to compute your age for the Performance tab (age-graded race percentage and personal-peak EF decline).</source>
+      <translation type="finished">Date of birth — used to compute your age for the Performance tab (age-graded race percentage and personal-peak EF decline).</translation>
+    </message>
+    <message>
+      <source>Gender:</source>
+      <translation type="finished">Gender:</translation>
+    </message>
+    <message>
+      <source>Prefer not to say</source>
+      <translation type="finished">Prefer not to say</translation>
+    </message>
+    <message>
+      <source>Male</source>
+      <translation type="finished">Male</translation>
+    </message>
+    <message>
+      <source>Female</source>
+      <translation type="finished">Female</translation>
+    </message>
+    <message>
+      <source>Required for WMA age-graded performance — the tables are gender-specific. The HF-physiology variant does not need it.</source>
+      <translation type="finished">Required for WMA age-graded performance — the tables are gender-specific. The HF-physiology variant does not need it.</translation>
     </message>
   </context>
   <context>

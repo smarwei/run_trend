@@ -46,6 +46,7 @@ from ..charts.hr_zone_chart import HrZoneChart
 from ..analytics.hr_zone_service import HrZoneService
 from ..charts.duration_chart import DurationChart
 from ..charts.training_load_chart import TrainingLoadChart
+from ..charts.age_grading_chart import AgeGradingChart
 from .runs_table import RunsTable
 from ..charts.pace_distance_chart import PaceDistanceChart
 from .threads import SyncThread, HrZoneFetchThread, StravaAuthThread
@@ -121,6 +122,7 @@ class MainWindow(QMainWindow):
         self.hr_zone_chart = HrZoneChart()
         self.duration_chart = DurationChart()
         self.training_load_chart = TrainingLoadChart()
+        self.age_grading_chart = AgeGradingChart()
         self.runs_table = RunsTable()
         self.pace_distance_chart = PaceDistanceChart()
 
@@ -163,6 +165,9 @@ class MainWindow(QMainWindow):
 
         # Tab 7: Training Load (ACWR)
         self.tab_widget.addTab(self.training_load_chart, self.tr("Training Load"))
+
+        # Tab 7b: Performance — age-graded WMA % + EF vs age-adjusted peak (T37)
+        self.tab_widget.addTab(self.age_grading_chart, self.tr("Performance"))
 
         # Tab 8: Projection
         self.tab_widget.addTab(self.projection_chart, self.tr("Projection"))
@@ -408,6 +413,8 @@ class MainWindow(QMainWindow):
              self.tr("Composite training-status score from 0 to 100 over time")),
             (self.training_load_chart, self.tr("Training load chart"),
              self.tr("Acute-to-chronic workload ratio with safe and caution zones")),
+            (self.age_grading_chart, self.tr("Age-graded performance chart"),
+             self.tr("WMA age-graded percentage per race distance and EF vs age-adjusted personal peak")),
             (self.projection_chart, self.tr("Projection chart"),
              self.tr("Future trend extrapolation and milestone target markers")),
             (self.pace_distance_chart, self.tr("Pace vs distance scatter plot"),
@@ -1087,6 +1094,17 @@ class MainWindow(QMainWindow):
         self.structure_overview_chart.update_chart(self.aggregates, smoothing_strength)
         self.score_chart.update_chart(self.aggregates, smoothing_strength)
         self.training_load_chart.update_chart(self.aggregates)
+        # Age-graded performance chart (T37)
+        self.age_grading_chart.update_chart(
+            self.aggregates,
+            self.activities,
+            settings={
+                'birth_date': self.settings.get('birth_date', '') or '',
+                'gender': self.settings.get('gender', '') or '',
+                'manual_hrmax': self.settings.get('manual_hrmax', 0) or 0,
+            },
+            race_markers=self.db.get_race_markers() if hasattr(self.db, 'get_race_markers') else [],
+        )
         self.projection_chart.set_goals(self.db.get_goals(include_achieved=False))
         self.projection_chart.update_chart(self.aggregates, self.current_period)
         self.runs_table.update_table(self.activities)
