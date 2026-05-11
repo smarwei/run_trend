@@ -1887,6 +1887,132 @@ Combine Training Load Chart with:
 
 ---
 
+### Performance Tab
+
+Shows how your current form compares to an **age-adjusted reference** —
+two scientifically distinct views in one tab.
+
+#### When is this chart useful?
+
+When you want to know *how far you are from your possible peak form for
+your age* — unlike the Score chart, which only compares you to your own
+rolling baseline.
+
+#### Prerequisites
+
+Under **Settings → General → Profile** you need:
+
+- **Date of birth** (used by both views)
+- **Gender** (only required for the WMA view — the tables are
+  gender-specific)
+
+Both are stored optionally; without a date of birth the tab stays empty
+with a hint. "Prefer not to say" for gender disables only the WMA view,
+not the HF view.
+
+#### View 1: WMA Age-Graded %
+
+**Data source:** [World Masters Athletics 2023](https://world-masters-athletics.org/wp-content/uploads/2023/02/2023-Age-Factors-WMA.pdf)
+age-factor tables (in force since 2023-01-01, derived from more than
+2.8 million competition times, with per-year factors from age 30 to 110).
+
+**Formula:**
+```
+Age-graded % = (world-record time × age factor) ÷ your time × 100
+```
+
+**Performance bands:**
+
+| Range       | Classification       |
+|-------------|----------------------|
+| ≥ 90 %      | International class  |
+| 80–90 %     | National class       |
+| 70–80 %     | Regional class       |
+| 60–70 %     | Local class          |
+| < 60 %      | Recreational         |
+
+**Chart content:**
+- Four coloured lines for 5K, 10K, half marathon, marathon
+- Each datapoint = HR-based McMillan prediction from a rolling 3-month
+  window (same mechanism as the race-time predictions in the summary
+  panel)
+- Dotted reference lines at 60/70/80/90/100 %
+- Actual race results (right-click on a run → "Mark as race") appear
+  as larger scatter points with a darker shade on their distance line —
+  real times are more reliable than predictions
+
+**Note:** The factors are age-specific, so the chart uses *your age at
+the time of each datapoint*. A 5K from two years ago at the same pace
+shows a *different* % than today.
+
+#### View 2: Aerobic Capacity %
+
+**Data source:** Your own Efficiency Factor (EF) over time, with an
+age-based decline model from the literature.
+
+**Methodological caveats up front:**
+
+- Friel (Joe Friel Training) and TrainingPeaks **explicitly warn**
+  against comparing EF across athletes. We therefore do not — the
+  reference line is your own personal best.
+- HRmax is estimated via **Tanaka (2001):** `208 − 0.7 × age`
+  (meta-analysis over 351 studies, n=18,712, gender-independent). More
+  accurate than the old `220 − age` from about age 40 onward.
+
+**Personal peak EF:**
+- Best 4-week mean of your EF in the past 12 months
+- Shown as a horizontal dotted grey line
+- If you maintain training volume, your EF should oscillate near this
+
+**Expected EF curve (dashed orange):**
+Forward-extrapolated from your peak using an age-driven decline rate.
+The rate depends on your recent training volume:
+
+| Training status                    | Decline per year |
+|------------------------------------|------------------|
+| Volume maintained                  | 0.5–0.65 %       |
+| Moderate reduction (11–20 %)       | 0.8–2.6 %        |
+| Sedentary (reduction > 20 %)       | 1.5–4.6 %        |
+
+Source: [Coppola et al. 2022](https://pmc.ncbi.nlm.nih.gov/articles/PMC9517884/),
+meta-analysis of longitudinal masters-athlete studies. Training-volume
+change alone explains 54 % / 39 % (men / women) of individual decline
+variance.
+
+**Caveat:** Linear decline is a **first approximation**. After about
+age 70 the decline accelerates as mitochondrial mechanisms become more
+dominant than reduced cardiac output ([review PMC9975246](https://pmc.ncbi.nlm.nih.gov/articles/PMC9975246/)).
+The linear path holds up well below 70.
+
+**Header line:**
+```
+Current EF: 24.3 • 96% of age-adjusted peak • Decline rate ~0.7%/yr (vol ratio 0.95)
+```
+
+- **Current EF:** Your latest EF × 1000 (same unit as the Heart Rate tab)
+- **% of age-adjusted peak:** How close you are to your age-adjusted peak
+- **Decline rate:** The decline rate currently applied (derived from
+  your volume ratio)
+- **Vol ratio:** Current volume divided by peak-period volume
+
+#### Interpretation
+
+- The two views **rank** form over time — neither is "better".
+- WMA is good for **competition perspective** (How would I rank in a
+  masters category?).
+- HF is good for **training response** (Am I currently responding to my
+  training? Am I trailing my own potential?).
+
+#### Sources
+
+- [WMA 2023 Age Factors PDF](https://world-masters-athletics.org/wp-content/uploads/2023/02/2023-Age-Factors-WMA.pdf)
+- [Howard Grubb's WMA-2023 calculator + Excel data](https://howardgrubb.co.uk/athletics/wmatnf23.html)
+- [Tanaka et al. (2001), "Age-predicted maximal heart rate revisited"](https://pubmed.ncbi.nlm.nih.gov/11153730/) — *J Am Coll Cardiol* 37(1)
+- [Coppola et al. (2022), "Impact of Training on the Loss of CRF in Aging Masters Endurance Athletes"](https://pmc.ncbi.nlm.nih.gov/articles/PMC9517884/) — *Int J Environ Res Public Health* 19(17)
+- [Joe Friel — Efficiency Factor in Running](https://joefrieltraining.com/the-efficiency-factor-in-running-2/)
+
+---
+
 ### Projection Tab
 
 #### Settings
