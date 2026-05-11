@@ -51,6 +51,7 @@ Stand: 2026-05-11.
 - [18 — Goal-Tracking mit Ist/Ziel-Linie auf Projection-Chart](18-goal-tracking.md)
 - [19 — HR-Zonen-Auswertung mit Zeit-in-Zone](19-hr-zones.md)
 - [36 — `MainWindow` God-Object refactorn](36-mainwindow-refactor.md)
+- [37 — Age-Graded Performance Chart (WMA + HF-Physiologie)](37-age-graded-performance.md)
 
 ### Methodisch (P3)
 - [20 — Pace als ACWR-Komponente überdenken](20-pace-acwr-review.md)
