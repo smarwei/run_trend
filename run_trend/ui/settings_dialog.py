@@ -364,6 +364,8 @@ class SettingsDialog(QDialog):
         old_hr_zone_scheme = self.settings.get('hr_zone_scheme', 'classic')
         old_include_treadmill = bool(self.settings.get('include_treadmill', True))
         old_include_manual = bool(self.settings.get('include_manual', True))
+        old_birth_date = self.settings.get('birth_date', '') or ''
+        old_gender = self.settings.get('gender', '') or ''
 
         client_id = self.client_id_input.text().strip()
         client_secret = self.client_secret_input.text().strip()
@@ -408,6 +410,9 @@ class SettingsDialog(QDialog):
         filters_changed = (
             include_treadmill != old_include_treadmill
             or include_manual != old_include_manual
+        )
+        profile_changed = (
+            birth_date_iso != old_birth_date or gender != old_gender
         )
 
         if not client_id or not client_secret:
@@ -488,7 +493,10 @@ class SettingsDialog(QDialog):
             if filters_changed:
                 # Filters affect the DB query — reload activities, not just charts
                 self.main_window._load_data()
-            elif hrmax_changed:
+            elif hrmax_changed or profile_changed:
+                # HRmax changes propagate through race predictions;
+                # profile changes (birth_date/gender) drive the Performance
+                # tab. Either way, re-render charts without re-fetching.
                 self.main_window._refresh_data()
 
         self.accept()

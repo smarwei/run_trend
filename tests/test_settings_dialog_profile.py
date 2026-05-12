@@ -119,5 +119,72 @@ class TestProfileRoundtrip(unittest.TestCase, _SettingsFixture):
         dlg.deleteLater()
 
 
+class TestProfileTriggersRefresh(unittest.TestCase, _SettingsFixture):
+    """When birth_date or gender changes, the Performance chart needs a
+    refresh — otherwise the new tab stays empty until app restart."""
+
+    def setUp(self):
+        _SettingsFixture.setUp(self)
+
+    def tearDown(self):
+        _SettingsFixture.tearDown(self)
+
+    def _make_mw_mock(self):
+        from unittest.mock import MagicMock
+        mw = MagicMock()
+        # auth status check inside _update_auth_status walks main_window.auth.
+        mw.auth = None
+        return mw
+
+    def test_changing_birth_date_calls_refresh(self):
+        from unittest.mock import MagicMock
+        self.settings.set('strava_client_id', 'x')
+        self.settings.set('strava_client_secret', 'y')
+
+        mw = self._make_mw_mock()
+        dlg = SettingsDialog(self.settings, main_window=mw)
+        dlg.birth_date_input.setDate(QDate(1985, 7, 1))
+
+        with patch.object(QMessageBox, 'information'):
+            dlg._save_settings()
+        dlg.deleteLater()
+
+        mw._refresh_data.assert_called_once()
+        mw._load_data.assert_not_called()  # data filters didn't change
+
+    def test_changing_gender_calls_refresh(self):
+        self.settings.set('strava_client_id', 'x')
+        self.settings.set('strava_client_secret', 'y')
+
+        mw = self._make_mw_mock()
+        dlg = SettingsDialog(self.settings, main_window=mw)
+        dlg.gender_combo.setCurrentIndex(
+            dlg.gender_combo.findData('female')
+        )
+
+        with patch.object(QMessageBox, 'information'):
+            dlg._save_settings()
+        dlg.deleteLater()
+
+        mw._refresh_data.assert_called_once()
+
+    def test_unchanged_profile_does_not_call_refresh(self):
+        self.settings.set('strava_client_id', 'x')
+        self.settings.set('strava_client_secret', 'y')
+        self.settings.set('birth_date', '1990-01-01')
+        self.settings.set('gender', 'male')
+
+        mw = self._make_mw_mock()
+        dlg = SettingsDialog(self.settings, main_window=mw)
+        # User opens settings and just clicks Save without touching anything.
+
+        with patch.object(QMessageBox, 'information'):
+            dlg._save_settings()
+        dlg.deleteLater()
+
+        mw._refresh_data.assert_not_called()
+        mw._load_data.assert_not_called()
+
+
 if __name__ == "__main__":
     unittest.main()
