@@ -309,6 +309,100 @@ training_score = (
 
 **Important:** The score is a summary. It does NOT replace structural metrics like Longest Run or Average Distance per Run, which should be viewed separately.
 
+#### Training Fitness (CTL) and Form (TSB)
+
+**What it is:** An **absolute** training-fitness metric alongside the
+self-relative Training Score (T38). Where the Score normalises against
+your own rolling baseline and therefore plateaus around ~50 once you
+stabilise at a given training level (`current_runs / baseline_runs ≈
+1.0`), CTL **stays high** as long as you keep training.
+
+**Three values under "Fitness:" in the Training Status panel:**
+
+- **Training Fitness** = current **CTL** (Chronic Training Load) in
+  TRIMP/day. Slow-moving number that grows with sustained training.
+- **Form (TSB)** = `CTL − ATL` (Training Stress Balance). Tells you
+  whether you're rested or fatigued — not whether you're fit.
+
+**Banister TRIMP per activity** (HR-based training load):
+
+```
+TRIMP = duration_min × HRr × 0.64 × e^(b × HRr)
+```
+
+where `HRr = (HR_avg − HR_rest) / (HR_max − HR_rest)` clamped to
+`[0, 1]`. The exponential factor `b = 1.92` (men) / `1.67` (women)
+weights high-intensity sessions disproportionately — 30 min at tempo
+produces more load than 30 min easy.
+
+**CTL and ATL** are exponentially weighted moving averages of daily
+TRIMP totals:
+
+```
+CTL_today = CTL_yesterday × (1 − 1/42) + daily_TRIMP × (1/42)
+ATL_today = ATL_yesterday × (1 − 1/7)  + daily_TRIMP × (1/7)
+```
+
+CTL takes about 6 weeks to converge after a training change ("fitness
+builds slowly"); ATL responds in a week ("fatigue clears fast"). While
+your history is shorter than 42 days the EWMA is still warming up; the
+app marks the CTL number with a `*` until you cross that threshold.
+
+**CTL ranges** (TRIMP/day — the scale is HR-based, not power-based as
+in TrainingPeaks; absolute values aren't directly comparable to
+power-derived CTL from cycling, but the relative bands apply):
+
+- **30–50**  recreational / casual
+- **60–90**  well-trained
+- **100+**   competitive
+
+**TSB zones (Coggan, same units as CTL):**
+
+| Range          | State                                              |
+|----------------|----------------------------------------------------|
+| > +25          | transitional (over-rested — losing fitness)        |
+| +10 to +25     | race-fresh (taper has worked)                      |
+| −10 to +10     | neutral                                            |
+| −20 to −10     | productive overload (build phase)                  |
+| −30 to −20     | approaching fatigue limit (consider deload)        |
+| < −30          | overreaching risk                                  |
+
+**Running-specific CTL ramp-up rates** (matches the "10 % rule" for
+weekly mileage):
+
+- Beginners: **+2 to +4** TRIMP/day per week
+- Intermediate: **+3 to +5**
+- Advanced: **+5 to +7**
+
+Faster ramps correlate with elevated injury risk in the literature.
+
+**When the app shows a number:**
+
+- Activities carry `average_heartrate` (otherwise TRIMP can't be
+  computed)
+- **Date of Birth** set (for the Tanaka HRmax fallback) **or** a
+  **manual Max HR** in Settings
+- **Gender** set (for the b-factor in the Banister formula)
+- **Resting HR** set (for the HR-reserve calculation)
+
+If any prerequisite is missing the label spells out which field to
+fill.
+
+**When to look at CTL instead of Score:**
+
+- You've been at the same training level for weeks/months and the
+  Score sits around 50 → CTL tells you the **absolute** load you're
+  sustaining.
+- You're tapering for a race and want to know if it's working → TSB
+  should swing positive (race-fresh).
+- You feel tired → check the ATL or a negative TSB.
+
+**Sources:**
+- Banister, E. W. (1991). Modeling Elite Athletic Performance.
+- Coggan, A., Performance Manager (TrainingPeaks).
+- Running-specific CTL ramp rates verified at:
+  <https://run.analyticszone.app/en/training-load/>
+
 ### Heart Rate Metrics
 
 #### Average Heart Rate per Period

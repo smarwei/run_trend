@@ -310,6 +310,101 @@ training_score = (
 
 **Wichtig:** Der Score ist eine Zusammenfassung. Er ersetzt NICHT die strukturellen Metriken wie Longest Run oder Average Distance per Run, die separat betrachtet werden sollten.
 
+#### Training Fitness (CTL) und Form (TSB)
+
+**Was es ist:** Eine **absolute** Trainingsfitness-Größe neben dem
+selbst-relativen Training Score (T38). Während der Score auf ein eigenes
+rollendes Baseline normalisiert ist und im Steady-State auf ~50 pendelt
+(`current_runs / baseline_runs ≈ 1.0`), bleibt CTL bei dauerhaftem
+Training **hoch**.
+
+**Drei Werte unter „Fitness:" im Training-Status-Panel:**
+
+- **Training Fitness** = aktueller **CTL** (Chronic Training Load) in
+  TRIMP/Tag. Stetig wachsender Wert bei kontinuierlichem Training.
+- **Form (TSB)** = `CTL − ATL` (Training Stress Balance). Misst, ob
+  du gerade ausgeruht oder müde bist — nicht ob du fit bist.
+
+**Banister-TRIMP pro Lauf** (HF-basierter Trainingsload):
+
+```
+TRIMP = duration_min × HRr × 0.64 × e^(b × HRr)
+```
+
+mit `HRr = (HR_avg − HR_rest) / (HR_max − HR_rest)`, gekappt auf
+`[0, 1]`. Der Exponentialfaktor `b = 1.92` (Männer) bzw. `1.67`
+(Frauen) gewichtet hochintensives Training überproportional — eine
+30-min-Tempo-Einheit erzeugt mehr Load als 30 min im Easy-Tempo.
+
+**CTL und ATL** sind exponentiell gewichtete gleitende Mittelwerte der
+täglichen TRIMP-Summe:
+
+```
+CTL_heute = CTL_gestern × (1 − 1/42) + tägliches_TRIMP × (1/42)
+ATL_heute = ATL_gestern × (1 − 1/7)  + tägliches_TRIMP × (1/7)
+```
+
+CTL braucht ca. 6 Wochen, um auf ein neues Trainingsniveau einzuschwingen
+(„Fitness baut sich langsam auf"); ATL nach einer Woche
+(„Müdigkeit baut sich schnell ab"). Während dieser Aufwärmphase (< 42
+Tage Historie) markiert die App den CTL-Wert mit einem `*`.
+
+**CTL-Bereiche** (TRIMP/Tag — die Skala ist HF-basiert, nicht
+Watt-basiert wie bei TrainingPeaks; absolute Werte sind also nicht
+direkt mit TSS-CTL aus dem Radsport vergleichbar, aber die relative
+Einordnung gilt analog):
+
+- **30–50** freizeitsportlich / locker
+- **60–90** gut trainiert
+- **100+**  wettkampforientiert
+
+**TSB-Zonen (Coggan, gleiche Skala wie CTL):**
+
+| Bereich       | Zustand                                       |
+|---------------|-----------------------------------------------|
+| > +25         | übergangs-frisch (zu lange erholt — Fitness verloren) |
+| +10 bis +25   | wettkampf-frisch (Tapering hat gewirkt)       |
+| −10 bis +10   | neutral                                       |
+| −20 bis −10   | produktive Überlast (Aufbau-Phase)            |
+| −30 bis −20   | Ermüdungsgrenze nähert sich (Deload erwägen)  |
+| < −30         | Übertrainings-Risiko                          |
+
+**CTL-Aufbau pro Woche** (Run-spezifische Empfehlung, deckt sich mit
+der „10 %-Regel" für Wochenkilometer):
+
+- Anfänger: **+2 bis +4** TRIMP/Tag pro Woche
+- Fortgeschritten: **+3 bis +5**
+- Wettkampforientiert: **+5 bis +7**
+
+Schnellere Anstiege gehen erfahrungsgemäß mit erhöhtem
+Verletzungsrisiko einher.
+
+**Wann zeigt die App eine Zahl:**
+
+- Aktivitäten mit `average_heartrate` (sonst kein TRIMP berechenbar)
+- **Geburtsdatum** gesetzt (für Tanaka-HRmax-Fallback) **oder**
+  **manuelle HR-Max** in den Settings
+- **Geschlecht** gesetzt (für den b-Faktor in der Banister-Formel)
+- **Ruhe-HF** gesetzt (für HF-Reserve-Berechnung)
+
+Fehlt eines davon, zeigt das Label einen klaren Hinweis welches Feld
+gesetzt werden muss.
+
+**Wann CTL anstatt Score gucken:**
+
+- Du bist seit Wochen/Monaten auf konstantem Niveau und der Score
+  pendelt um 50 → CTL zeigt dir, dass du auf deinem etablierten
+  Niveau **absolut** ein bestimmtes Trainingsvolumen hältst.
+- Du planst einen Wettkampf und willst wissen, ob dein Tapering
+  greift → TSB sollte dann positiv werden (race-fresh).
+- Du fühlst dich müde → schau auf den ATL bzw. negativen TSB.
+
+**Quellen:**
+- Banister, E. W. (1991). Modeling Elite Athletic Performance.
+- Coggan, A., Performance Manager (TrainingPeaks).
+- Verifizierte CTL-Anstiegsraten:
+  <https://run.analyticszone.app/en/training-load/>
+
 ### Heart Rate Metrics (Herzfrequenz)
 
 #### Average Heart Rate per Period

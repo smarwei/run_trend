@@ -2418,6 +2418,120 @@ Same pace at lower HR = better aerobic fitness raises this value.</source>
 Basiert auf dem Efficiency Factor (Pace ÷ HF). Benötigt Herzfrequenz-Daten.
 Gleiche Pace bei niedrigerer HF = bessere aerobe Fitness steigert diesen Wert.</translation>
     </message>
+    <message>
+      <source>Fitness:</source>
+      <translation type="finished">Fitness:</translation>
+    </message>
+    <message>
+      <source>Training Fitness: -</source>
+      <translation type="finished">Training Fitness: -</translation>
+    </message>
+    <message>
+      <source>Training Fitness: {:.0f}{}</source>
+      <translation type="finished">Training Fitness: {:.0f}{}</translation>
+    </message>
+    <message>
+      <source>Training Fitness: {}</source>
+      <translation type="finished">Training Fitness: {}</translation>
+    </message>
+    <message>
+      <source>Training Fitness (CTL — Chronic Training Load).
+
+Exponentially weighted average of your daily Banister TRIMP over the last 42 days. Unlike the Score above, this is an absolute number that grows with sustained training and stays elevated as long as you keep training — it does NOT reset against your own baseline.
+
+Typical ranges (TRIMP/day):
+  • 30–50  recreational / casual
+  • 60–90  well-trained
+  • 100+   competitive
+
+Needs Date of Birth, Gender and Resting Heart Rate to be set (Settings → General → Profile / Heart Rate).</source>
+      <translation type="finished">Training Fitness (CTL — Chronic Training Load).
+
+Exponentiell gewichteter Mittelwert deines täglichen Banister-TRIMP über die letzten 42 Tage. Anders als der Score oben ist das ein absoluter Wert: er wächst bei dauerhaftem Training und bleibt hoch, solange du weiter trainierst — er resettet sich NICHT gegen dein eigenes Baseline.
+
+Typische Bereiche (TRIMP/Tag):
+  • 30–50  freizeitsportlich / locker
+  • 60–90  gut trainiert
+  • 100+   wettkampforientiert
+
+Benötigt Geburtsdatum, Geschlecht und Ruhe-HF (Einstellungen → Allgemein → Profil / Herzfrequenz).</translation>
+    </message>
+    <message>
+      <source>Form: -</source>
+      <translation type="finished">Form: -</translation>
+    </message>
+    <message>
+      <source>Form (TSB): {:+.0f}  {}</source>
+      <translation type="finished">Form (TSB): {:+.0f}  {}</translation>
+    </message>
+    <message>
+      <source>Form (TSB): -</source>
+      <translation type="finished">Form (TSB): -</translation>
+    </message>
+    <message>
+      <source>Form (TSB — Training Stress Balance) = CTL − ATL.
+
+ATL is the same exponential average over only the last 7 days (acute fatigue). A positive TSB means you've rested faster than your fitness has decayed — race-ready. Negative TSB means you're absorbing load — building.
+
+Zones (Coggan):
+  • &gt; +25     transitional (over-rested)
+  • +10..+25  race-fresh
+  • −10..+10  neutral
+  • −20..−10  productive overload (build phase)
+  • −30..−20  approaching fatigue limit
+  • &lt; −30     overreaching risk</source>
+      <translation type="finished">Form (TSB — Training Stress Balance) = CTL − ATL.
+
+ATL ist derselbe exponentielle Mittelwert über die letzten 7 Tage (akute Ermüdung). Ein positiver TSB heißt, du hast dich schneller erholt als deine Fitness gesunken ist — wettkampfbereit. Negativer TSB heißt, du nimmst gerade Last auf — Aufbauphase.
+
+Zonen (Coggan):
+  • &gt; +25     übergangs-frisch (zu lange erholt)
+  • +10..+25  wettkampf-frisch
+  • −10..+10  neutral
+  • −20..−10  produktive Überlast (Aufbauphase)
+  • −30..−20  Ermüdungsgrenze nähert sich
+  • &lt; −30     Übertrainings-Risiko</translation>
+    </message>
+    <message>
+      <source>transitional (over-rested)</source>
+      <translation type="finished">übergangs-frisch (zu lange erholt)</translation>
+    </message>
+    <message>
+      <source>race-fresh</source>
+      <translation type="finished">wettkampf-frisch</translation>
+    </message>
+    <message>
+      <source>neutral</source>
+      <translation type="finished">neutral</translation>
+    </message>
+    <message>
+      <source>productive overload</source>
+      <translation type="finished">produktive Überlast</translation>
+    </message>
+    <message>
+      <source>approaching fatigue limit</source>
+      <translation type="finished">Ermüdungsgrenze nähert sich</translation>
+    </message>
+    <message>
+      <source>overreaching risk</source>
+      <translation type="finished">Übertrainings-Risiko</translation>
+    </message>
+    <message>
+      <source>Set Resting HR in Settings</source>
+      <translation type="finished">Ruhe-HF in den Einstellungen setzen</translation>
+    </message>
+    <message>
+      <source>Set Gender in Settings</source>
+      <translation type="finished">Geschlecht in den Einstellungen setzen</translation>
+    </message>
+    <message>
+      <source>Set Max HR or Date of Birth in Settings</source>
+      <translation type="finished">Max-HF oder Geburtsdatum in den Einstellungen setzen</translation>
+    </message>
+    <message>
+      <source>No HR-equipped activities yet</source>
+      <translation type="finished">Noch keine Aktivitäten mit HF-Daten</translation>
+    </message>
   </context>
   <context>
     <name>AboutDialog</name>
