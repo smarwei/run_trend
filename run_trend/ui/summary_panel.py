@@ -181,6 +181,54 @@ class SummaryPanel(QWidget):
             ),
         ))
 
+        # T38 — absolute fitness companion: CTL (Coggan Performance
+        # Manager) so a steady-state runner sees their absolute level,
+        # not just relative trending.
+        fitness_header = QLabel(self.tr("Fitness:"))
+        fitness_header.setStyleSheet("font-size: 10px; color: gray; margin-top: 8px;")
+        score_layout.addWidget(fitness_header)
+
+        self.training_fitness_label = QLabel(self.tr("Training Fitness: -"))
+        self.training_fitness_label.setStyleSheet("font-size: 11px;")
+        score_layout.addLayout(_row_with_help(
+            self.training_fitness_label,
+            self.tr(
+                "Training Fitness (CTL — Chronic Training Load).\n\n"
+                "Exponentially weighted average of your daily Banister "
+                "TRIMP over the last 42 days. Unlike the Score above, "
+                "this is an absolute number that grows with sustained "
+                "training and stays elevated as long as you keep "
+                "training — it does NOT reset against your own "
+                "baseline.\n\n"
+                "Typical ranges (TRIMP/day):\n"
+                "  • 30–50  recreational / casual\n"
+                "  • 60–90  well-trained\n"
+                "  • 100+   competitive\n\n"
+                "Needs Date of Birth, Gender and Resting Heart Rate to be "
+                "set (Settings → General → Profile / Heart Rate)."
+            ),
+        ))
+
+        self.form_label = QLabel(self.tr("Form: -"))
+        self.form_label.setStyleSheet("font-size: 11px;")
+        score_layout.addLayout(_row_with_help(
+            self.form_label,
+            self.tr(
+                "Form (TSB — Training Stress Balance) = CTL − ATL.\n\n"
+                "ATL is the same exponential average over only the last "
+                "7 days (acute fatigue). A positive TSB means you've "
+                "rested faster than your fitness has decayed — race-ready. "
+                "Negative TSB means you're absorbing load — building.\n\n"
+                "Zones (Coggan):\n"
+                "  • > +25     transitional (over-rested)\n"
+                "  • +10..+25  race-fresh\n"
+                "  • −10..+10  neutral\n"
+                "  • −20..−10  productive overload (build phase)\n"
+                "  • −30..−20  approaching fatigue limit\n"
+                "  • < −30     overreaching risk"
+            ),
+        ))
+
         score_group.setLayout(score_layout)
         layout.addWidget(score_group)
 
@@ -391,6 +439,41 @@ class SummaryPanel(QWidget):
             self.score_frequency_label.setText(self.tr("Frequency: -"))
             self.score_pace_label.setText(self.tr("Pace: -"))
             self.score_efficiency_label.setText(self.tr("Efficiency: -"))
+
+        # T38 — absolute fitness via CTL/TSB. Receives a dict from
+        # MainWindow with the precomputed state, or None if prerequisites
+        # are missing (no birth date, no hr_rest, no HR-equipped runs).
+        fitness = data.get('fitness_state')
+        fitness_hint = data.get('fitness_hint')
+        if fitness:
+            ctl = fitness.get('ctl', 0.0)
+            tsb = fitness.get('tsb', 0.0)
+            cold = fitness.get('cold_start', False)
+            zone = fitness.get('zone', '')
+            ctl_suffix = " *" if cold else ""
+            self.training_fitness_label.setText(
+                self.tr("Training Fitness: {:.0f}{}").format(ctl, ctl_suffix)
+            )
+            # Map internal zone keys to user-facing labels.
+            zone_text = {
+                'transitional': self.tr('transitional (over-rested)'),
+                'race-fresh': self.tr('race-fresh'),
+                'neutral': self.tr('neutral'),
+                'productive': self.tr('productive overload'),
+                'fatigue-limit': self.tr('approaching fatigue limit'),
+                'overreaching': self.tr('overreaching risk'),
+            }.get(zone, '')
+            self.form_label.setText(
+                self.tr("Form (TSB): {:+.0f}  {}").format(tsb, zone_text)
+            )
+        elif fitness_hint:
+            self.training_fitness_label.setText(
+                self.tr("Training Fitness: {}").format(fitness_hint)
+            )
+            self.form_label.setText(self.tr("Form (TSB): -"))
+        else:
+            self.training_fitness_label.setText(self.tr("Training Fitness: -"))
+            self.form_label.setText(self.tr("Form (TSB): -"))
 
         # Marathon milestone
         marathon_estimate = data.get('marathon_estimate')

@@ -132,6 +132,104 @@ class TestScoreUsesLastCompletePeriod(unittest.TestCase, _MwFixture):
         label = self.window.summary_panel.consistency_label.text()
         self.assertIn("so far", label)
 
+    def test_fitness_hint_when_hr_rest_missing(self):
+        # Birth date + gender + manual HRmax set, but no hr_rest → hint.
+        self.window.settings.set('birth_date', '1990-01-01')
+        self.window.settings.set('gender', 'male')
+        self.window.settings.set('manual_hrmax', 195)
+        self.window.settings.set('hr_rest', 0)
+        self.window.aggregates = [
+            _aggregate(datetime(2026, 1, 5), complete=True, num_runs=4),
+        ]
+        self.window.activities = []
+        self._run_update()
+
+        text = self.window.summary_panel.training_fitness_label.text()
+        self.assertIn("Resting HR", text)
+
+    def test_fitness_hint_when_gender_missing(self):
+        self.window.settings.set('birth_date', '1990-01-01')
+        self.window.settings.set('gender', '')
+        self.window.settings.set('manual_hrmax', 195)
+        self.window.settings.set('hr_rest', 50)
+        self.window.aggregates = [
+            _aggregate(datetime(2026, 1, 5), complete=True, num_runs=4),
+        ]
+        self.window.activities = []
+        self._run_update()
+
+        text = self.window.summary_panel.training_fitness_label.text()
+        self.assertIn("Gender", text)
+
+    def test_fitness_hint_when_hrmax_unknown(self):
+        # No manual HRmax and no birth date → can't derive Tanaka either.
+        self.window.settings.set('birth_date', '')
+        self.window.settings.set('gender', 'male')
+        self.window.settings.set('manual_hrmax', 0)
+        self.window.settings.set('hr_rest', 50)
+        self.window.aggregates = [
+            _aggregate(datetime(2026, 1, 5), complete=True, num_runs=4),
+        ]
+        self.window.activities = []
+        self._run_update()
+
+        text = self.window.summary_panel.training_fitness_label.text()
+        self.assertIn("Max HR", text)
+        self.assertIn("Date of Birth", text)
+
+    def test_fitness_hint_when_no_hr_activities(self):
+        # All prereqs configured, but activities have no HR data.
+        self.window.settings.set('birth_date', '1990-01-01')
+        self.window.settings.set('gender', 'male')
+        self.window.settings.set('manual_hrmax', 195)
+        self.window.settings.set('hr_rest', 50)
+        self.window.aggregates = [
+            _aggregate(datetime(2026, 1, 5), complete=True, num_runs=4),
+        ]
+        self.window.activities = [
+            {
+                'strava_id': 1, 'name': 'Run', 'type': 'Run',
+                'start_date': '2026-01-05T10:00:00',
+                'distance': 5000.0, 'moving_time': 1800,
+                # No average_heartrate.
+            },
+        ]
+        self._run_update()
+
+        text = self.window.summary_panel.training_fitness_label.text()
+        self.assertIn("HR-equipped", text)
+
+    def test_fitness_computed_with_full_prereqs(self):
+        self.window.settings.set('birth_date', '1990-01-01')
+        self.window.settings.set('gender', 'male')
+        self.window.settings.set('manual_hrmax', 195)
+        self.window.settings.set('hr_rest', 50)
+        # 30 days of moderate HR runs to build up some CTL.
+        base = datetime(2026, 1, 1)
+        self.window.aggregates = [
+            _aggregate(base, complete=True, num_runs=4),
+        ]
+        self.window.activities = [
+            {
+                'strava_id': i,
+                'name': f'Run {i}',
+                'type': 'Run',
+                'start_date': (base + timedelta(days=i)).isoformat(),
+                'distance': 10000.0,
+                'moving_time': 3000,
+                'average_heartrate': 145,
+            }
+            for i in range(30)
+        ]
+        self._run_update()
+
+        text = self.window.summary_panel.training_fitness_label.text()
+        # Should show a numeric CTL — not the literal placeholder.
+        self.assertNotIn("-", text.replace("Training Fitness:", ""))
+        self.assertRegex(text, r"\d")
+        form_text = self.window.summary_panel.form_label.text()
+        self.assertRegex(form_text, r"[+-]?\d")
+
     def test_training_load_pulled_from_last_complete(self):
         # Different load values across periods to verify which one wins.
         base = datetime(2026, 1, 5)
