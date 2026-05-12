@@ -119,6 +119,10 @@ class SummaryPanel(QWidget):
                 "Training Score (0-100).\n\n"
                 "Composite of recent training consistency, weekly distance, "
                 "and aerobic efficiency.\n\n"
+                "When the current period is still in progress, the score "
+                "and its breakdown read from the last complete period — "
+                "otherwise partial-period runs would compare against a "
+                "full-period baseline and drag everything down.\n\n"
                 "Typical ranges:\n"
                 "  • 0-29  red   – minimal training\n"
                 "  • 30-59 amber – building up\n"
@@ -350,18 +354,13 @@ class SummaryPanel(QWidget):
         else:
             self.hrmax_suggestion_label.setVisible(False)
 
-        # Training score. If main_window fell back to the last complete
-        # period (so an in-progress current period doesn't drag the
-        # breakdown), tell the user — otherwise "Frequency 3.7/20" reads
-        # like an error rather than "your current week isn't finished yet".
+        # Training score. The underlying fallback to the last complete
+        # period happens in MainWindow when the current period is in
+        # progress; the score label here just shows the number. The
+        # help tooltip on the score label documents the fallback so
+        # users can find out without UI clutter.
         score = data.get('current_score', 0)
-        uses_last_complete = bool(data.get('score_uses_last_complete', False))
-        if uses_last_complete:
-            self.score_label.setText(
-                self.tr("Score: {:.1f}  (last complete period)").format(score)
-            )
-        else:
-            self.score_label.setText(self.tr("Score: {:.1f}").format(score))
+        self.score_label.setText(self.tr("Score: {:.1f}").format(score))
 
         # Set color based on score
         if score < 30:

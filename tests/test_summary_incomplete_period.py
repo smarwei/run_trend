@@ -100,14 +100,15 @@ class TestScoreUsesLastCompletePeriod(unittest.TestCase, _MwFixture):
 
         self._run_update()
 
-        # The score label should reflect a complete period (score=54 for
-        # num_runs=4) plus a "(last complete period)" annotation, not the
-        # partial period's score of 51.
-        label = self.window.summary_panel.score_label.text()
-        self.assertIn("54", label)
-        self.assertIn("last complete period", label)
+        # Big score number reflects a complete period (54 for num_runs=4),
+        # not the partial period's score of 51. No visible "last complete
+        # period" annotation — the score label stays compact.
+        score_text = self.window.summary_panel.score_label.text()
+        self.assertIn("54", score_text)
+        self.assertNotIn("last complete", score_text)
+        self.assertNotIn("(", score_text)
 
-    def test_complete_current_period_uses_latest_silently(self):
+    def test_complete_current_period_uses_latest(self):
         base = datetime(2026, 1, 5)
         self.window.aggregates = [
             _aggregate(base, complete=True, num_runs=4),
@@ -117,10 +118,8 @@ class TestScoreUsesLastCompletePeriod(unittest.TestCase, _MwFixture):
         self.window.activities = []
         self._run_update()
 
-        label = self.window.summary_panel.score_label.text()
-        self.assertIn("55", label)  # 50 + 5
-        # No "last complete" hint when the current period IS complete.
-        self.assertNotIn("last complete period", label)
+        score_text = self.window.summary_panel.score_label.text()
+        self.assertIn("55", score_text)  # 50 + 5
 
     def test_consistency_label_marks_partial_week(self):
         base = datetime(2026, 1, 5)

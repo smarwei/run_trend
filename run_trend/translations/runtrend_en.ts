@@ -2131,10 +2131,6 @@ Caveat: this app's composite ACWR includes a pace component (faster pace = highe
       <translation type="finished">Score: {:.1f}</translation>
     </message>
     <message>
-      <source>Score: {:.1f}  (last complete period)</source>
-      <translation type="finished">Score: {:.1f}  (last complete period)</translation>
-    </message>
-    <message>
       <source>Active Days: {} ({:.0%} so far)</source>
       <translation type="finished">Active Days: {} ({:.0%} so far)</translation>
     </message>
