@@ -959,10 +959,25 @@ class MainWindow(QMainWindow):
         latest_agg = self.aggregates[-1]
         current_avg_distance = latest_agg['total_distance_km']
         current_avg_pace = latest_agg['weighted_avg_pace_min_per_km']
-        current_score = latest_agg.get('training_score', 0)
 
         # Check if current period is complete
         is_current_period_complete = latest_agg.get('is_complete', True)
+
+        # Training Score + breakdown should NOT be read from an in-progress
+        # period — that compares partial runs against a full-period
+        # baseline and produces misleadingly low numbers (e.g. Frequency
+        # 3.7/20 mid-week even when the user runs every other day).
+        # Fall back to the latest complete aggregate; if none exists yet
+        # (very early training), keep the latest as the only available
+        # data point and let the panel show it.
+        score_agg = next(
+            (a for a in reversed(self.aggregates) if a.get('is_complete', True)),
+            latest_agg,
+        )
+        current_score = score_agg.get('training_score', 0)
+        score_uses_last_complete = (
+            score_agg is not latest_agg and not is_current_period_complete
+        )
 
         # Heart rate metrics
         current_avg_hr = latest_agg.get('avg_heartrate', 0)
@@ -1026,8 +1041,10 @@ class MainWindow(QMainWindow):
                 manual_hrmax=manual_hrmax
             )
 
-        # Training Load data
-        load_data = latest_agg.get('training_load')
+        # Training Load (ACWR) — same problem as the score breakdown: an
+        # in-progress period under-counts TRIMP/volume against a full-period
+        # baseline. Use the last complete aggregate's load.
+        load_data = score_agg.get('training_load')
 
         self.summary_panel.update_summary({
             'total_runs': total_runs,
@@ -1045,7 +1062,8 @@ class MainWindow(QMainWindow):
             'training_load': load_data,
             'active_days': latest_agg.get('active_days'),
             'consistency_ratio': latest_agg.get('consistency_ratio'),
-            'score_components': latest_agg.get('score_components'),
+            'score_components': score_agg.get('score_components'),
+            'score_uses_last_complete': score_uses_last_complete,
         })
 
     def _apply_race_markers_to_charts(self):

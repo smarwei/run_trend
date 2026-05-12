@@ -298,13 +298,21 @@ class SummaryPanel(QWidget):
         else:
             self.current_pace_label.setText(self.tr("Avg Pace: -"))
 
-        # Consistency (active days / days in period) — spec §6.2
+        # Consistency (active days / days in period) — spec §6.2.
+        # When the period is in progress, the consistency_ratio uses
+        # full-period days as the denominator, which under-reports.
+        # Tag the value as "(so far)" so it isn't misread.
         active_days = data.get('active_days')
         consistency = data.get('consistency_ratio')
         if active_days is not None and consistency is not None:
-            self.consistency_label.setText(
-                self.tr("Active Days: {} ({:.0%})").format(active_days, consistency)
-            )
+            if is_complete:
+                self.consistency_label.setText(
+                    self.tr("Active Days: {} ({:.0%})").format(active_days, consistency)
+                )
+            else:
+                self.consistency_label.setText(
+                    self.tr("Active Days: {} ({:.0%} so far)").format(active_days, consistency)
+                )
         else:
             self.consistency_label.setText(self.tr("Active Days: -"))
 
@@ -342,9 +350,18 @@ class SummaryPanel(QWidget):
         else:
             self.hrmax_suggestion_label.setVisible(False)
 
-        # Training score
+        # Training score. If main_window fell back to the last complete
+        # period (so an in-progress current period doesn't drag the
+        # breakdown), tell the user — otherwise "Frequency 3.7/20" reads
+        # like an error rather than "your current week isn't finished yet".
         score = data.get('current_score', 0)
-        self.score_label.setText(self.tr("Score: {:.1f}").format(score))
+        uses_last_complete = bool(data.get('score_uses_last_complete', False))
+        if uses_last_complete:
+            self.score_label.setText(
+                self.tr("Score: {:.1f}  (last complete period)").format(score)
+            )
+        else:
+            self.score_label.setText(self.tr("Score: {:.1f}").format(score))
 
         # Set color based on score
         if score < 30:

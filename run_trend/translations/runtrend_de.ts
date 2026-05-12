@@ -2131,6 +2131,14 @@ Caveat: Der zusammengesetzte ACWR dieser App enthält eine Pace-Komponente (schn
       <translation type="finished">Bewertung: {:.1f}</translation>
     </message>
     <message>
+      <source>Score: {:.1f}  (last complete period)</source>
+      <translation type="finished">Bewertung: {:.1f}  (letzte abgeschlossene Periode)</translation>
+    </message>
+    <message>
+      <source>Active Days: {} ({:.0%} so far)</source>
+      <translation type="finished">Aktive Tage: {} ({:.0%} bisher)</translation>
+    </message>
+    <message>
       <location filename="../ui/summary_panel.py" line="197" />
       <source>Milestone Reached!</source>
       <translation type="finished">Meilenstein erreicht!</translation>
