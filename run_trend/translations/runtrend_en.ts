@@ -866,6 +866,14 @@ Linear decline is a first approximation; real decline accelerates past age 70 as
       <translation type="finished">Spread {:.1f}pp</translation>
     </message>
     <message>
+      <source>Age-graded % (avg over distances)</source>
+      <translation type="finished">Age-graded % (avg over distances)</translation>
+    </message>
+    <message>
+      <source>Best {}: {:.0f}%  •  Worst {}: {:.0f}%</source>
+      <translation type="finished">Best {}: {:.0f}%  •  Worst {}: {:.0f}%</translation>
+    </message>
+    <message>
       <source>No predictions yet.</source>
       <translation type="finished">No predictions yet.</translation>
     </message>

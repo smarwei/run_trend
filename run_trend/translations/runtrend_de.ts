@@ -866,6 +866,14 @@ Linearer Decline ist eine erste Näherung; der reale Decline beschleunigt nach A
       <translation type="finished">Spread {:.1f}pp</translation>
     </message>
     <message>
+      <source>Age-graded % (avg over distances)</source>
+      <translation type="finished">Age-graded % (Mittel über Distanzen)</translation>
+    </message>
+    <message>
+      <source>Best {}: {:.0f}%  •  Worst {}: {:.0f}%</source>
+      <translation type="finished">Stärkste {}: {:.0f}%  •  Schwächste {}: {:.0f}%</translation>
+    </message>
+    <message>
       <source>No predictions yet.</source>
       <translation type="finished">Noch keine Vorhersagen.</translation>
     </message>

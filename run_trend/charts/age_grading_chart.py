@@ -357,22 +357,32 @@ class AgeGradingChart(BaseChart):
             line.attachAxis(axis_y)
             view['series'].append(line)
 
-        # One line per distance. Apply SMA smoothing to the % values
-        # using the toolbar's strength so this chart honours the same
-        # smoothing toggle as the rest.
+        # Single primary line: mean age-graded % per period across all
+        # four distances. With both prediction paths driven by a single
+        # training-pace input, the per-distance lines are highly
+        # correlated — showing four overlapping curves was visually noisy
+        # and overstated the independence of the signals. Per-distance
+        # detail still flows in through the race-marker scatter overlay
+        # below, which uses actual race times rather than extrapolations.
         smoothing = getattr(self, '_smoothing', 'off')
+        # Index per-distance points by timestamp so we can mean them
+        # period-wise without relying on identical lengths.
+        ts_to_pcts: Dict[int, List[float]] = {}
         for dist in _DISTANCE_LABELS_TR_KEYS:
-            pts = per_distance_points[dist]
-            if not pts:
-                continue
+            for ts, pct in per_distance_points[dist]:
+                ts_to_pcts.setdefault(ts, []).append(pct)
+        mean_pts = sorted(
+            (ts, sum(vs) / len(vs)) for ts, vs in ts_to_pcts.items() if vs
+        )
+        if mean_pts:
             line = QLineSeries()
-            line.setName(self._distance_translated(dist))
-            pcts = [pct for _, pct in pts]
+            line.setName(self.tr("Age-graded % (avg over distances)"))
+            pcts = [v for _, v in mean_pts]
             smoothed = self._smooth_data(pcts, smoothing)
-            for (ts, _), val in zip(pts, smoothed):
+            for (ts, _), val in zip(mean_pts, smoothed):
                 line.append(ts, val)
-            pen = QPen(QColor(_LINE_COLORS[dist]))
-            pen.setWidth(2)
+            pen = QPen(QColor("#2c3e50"))
+            pen.setWidth(3)
             line.setPen(pen)
             chart.addSeries(line)
             line.attachAxis(axis_x)
@@ -418,31 +428,37 @@ class AgeGradingChart(BaseChart):
             view['series'].append(scatter)
             scatter_added += 1
 
-        # Header summary.
-        parts = []
-        latest_values = []
-        for dist in _DISTANCE_LABELS_TR_KEYS:
-            pct = latest_pct_label[dist]
-            if pct is None:
-                continue
-            parts.append(
-                f"{self._distance_translated(dist)}: {pct:.0f}%"
-            )
-            latest_values.append(pct)
-        # Spread indicator — flags when all 4 distances cluster (typical for
-        # Riegel/single-pace predictions) so the user knows the chart is
-        # showing one fitness signal rather than four independent ones.
+        # Header summary — single "Latest" number (the mean), plus a
+        # best/worst-distance annotation only when there's actually a
+        # meaningful spread (otherwise the four distances carry nearly
+        # the same info, so naming them is just noise).
+        latest_dist_pcts = {
+            dist: pct for dist, pct in latest_pct_label.items() if pct is not None
+        }
+        latest_mean: Optional[float] = None
+        spread = 0.0
+        best_part = ""
+        if latest_dist_pcts:
+            vals = list(latest_dist_pcts.values())
+            latest_mean = sum(vals) / len(vals)
+            spread = max(vals) - min(vals)
+            if spread >= 3.0:
+                best_dist = max(latest_dist_pcts, key=latest_dist_pcts.get)
+                worst_dist = min(latest_dist_pcts, key=latest_dist_pcts.get)
+                best_part = "  •  " + self.tr(
+                    "Best {}: {:.0f}%  •  Worst {}: {:.0f}%"
+                ).format(
+                    self._distance_translated(best_dist), latest_dist_pcts[best_dist],
+                    self._distance_translated(worst_dist), latest_dist_pcts[worst_dist],
+                )
         spread_suffix = ""
-        if len(latest_values) >= 2:
-            spread = max(latest_values) - min(latest_values)
+        if latest_dist_pcts:
             if spread < 3.0:
                 spread_suffix = "  •  " + self.tr(
                     "Spread {:.1f}pp — distances cluster (one underlying pace)"
                 ).format(spread)
             else:
-                spread_suffix = "  •  " + self.tr(
-                    "Spread {:.1f}pp"
-                ).format(spread)
+                spread_suffix = "  •  " + self.tr("Spread {:.1f}pp").format(spread)
         suffix = ""
         if scatter_added:
             suffix = "  •  " + self.tr("{} real races overlaid").format(scatter_added)
@@ -457,11 +473,13 @@ class AgeGradingChart(BaseChart):
             method_note = "  •  " + self.tr(
                 "pace-based fallback (no HR-classified easy runs found)"
             )
-        view['header_label'].setText(
-            (self.tr("Latest age-graded %") + ":  " + "  |  ".join(parts)
-             + spread_suffix + method_note + suffix)
-            if parts else self.tr("No predictions yet.")
-        )
+        if latest_mean is None:
+            view['header_label'].setText(self.tr("No predictions yet."))
+        else:
+            view['header_label'].setText(
+                self.tr("Latest age-graded %") + f": {latest_mean:.0f}%"
+                + best_part + spread_suffix + method_note + suffix
+            )
 
     # ------------------------------------------------------------------ #
     # HF tab                                                               #

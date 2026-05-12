@@ -179,7 +179,7 @@ class TestRiegelFallback(unittest.TestCase):
         _ensure_qapplication()
         self.chart = AgeGradingChart()
 
-    def test_aggregate_without_hr_still_renders_lines(self):
+    def test_aggregate_without_hr_still_renders_primary_line(self):
         from PySide6.QtCharts import QLineSeries
         # Build aggregates where HR data is entirely absent.
         no_hr_aggs = _aggregates(num_periods=20, with_hr=False)
@@ -208,13 +208,13 @@ class TestRiegelFallback(unittest.TestCase):
             },
         )
         wma_chart = self.chart.wma_view['chart']
-        line_series = [
-            s for s in wma_chart.series() if isinstance(s, QLineSeries)
+        # Primary line is the per-period mean across distances. It must
+        # have at least as many points as we have aggregates (after warm-up).
+        primary = [
+            s for s in wma_chart.series()
+            if isinstance(s, QLineSeries) and s.count() >= 5
         ]
-        # 4 distances × 1 line + reference bands. We just check ≥ 4 actual
-        # data lines (the ones with non-zero start_date plot points).
-        data_lines = [s for s in line_series if s.count() > 2]
-        self.assertGreaterEqual(len(data_lines), 4)
+        self.assertGreaterEqual(len(primary), 1)
 
     def test_header_notes_fallback_when_no_hr(self):
         no_hr_aggs = _aggregates(num_periods=15, with_hr=False)
@@ -319,11 +319,12 @@ class TestSmoothing(unittest.TestCase):
             smoothing=smoothing,
         )
         from PySide6.QtCharts import QLineSeries
-        # Grab the "5K" distance line by its translated name.
+        # The primary (mean) line is the thick one with many data points;
+        # reference bands have exactly 2 points (start and end of x-range).
         for s in self.chart.wma_view['chart'].series():
-            if isinstance(s, QLineSeries) and s.name() == self.chart._distance_translated("5K"):
+            if isinstance(s, QLineSeries) and s.count() > 5:
                 return [s.at(i).y() for i in range(s.count())]
-        self.fail("5K line not found")
+        self.fail("primary mean line not found")
 
     def test_off_keeps_outlier_visible(self):
         ys = self._render('off')
