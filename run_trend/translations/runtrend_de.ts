@@ -850,6 +850,14 @@ Linearer Decline ist eine erste Näherung; der reale Decline beschleunigt nach A
       <translation type="finished">{} reale Rennen überlagert</translation>
     </message>
     <message>
+      <source>{} HR-based, {} pace-only (no HR data)</source>
+      <translation type="finished">{} HF-basiert, {} nur Pace (keine HF-Daten)</translation>
+    </message>
+    <message>
+      <source>pace-based fallback (no HR-classified easy runs found)</source>
+      <translation type="finished">Pace-basierter Fallback (keine HF-klassifizierten Easy-Runs gefunden)</translation>
+    </message>
+    <message>
       <source>No predictions yet.</source>
       <translation type="finished">Noch keine Vorhersagen.</translation>
     </message>

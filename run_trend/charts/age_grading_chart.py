@@ -34,6 +34,9 @@ from ..ui.help_label import make_help_icon
 
 _DISTANCE_LABELS_TR_KEYS = ("5K", "10K", "Half Marathon", "Marathon")
 _DISTANCE_KM = {"5K": 5.0, "10K": 10.0, "Half Marathon": 21.0975, "Marathon": 42.195}
+# Riegel time-distance scaling exponent — empirical fit, widely used since
+# Riegel (1981). 1.06 is the canonical value for running across 5K–marathon.
+_RIEGEL_EXPONENT = 1.06
 _LINE_COLORS = {
     "5K": "#3498db",
     "10K": "#27ae60",
@@ -247,22 +250,37 @@ class AgeGradingChart(BaseChart):
             d: None for d in _DISTANCE_LABELS_TR_KEYS
         }
 
+        used_fallback = 0
+        used_hr_method = 0
         for agg in complete:
             period_dt: datetime = agg['period_date']
             window_start = period_dt - timedelta(days=30 * _ROLLING_WINDOW_MONTHS)
             window_runs = _runs_in_window(activities, window_start, period_dt)
-            if len(window_runs) < 3:
+
+            predictions: Optional[Dict[str, Dict[str, Any]]] = None
+            # Preferred: HR-classified easy runs → McMillan via RacePredictor.
+            if len(window_runs) >= 3:
+                pred = RacePredictor.estimate_race_times(
+                    window_runs,
+                    max_hr=manual_hrmax if manual_hrmax > 0 else 200,
+                    efficiency_factor=agg.get('efficiency_factor'),
+                    recent_months=_ROLLING_WINDOW_MONTHS,
+                    manual_hrmax=manual_hrmax if manual_hrmax > 0 else None,
+                )
+                if pred and pred.get('has_prediction'):
+                    predictions = pred['predictions']
+                    used_hr_method += 1
+
+            # Fallback: Riegel scaling from the aggregate's own average-run
+            # profile. Lets the chart cover periods without HR data so it
+            # actually starts where the user's training_start_date does.
+            if predictions is None:
+                predictions = _riegel_from_aggregate(agg)
+                if predictions is not None:
+                    used_fallback += 1
+
+            if predictions is None:
                 continue
-            pred = RacePredictor.estimate_race_times(
-                window_runs,
-                max_hr=manual_hrmax if manual_hrmax > 0 else 200,
-                efficiency_factor=agg.get('efficiency_factor'),
-                recent_months=_ROLLING_WINDOW_MONTHS,
-                manual_hrmax=manual_hrmax if manual_hrmax > 0 else None,
-            )
-            if not pred or not pred.get('has_prediction'):
-                continue
-            predictions = pred['predictions']
             age = ag.age_on_date(birth_date, period_dt.date())
             ts_ms = int(period_dt.timestamp() * 1000)
             for dist in _DISTANCE_LABELS_TR_KEYS:
@@ -391,8 +409,20 @@ class AgeGradingChart(BaseChart):
         suffix = ""
         if scatter_added:
             suffix = "  •  " + self.tr("{} real races overlaid").format(scatter_added)
+        # Note when the fallback contributed so the user knows some
+        # points are pace-only (no HR classification).
+        method_note = ""
+        if used_fallback and used_hr_method:
+            method_note = "  •  " + self.tr(
+                "{} HR-based, {} pace-only (no HR data)"
+            ).format(used_hr_method, used_fallback)
+        elif used_fallback and not used_hr_method:
+            method_note = "  •  " + self.tr(
+                "pace-based fallback (no HR-classified easy runs found)"
+            )
         view['header_label'].setText(
-            (self.tr("Latest age-graded %") + ":  " + "  |  ".join(parts) + suffix)
+            (self.tr("Latest age-graded %") + ":  " + "  |  ".join(parts)
+             + method_note + suffix)
             if parts else self.tr("No predictions yet.")
         )
 
@@ -534,6 +564,39 @@ class AgeGradingChart(BaseChart):
             "Marathon": self.tr("Marathon"),
         }
         return translations.get(distance_label, distance_label)
+
+
+def _riegel_from_aggregate(agg: Dict[str, Any]) -> Optional[Dict[str, Dict[str, Any]]]:
+    """Build race-time predictions from a period's pace + average-distance.
+
+    Uses Riegel's empirical formula ``T2 = T1 × (D2/D1)^1.06`` to scale
+    the user's typical training-run profile (avg pace × avg distance)
+    to 5K / 10K / HM / Marathon.
+
+    This is the fallback when HR-based McMillan classification doesn't
+    produce a prediction (historical periods without HR data, or runs
+    that don't sit in the 60–75 % HRmax Easy-Run window). Less precise
+    than HR-classified, but lets the chart actually cover the user's
+    full training_start_date range.
+
+    Returns ``None`` if the aggregate lacks the inputs (zero pace or
+    distance).
+    """
+    pace_min_per_km = agg.get('weighted_avg_pace_min_per_km') or 0
+    avg_distance_km = agg.get('avg_distance_per_run_km') or 0
+    if pace_min_per_km <= 0 or avg_distance_km <= 0:
+        return None
+    known_time_min = pace_min_per_km * avg_distance_km
+    if known_time_min <= 0:
+        return None
+    out: Dict[str, Dict[str, Any]] = {}
+    for race_name, target_km in _DISTANCE_KM.items():
+        time_min = known_time_min * (target_km / avg_distance_km) ** _RIEGEL_EXPONENT
+        out[race_name] = {
+            'total_time_minutes': time_min,
+            'pace_min_per_km': time_min / target_km,
+        }
+    return out
 
 
 def _runs_in_window(

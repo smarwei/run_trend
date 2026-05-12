@@ -29,6 +29,7 @@ def _aggregates(num_periods: int = 20, with_hr: bool = True) -> list:
             'total_distance_km': 40.0 + i * 0.5,
             'total_moving_time_h': 4.0,
             'num_runs': 4,
+            'avg_distance_per_run_km': (40.0 + i * 0.5) / 4,
             'weighted_avg_pace_min_per_km': 5.0,
             'avg_speed_kmh': 12.0,
             'efficiency_factor': 0.024 + 0.0005 * (i % 4) if with_hr else 0.0,
@@ -167,6 +168,111 @@ class TestWmaTabRendering(unittest.TestCase):
             if isinstance(s, QScatterSeries)
         ]
         self.assertEqual(len(scatters), 0)
+
+
+class TestRiegelFallback(unittest.TestCase):
+    """Periods without HR-classified easy runs still need predictions —
+    otherwise the chart starts wherever HR coverage starts, not at the
+    user's training_start_date."""
+
+    def setUp(self):
+        _ensure_qapplication()
+        self.chart = AgeGradingChart()
+
+    def test_aggregate_without_hr_still_renders_lines(self):
+        from PySide6.QtCharts import QLineSeries
+        # Build aggregates where HR data is entirely absent.
+        no_hr_aggs = _aggregates(num_periods=20, with_hr=False)
+        # Activities also without HR — RacePredictor would fail.
+        no_hr_acts = []
+        end = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        for i in range(40):
+            dt = end - timedelta(days=40 - i)
+            no_hr_acts.append({
+                'strava_id': i,
+                'name': f'Run {i}',
+                'type': 'Run',
+                'start_date': dt.isoformat(),
+                'distance': 8000.0,
+                'moving_time': 2640,  # 5:30/km × 8km
+                'average_speed': 3.03,
+                'has_heartrate': False,
+            })
+        self.chart.update_chart(
+            aggregates=no_hr_aggs,
+            activities=no_hr_acts,
+            settings={
+                'birth_date': '1990-01-01',
+                'gender': 'male',
+                'manual_hrmax': 0,  # unset → HR-method should fail
+            },
+        )
+        wma_chart = self.chart.wma_view['chart']
+        line_series = [
+            s for s in wma_chart.series() if isinstance(s, QLineSeries)
+        ]
+        # 4 distances × 1 line + reference bands. We just check ≥ 4 actual
+        # data lines (the ones with non-zero start_date plot points).
+        data_lines = [s for s in line_series if s.count() > 2]
+        self.assertGreaterEqual(len(data_lines), 4)
+
+    def test_header_notes_fallback_when_no_hr(self):
+        no_hr_aggs = _aggregates(num_periods=15, with_hr=False)
+        end = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        acts = [
+            {
+                'strava_id': i,
+                'name': f'r{i}',
+                'type': 'Run',
+                'start_date': (end - timedelta(days=30 - i)).isoformat(),
+                'distance': 8000.0,
+                'moving_time': 2640,
+                'average_speed': 3.03,
+            }
+            for i in range(30)
+        ]
+        self.chart.update_chart(
+            aggregates=no_hr_aggs,
+            activities=acts,
+            settings={
+                'birth_date': '1990-01-01',
+                'gender': 'male',
+                'manual_hrmax': 0,
+            },
+        )
+        header = self.chart.wma_view['header_label'].text()
+        # Fallback-only mode: header contains the explicit note.
+        self.assertIn("pace-based", header)
+
+
+class TestRiegelHelper(unittest.TestCase):
+    """Direct check of the _riegel_from_aggregate helper."""
+
+    def test_predicts_all_four_distances(self):
+        from run_trend.charts.age_grading_chart import _riegel_from_aggregate
+        agg = {
+            'weighted_avg_pace_min_per_km': 5.5,
+            'avg_distance_per_run_km': 8.0,
+        }
+        result = _riegel_from_aggregate(agg)
+        self.assertIsNotNone(result)
+        self.assertEqual(
+            set(result.keys()),
+            {'5K', '10K', 'Half Marathon', 'Marathon'},
+        )
+        # Marathon time should be longer than HM time (Riegel monotone).
+        self.assertGreater(
+            result['Marathon']['total_time_minutes'],
+            result['Half Marathon']['total_time_minutes'],
+        )
+
+    def test_returns_none_for_missing_inputs(self):
+        from run_trend.charts.age_grading_chart import _riegel_from_aggregate
+        self.assertIsNone(_riegel_from_aggregate({}))
+        self.assertIsNone(_riegel_from_aggregate({'weighted_avg_pace_min_per_km': 0,
+                                                   'avg_distance_per_run_km': 5}))
+        self.assertIsNone(_riegel_from_aggregate({'weighted_avg_pace_min_per_km': 5,
+                                                   'avg_distance_per_run_km': 0}))
 
 
 class TestHfTabRendering(unittest.TestCase):

@@ -850,6 +850,14 @@ Linear decline is a first approximation; real decline accelerates past age 70 as
       <translation type="finished">{} real races overlaid</translation>
     </message>
     <message>
+      <source>{} HR-based, {} pace-only (no HR data)</source>
+      <translation type="finished">{} HR-based, {} pace-only (no HR data)</translation>
+    </message>
+    <message>
+      <source>pace-based fallback (no HR-classified easy runs found)</source>
+      <translation type="finished">pace-based fallback (no HR-classified easy runs found)</translation>
+    </message>
+    <message>
       <source>No predictions yet.</source>
       <translation type="finished">No predictions yet.</translation>
     </message>
