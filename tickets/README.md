@@ -52,6 +52,7 @@ Stand: 2026-05-11.
 - [19 — HR-Zonen-Auswertung mit Zeit-in-Zone](19-hr-zones.md)
 - [36 — `MainWindow` God-Object refactorn](36-mainwindow-refactor.md)
 - [37 — Age-Graded Performance Chart (WMA + HF-Physiologie)](37-age-graded-performance.md)
+- [38 — Training-Fitness via CTL/ATL/TSB (absolute Skala neben Training-Score)](38-training-fitness-ctl.md)
 
 ### Methodisch (P3)
 - [20 — Pace als ACWR-Komponente überdenken](20-pace-acwr-review.md)
