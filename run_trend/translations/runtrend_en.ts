@@ -858,6 +858,14 @@ Linear decline is a first approximation; real decline accelerates past age 70 as
       <translation type="finished">pace-based fallback (no HR-classified easy runs found)</translation>
     </message>
     <message>
+      <source>Spread {:.1f}pp — distances cluster (one underlying pace)</source>
+      <translation type="finished">Spread {:.1f}pp — distances cluster (one underlying pace)</translation>
+    </message>
+    <message>
+      <source>Spread {:.1f}pp</source>
+      <translation type="finished">Spread {:.1f}pp</translation>
+    </message>
+    <message>
       <source>No predictions yet.</source>
       <translation type="finished">No predictions yet.</translation>
     </message>

@@ -858,6 +858,14 @@ Linearer Decline ist eine erste Näherung; der reale Decline beschleunigt nach A
       <translation type="finished">Pace-basierter Fallback (keine HF-klassifizierten Easy-Runs gefunden)</translation>
     </message>
     <message>
+      <source>Spread {:.1f}pp — distances cluster (one underlying pace)</source>
+      <translation type="finished">Spread {:.1f}pp — Distanzen clustern (eine Pace-Basis)</translation>
+    </message>
+    <message>
+      <source>Spread {:.1f}pp</source>
+      <translation type="finished">Spread {:.1f}pp</translation>
+    </message>
+    <message>
       <source>No predictions yet.</source>
       <translation type="finished">Noch keine Vorhersagen.</translation>
     </message>

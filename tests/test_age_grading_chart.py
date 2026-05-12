@@ -275,6 +275,28 @@ class TestRiegelHelper(unittest.TestCase):
                                                    'avg_distance_per_run_km': 0}))
 
 
+class TestSpreadIndicator(unittest.TestCase):
+    """Header surfaces a spread indicator so users see when all 4
+    distances are reporting essentially the same signal."""
+
+    def setUp(self):
+        _ensure_qapplication()
+        self.chart = AgeGradingChart()
+
+    def test_header_flags_tight_cluster_in_riegel_mode(self):
+        # No-HR data → Riegel fallback → predictions cluster tightly.
+        self.chart.update_chart(
+            aggregates=_aggregates(num_periods=15, with_hr=False),
+            activities=[],
+            settings={'birth_date': '1980-01-01', 'gender': 'male',
+                      'manual_hrmax': 0},
+        )
+        header = self.chart.wma_view['header_label'].text()
+        # Spread annotation should be present, calling out the clustering.
+        self.assertIn("Spread", header)
+        self.assertIn("cluster", header)
+
+
 class TestSmoothing(unittest.TestCase):
     """Smoothing toolbar toggle must reach the WMA and HF lines too —
     otherwise toggling Light/Medium/Strong has no effect on Performance."""

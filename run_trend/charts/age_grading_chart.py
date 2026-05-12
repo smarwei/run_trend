@@ -85,7 +85,16 @@ class AgeGradingChart(BaseChart):
                 "Each line is a 3-month rolling prediction (5K/10K/HM/"
                 "Marathon) from your HR-classified easy-run pace. Real "
                 "races marked via right-click on a run appear as larger "
-                "scatter points on top of their line."
+                "scatter points on top of their line.\n\n"
+                "Why the lines often cluster: all four predictions derive "
+                "from a single training-pace input — HR-based McMillan "
+                "uses one easy pace and shifts by ±75 s/km per distance, "
+                "the Riegel fallback uses one pace × distance scaled by "
+                "(D2/D1)^1.06. WMA factors per distance are within ~3 % "
+                "of each other for a given age, so the four lines tend "
+                "to track each other. Real distance-strength differences "
+                "(e.g. a marathon specialist vs a 5K specialist) only "
+                "show up via the race-marker scatter overlay."
             ),
         )
         self.hf_view = self._build_chart_page(
@@ -411,6 +420,7 @@ class AgeGradingChart(BaseChart):
 
         # Header summary.
         parts = []
+        latest_values = []
         for dist in _DISTANCE_LABELS_TR_KEYS:
             pct = latest_pct_label[dist]
             if pct is None:
@@ -418,6 +428,21 @@ class AgeGradingChart(BaseChart):
             parts.append(
                 f"{self._distance_translated(dist)}: {pct:.0f}%"
             )
+            latest_values.append(pct)
+        # Spread indicator — flags when all 4 distances cluster (typical for
+        # Riegel/single-pace predictions) so the user knows the chart is
+        # showing one fitness signal rather than four independent ones.
+        spread_suffix = ""
+        if len(latest_values) >= 2:
+            spread = max(latest_values) - min(latest_values)
+            if spread < 3.0:
+                spread_suffix = "  •  " + self.tr(
+                    "Spread {:.1f}pp — distances cluster (one underlying pace)"
+                ).format(spread)
+            else:
+                spread_suffix = "  •  " + self.tr(
+                    "Spread {:.1f}pp"
+                ).format(spread)
         suffix = ""
         if scatter_added:
             suffix = "  •  " + self.tr("{} real races overlaid").format(scatter_added)
@@ -434,7 +459,7 @@ class AgeGradingChart(BaseChart):
             )
         view['header_label'].setText(
             (self.tr("Latest age-graded %") + ":  " + "  |  ".join(parts)
-             + method_note + suffix)
+             + spread_suffix + method_note + suffix)
             if parts else self.tr("No predictions yet.")
         )
 
