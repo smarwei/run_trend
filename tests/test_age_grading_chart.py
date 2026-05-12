@@ -275,6 +275,50 @@ class TestRiegelHelper(unittest.TestCase):
                                                    'avg_distance_per_run_km': 0}))
 
 
+class TestSmoothing(unittest.TestCase):
+    """Smoothing toolbar toggle must reach the WMA and HF lines too —
+    otherwise toggling Light/Medium/Strong has no effect on Performance."""
+
+    def setUp(self):
+        _ensure_qapplication()
+        self.chart = AgeGradingChart()
+
+    def _render(self, smoothing: str):
+        # Use no-HR aggregates so Riegel fallback gives a deterministic
+        # series we can compare across smoothing settings.
+        aggs = _aggregates(num_periods=15, with_hr=False)
+        # Inject one outlier mid-series so smoothing has something to dampen.
+        aggs[7]['weighted_avg_pace_min_per_km'] = 7.0  # much slower than 5.0
+        self.chart.update_chart(
+            aggregates=aggs,
+            activities=[],
+            settings={'birth_date': '1990-01-01', 'gender': 'male',
+                      'manual_hrmax': 0},
+            smoothing=smoothing,
+        )
+        from PySide6.QtCharts import QLineSeries
+        # Grab the "5K" distance line by its translated name.
+        for s in self.chart.wma_view['chart'].series():
+            if isinstance(s, QLineSeries) and s.name() == self.chart._distance_translated("5K"):
+                return [s.at(i).y() for i in range(s.count())]
+        self.fail("5K line not found")
+
+    def test_off_keeps_outlier_visible(self):
+        ys = self._render('off')
+        spread_off = max(ys) - min(ys)
+        ys2 = self._render('strong')
+        spread_strong = max(ys2) - min(ys2)
+        # Strong SMA should narrow the spread compared to off.
+        self.assertLess(spread_strong, spread_off)
+
+    def test_smoothing_changes_values(self):
+        ys_off = self._render('off')
+        ys_medium = self._render('medium')
+        # At least one position should differ — proves smoothing took effect.
+        self.assertTrue(any(abs(a - b) > 1e-6
+                            for a, b in zip(ys_off, ys_medium)))
+
+
 class TestHfTabRendering(unittest.TestCase):
 
     def setUp(self):

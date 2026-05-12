@@ -1104,6 +1104,7 @@ class MainWindow(QMainWindow):
                 'manual_hrmax': self.settings.get('manual_hrmax', 0) or 0,
             },
             race_markers=self.db.get_race_markers() if hasattr(self.db, 'get_race_markers') else [],
+            smoothing=smoothing_strength,
         )
         self.projection_chart.set_goals(self.db.get_goals(include_achieved=False))
         self.projection_chart.update_chart(self.aggregates, self.current_period)

@@ -171,6 +171,7 @@ class AgeGradingChart(BaseChart):
         activities: List[Dict[str, Any]],
         settings: Dict[str, Any],
         race_markers: Optional[List[Dict[str, Any]]] = None,
+        smoothing: str = 'off',
     ) -> None:
         """Re-render both inner tabs based on the latest data + settings.
 
@@ -178,7 +179,13 @@ class AgeGradingChart(BaseChart):
         ``birth_date`` (ISO), ``gender`` (str), and ``manual_hrmax`` (int).
         Passing a dict rather than a live AppSettings keeps the chart
         unit-testable.
+
+        ``smoothing`` is the toolbar's SMA strength ('off' / 'light' /
+        'medium' / 'strong') and applies to both the per-distance WMA %
+        lines and the HF measured EF series.
         """
+        # Remember for the inner re-renders.
+        self._smoothing = smoothing
         birth_date_iso = (settings.get('birth_date') or '').strip()
         gender = (settings.get('gender') or '').strip()
         manual_hrmax = int(settings.get('manual_hrmax', 0) or 0)
@@ -341,15 +348,20 @@ class AgeGradingChart(BaseChart):
             line.attachAxis(axis_y)
             view['series'].append(line)
 
-        # One line per distance.
+        # One line per distance. Apply SMA smoothing to the % values
+        # using the toolbar's strength so this chart honours the same
+        # smoothing toggle as the rest.
+        smoothing = getattr(self, '_smoothing', 'off')
         for dist in _DISTANCE_LABELS_TR_KEYS:
             pts = per_distance_points[dist]
             if not pts:
                 continue
             line = QLineSeries()
             line.setName(self._distance_translated(dist))
-            for ts, pct in pts:
-                line.append(ts, pct)
+            pcts = [pct for _, pct in pts]
+            smoothed = self._smooth_data(pcts, smoothing)
+            for (ts, _), val in zip(pts, smoothed):
+                line.append(ts, val)
             pen = QPen(QColor(_LINE_COLORS[dist]))
             pen.setWidth(2)
             line.setPen(pen)
@@ -479,10 +491,14 @@ class AgeGradingChart(BaseChart):
         else:
             volume_ratio = 1.0
 
-        # Build measured + expected series.
+        # Build measured + expected series. Smoothing applies only to the
+        # measured line — the expected curve is the theoretical reference
+        # and shouldn't be averaged.
+        smoothing = getattr(self, '_smoothing', 'off')
         measured = QLineSeries()
         measured.setName(self.tr("Measured EF × 1000"))
-        for d, v in ef_dated:
+        measured_values = self._smooth_data([v for _, v in ef_dated], smoothing)
+        for (d, _), v in zip(ef_dated, measured_values):
             measured.append(int(d.timestamp() * 1000), v)
         m_pen = QPen(QColor("#2ecc71"))
         m_pen.setWidth(2)
