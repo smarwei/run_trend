@@ -14,6 +14,7 @@ Stand: 2026-05-11.
 
 ### Quick Wins (P0)
 - [01 — Sync- und Connect-Buttons in der Toolbar](01-sync-toolbar-buttons.md)
+- [41 — Methodische Caveats in Metrik-Tooltips ergänzen](41-methodische-caveats.md)
 - [02 — Letzte Sync-Zeit persistent in Statusleiste](02-persistent-last-sync.md)
 - [03 — RunsTable: fehlende HR sortiert ans Ende](03-runs-table-hr-sort.md)
 - [04 — Empty-States für leere Charts und unverbundene Konten](04-empty-states.md)
@@ -37,6 +38,7 @@ Stand: 2026-05-11.
 
 ### UX-Erweiterungen (P1)
 - [12 — Export: Charts als PNG, Daten als CSV](12-export-png-csv.md)
+- [39 — Training-Score als „Trend-Indikator" labeln (oder ersetzen)](39-score-rename-trend.md)
 - [13 — Onboarding-Wizard beim ersten Start](13-onboarding-wizard.md)
 - [14 — Year-over-Year-Vergleichslinie auf Charts](14-year-over-year.md)
 - [15 — Race-Marker auf Zeitachsen-Charts](15-race-markers.md)
@@ -53,6 +55,7 @@ Stand: 2026-05-11.
 - [36 — `MainWindow` God-Object refactorn](36-mainwindow-refactor.md)
 - [37 — Age-Graded Performance Chart (WMA + HF-Physiologie)](37-age-graded-performance.md)
 - [38 — Training-Fitness via CTL/ATL/TSB (absolute Skala neben Training-Score)](38-training-fitness-ctl.md)
+- [40 — ACWR auf tägliche 7:28-Tage-Rolling-Sums umstellen](40-acwr-daily-rolling.md)
 
 ### Methodisch (P3)
 - [20 — Pace als ACWR-Komponente überdenken](20-pace-acwr-review.md)
