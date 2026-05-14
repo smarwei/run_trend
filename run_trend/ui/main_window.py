@@ -208,7 +208,11 @@ class MainWindow(QMainWindow):
 
         file_menu.addSeparator()
         quit_action = QAction(self.tr("&Quit"), self)
-        quit_action.setShortcut(QKeySequence.Quit)  # Ctrl+Q on Linux/Win, Cmd+Q on Mac
+        # QKeySequence.Quit on Qt 6.10+ resolves to a standalone Qt.Key_Exit
+        # (no modifier) instead of the historical Ctrl+Q binding — so the
+        # shortcut becomes effectively unreachable on a regular keyboard.
+        # Bind portably via the literal text so Ctrl+Q actually works.
+        quit_action.setShortcut(QKeySequence("Ctrl+Q"))
         quit_action.triggered.connect(self.close)
         file_menu.addAction(quit_action)
         self.quit_action = quit_action
