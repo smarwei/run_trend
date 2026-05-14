@@ -54,6 +54,15 @@
             pkgs.qt6.qtbase
             pkgs.qt6.qtwayland
             pkgs.sqlite
+            # Flatpak toolchain so `flatpak-builder` works out of the box
+            # in the devshell. appstream brings the `appstreamcli` binary
+            # that flatpak-builder shells out to during metainfo
+            # compose — without it the build aborts before the export
+            # step (no app gets installed). flatpak itself provides the
+            # `flatpak` CLI used to install + run the resulting bundle.
+            pkgs.flatpak
+            pkgs.flatpak-builder
+            pkgs.appstream
           ];
 
           shellHook = ''
@@ -61,8 +70,12 @@
             echo "Python: ${pythonEnv}/bin/python --version"
             echo ""
             echo "Available commands:"
-            echo "  python -m run_trend.main - Run the application"
-            echo "  pytest tests/            - Run tests"
+            echo "  python -m run_trend.main          - Run the application"
+            echo "  pytest tests/                     - Run tests"
+            echo "  flatpak-builder --user --install \\"
+            echo "    --force-clean --ccache \\"
+            echo "    build-dir de.arneweiss.RunTrend.json  - Build + install Flatpak"
+            echo "  flatpak run de.arneweiss.RunTrend - Run the installed Flatpak"
             echo ""
           '';
 

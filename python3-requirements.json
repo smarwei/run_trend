@@ -79,6 +79,20 @@
                     "sha256": "d0d9b7c93578baafcbc5f0b83eaf17b79d345c6f36917ba0c67f45226911d499"
                 }
             ]
+        },
+        {
+            "name": "python3-markdown",
+            "buildsystem": "simple",
+            "build-commands": [
+                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"markdown>=3.4.0\" --no-build-isolation"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/de/1f/77fa3081e4f66ca3576c896ae5d31c3002ac6607f9747d2e3aa49227e464/markdown-3.10.2-py3-none-any.whl",
+                    "sha256": "e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36"
+                }
+            ]
         }
     ]
 }
