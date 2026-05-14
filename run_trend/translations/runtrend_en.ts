@@ -214,8 +214,8 @@ Needs HR-sensor data; otherwise the chart stays empty.</translation>
     </message>
     <message>
       <location filename="../ui/main_window.py" line="157" />
-      <source>Score</source>
-      <translation type="finished">Score</translation>
+      <source>Trend</source>
+      <translation type="finished">Trend</translation>
     </message>
     <message>
       <location filename="../ui/main_window.py" line="160" />

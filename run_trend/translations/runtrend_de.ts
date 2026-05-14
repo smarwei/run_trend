@@ -214,8 +214,8 @@ Benötigt HF-Sensor-Daten; ansonsten bleibt das Chart leer.</translation>
     </message>
     <message>
       <location filename="../ui/main_window.py" line="157" />
-      <source>Score</source>
-      <translation type="finished">Bewertung</translation>
+      <source>Trend</source>
+      <translation type="finished">Trend</translation>
     </message>
     <message>
       <location filename="../ui/main_window.py" line="160" />

@@ -161,7 +161,7 @@ class MainWindow(QMainWindow):
         self.tab_widget.addTab(self.structure_overview_chart, self.tr("Structure"))
 
         # Tab 6: Training Score
-        self.tab_widget.addTab(self.score_chart, self.tr("Score"))
+        self.tab_widget.addTab(self.score_chart, self.tr("Trend"))
 
         # Tab 7: Training Load (ACWR)
         self.tab_widget.addTab(self.training_load_chart, self.tr("Training Load"))
