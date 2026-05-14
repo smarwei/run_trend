@@ -1925,49 +1925,71 @@ Race predictions will be updated.</translation>
     <name>TrainingLoadChart</name>
     <message>
       <location filename="../charts/training_load_chart.py" line="22" />
-      <source>ACWR — Acute:Chronic Workload Ratio.
+      <source>ACWR — Acute:Chronic Workload Ratio (Gabbett 2016).
 
-Formula: TRIMP of last 7 days ÷ average TRIMP of last 28 days.
-TRIMP (Banister, 1991) = duration × HR-zone intensity.
+Formula: load of last 7 days ÷ average daily load over the last 28 days (both expressed in weekly units). Computed daily — the line updates every day rather than jumping at week boundaries.
+
+Load source: Banister TRIMP when Resting HR, Gender, and either Max HR or Date of Birth are configured; otherwise daily kilometres (a coarser load proxy that ignores intensity).
 
 Sweet-spot: 0.8–1.3 (sustainable progression).
 Caution:    1.3–1.5 (monitor recovery).
 Danger:     ≥1.5    (elevated injury risk).
 
-Needs ≥5 weeks of data to be meaningful.
-
-Caveat: this app's composite ACWR includes a pace component (faster pace = higher load). A sustained fitness-driven pace improvement can therefore push the score upward even if your volume and HR are stable — read elevated values in that context, not as automatic overtraining warnings.
+Cold-start: the line only appears after 28 days of history; before that the chronic window isn't full.
 
 Caveat: Gabbett's Sweet-Spot bands (2016) are empirically widespread but scientifically contested — Impellizzeri et al. 2020 documented mathematical artefacts at small chronic values and weak injury correlations in follow-up studies. Treat ACWR as an indicator, not a diagnosis.</source>
-      <translation type="finished">ACWR — Acute:Chronic Workload Ratio.
+      <translation type="finished">ACWR — Acute:Chronic Workload Ratio (Gabbett 2016).
 
-Formula: TRIMP of last 7 days ÷ average TRIMP of last 28 days.
-TRIMP (Banister, 1991) = duration × HR-zone intensity.
+Formula: load of last 7 days ÷ average daily load over the last 28 days (both expressed in weekly units). Computed daily — the line updates every day rather than jumping at week boundaries.
+
+Load source: Banister TRIMP when Resting HR, Gender, and either Max HR or Date of Birth are configured; otherwise daily kilometres (a coarser load proxy that ignores intensity).
 
 Sweet-spot: 0.8–1.3 (sustainable progression).
 Caution:    1.3–1.5 (monitor recovery).
 Danger:     ≥1.5    (elevated injury risk).
 
-Needs ≥5 weeks of data to be meaningful.
-
-Caveat: this app's composite ACWR includes a pace component (faster pace = higher load). A sustained fitness-driven pace improvement can therefore push the score upward even if your volume and HR are stable — read elevated values in that context, not as automatic overtraining warnings.
+Cold-start: the line only appears after 28 days of history; before that the chronic window isn't full.
 
 Caveat: Gabbett's Sweet-Spot bands (2016) are empirically widespread but scientifically contested — Impellizzeri et al. 2020 documented mathematical artefacts at small chronic values and weak injury correlations in follow-up studies. Treat ACWR as an indicator, not a diagnosis.</translation>
     </message>
     <message>
       <location filename="../charts/training_load_chart.py" line="83" />
-      <source>Safe Zone (40-65)</source>
-      <translation type="finished">Safe Zone (40-65)</translation>
+      <source>Safe Zone (0.8-1.3)</source>
+      <translation type="finished">Safe Zone (0.8-1.3)</translation>
     </message>
     <message>
       <location filename="../charts/training_load_chart.py" line="84" />
-      <source>Caution Zone (65-80)</source>
-      <translation type="finished">Caution Zone (65-80)</translation>
+      <source>Caution Zone (1.3-1.5)</source>
+      <translation type="finished">Caution Zone (1.3-1.5)</translation>
     </message>
     <message>
       <location filename="../charts/training_load_chart.py" line="85" />
-      <source>Danger Zone (80+)</source>
-      <translation type="finished">Danger Zone (80+)</translation>
+      <source>Danger Zone (&gt;1.5)</source>
+      <translation type="finished">Danger Zone (&gt;1.5)</translation>
+    </message>
+    <message>
+      <source>Training Load (ACWR) — {}</source>
+      <translation type="finished">Training Load (ACWR) — {}</translation>
+    </message>
+    <message>
+      <source>Training Load (Need 28 days)</source>
+      <translation type="finished">Training Load (Need 28 days)</translation>
+    </message>
+    <message>
+      <source>Training Load (Need activities)</source>
+      <translation type="finished">Training Load (Need activities)</translation>
+    </message>
+    <message>
+      <source>TRIMP</source>
+      <translation type="finished">TRIMP</translation>
+    </message>
+    <message>
+      <source>Distance</source>
+      <translation type="finished">Distance</translation>
+    </message>
+    <message>
+      <source>ACWR</source>
+      <translation type="finished">ACWR</translation>
     </message>
   </context>
   <context>
@@ -2544,6 +2566,26 @@ Zones (Coggan):
     <message>
       <source>No HR-equipped activities yet</source>
       <translation type="finished">No HR-equipped activities yet</translation>
+    </message>
+    <message>
+      <source>ACWR: {:.2f} ({})</source>
+      <translation type="finished">ACWR: {:.2f} ({})</translation>
+    </message>
+    <message>
+      <source>ACWR: -</source>
+      <translation type="finished">ACWR: -</translation>
+    </message>
+    <message>
+      <source>Need 28 days</source>
+      <translation type="finished">Need 28 days</translation>
+    </message>
+    <message>
+      <source>No activities yet</source>
+      <translation type="finished">No activities yet</translation>
+    </message>
+    <message>
+      <source>⚠ ACWR is an indicator, not a diagnosis (Impellizzeri et al. 2020). Compare with how the runs feel.</source>
+      <translation type="finished">⚠ ACWR is an indicator, not a diagnosis (Impellizzeri et al. 2020). Compare with how the runs feel.</translation>
     </message>
   </context>
   <context>

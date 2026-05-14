@@ -1925,49 +1925,71 @@ Wettkampf-Vorhersagen werden aktualisiert.</translation>
     <name>TrainingLoadChart</name>
     <message>
       <location filename="../charts/training_load_chart.py" line="22" />
-      <source>ACWR — Acute:Chronic Workload Ratio.
+      <source>ACWR — Acute:Chronic Workload Ratio (Gabbett 2016).
 
-Formula: TRIMP of last 7 days ÷ average TRIMP of last 28 days.
-TRIMP (Banister, 1991) = duration × HR-zone intensity.
+Formula: load of last 7 days ÷ average daily load over the last 28 days (both expressed in weekly units). Computed daily — the line updates every day rather than jumping at week boundaries.
+
+Load source: Banister TRIMP when Resting HR, Gender, and either Max HR or Date of Birth are configured; otherwise daily kilometres (a coarser load proxy that ignores intensity).
 
 Sweet-spot: 0.8–1.3 (sustainable progression).
 Caution:    1.3–1.5 (monitor recovery).
 Danger:     ≥1.5    (elevated injury risk).
 
-Needs ≥5 weeks of data to be meaningful.
-
-Caveat: this app's composite ACWR includes a pace component (faster pace = higher load). A sustained fitness-driven pace improvement can therefore push the score upward even if your volume and HR are stable — read elevated values in that context, not as automatic overtraining warnings.
+Cold-start: the line only appears after 28 days of history; before that the chronic window isn't full.
 
 Caveat: Gabbett's Sweet-Spot bands (2016) are empirically widespread but scientifically contested — Impellizzeri et al. 2020 documented mathematical artefacts at small chronic values and weak injury correlations in follow-up studies. Treat ACWR as an indicator, not a diagnosis.</source>
-      <translation type="finished">ACWR — Acute:Chronic Workload Ratio.
+      <translation type="finished">ACWR — Acute:Chronic Workload Ratio (Gabbett 2016).
 
-Formel: TRIMP der letzten 7 Tage ÷ Durchschnitts-TRIMP der letzten 28 Tage.
-TRIMP (Banister, 1991) = Dauer × HF-Zonen-Intensität.
+Formel: Last der letzten 7 Tage ÷ tägliche Durchschnitts-Last der letzten 28 Tage (beide in Wochen-Einheiten ausgedrückt). Tagesweise berechnet — die Linie aktualisiert jeden Tag, springt nicht erst an Wochengrenzen.
+
+Last-Quelle: Banister-TRIMP, sobald Ruhe-HF, Geschlecht und entweder Max-HF oder Geburtsdatum konfiguriert sind; sonst Tageskilometer (grober Last-Proxy ohne Intensitäts-Information).
 
 Sweet-Spot: 0,8–1,3 (nachhaltige Steigerung).
 Vorsicht:   1,3–1,5 (Erholung beachten).
 Gefahr:     ≥1,5    (erhöhtes Verletzungsrisiko).
 
-Benötigt ≥5 Wochen Daten, um aussagekräftig zu sein.
-
-Caveat: Der zusammengesetzte ACWR dieser App enthält eine Pace-Komponente (schnellere Pace = höhere Last). Eine fitnessbedingte, nachhaltige Pace-Verbesserung kann den Score also nach oben treiben, selbst wenn Volumen und HF stabil sind — erhöhte Werte in diesem Licht lesen, nicht automatisch als Übertrainings-Warnung.
+Cold-Start: Die Linie erscheint erst nach 28 Tagen Historie; vorher ist das Chronic-Fenster noch nicht voll.
 
 Caveat: Gabbett's Sweet-Spot-Bänder (2016) sind empirisch verbreitet, aber wissenschaftlich umstritten — Impellizzeri et al. 2020 dokumentieren mathematische Artefakte bei kleinen Chronic-Werten und schwache Verletzungs-Korrelationen in Follow-up-Studien. Lies ACWR als Indikator, nicht als Diagnose.</translation>
     </message>
     <message>
       <location filename="../charts/training_load_chart.py" line="83" />
-      <source>Safe Zone (40-65)</source>
-      <translation type="finished">Sichere Zone (40-65)</translation>
+      <source>Safe Zone (0.8-1.3)</source>
+      <translation type="finished">Sichere Zone (0,8-1,3)</translation>
     </message>
     <message>
       <location filename="../charts/training_load_chart.py" line="84" />
-      <source>Caution Zone (65-80)</source>
-      <translation type="finished">Vorsichtszone (65-80)</translation>
+      <source>Caution Zone (1.3-1.5)</source>
+      <translation type="finished">Vorsichtszone (1,3-1,5)</translation>
     </message>
     <message>
       <location filename="../charts/training_load_chart.py" line="85" />
-      <source>Danger Zone (80+)</source>
-      <translation type="finished">Gefahrenzone (80+)</translation>
+      <source>Danger Zone (&gt;1.5)</source>
+      <translation type="finished">Gefahrenzone (&gt;1,5)</translation>
+    </message>
+    <message>
+      <source>Training Load (ACWR) — {}</source>
+      <translation type="finished">Trainingsbelastung (ACWR) — {}</translation>
+    </message>
+    <message>
+      <source>Training Load (Need 28 days)</source>
+      <translation type="finished">Trainingsbelastung (benötigt 28 Tage)</translation>
+    </message>
+    <message>
+      <source>Training Load (Need activities)</source>
+      <translation type="finished">Trainingsbelastung (benötigt Aktivitäten)</translation>
+    </message>
+    <message>
+      <source>TRIMP</source>
+      <translation type="finished">TRIMP</translation>
+    </message>
+    <message>
+      <source>Distance</source>
+      <translation type="finished">Distanz</translation>
+    </message>
+    <message>
+      <source>ACWR</source>
+      <translation type="finished">ACWR</translation>
     </message>
   </context>
   <context>
@@ -2564,6 +2586,26 @@ Zonen (Coggan):
     <message>
       <source>No HR-equipped activities yet</source>
       <translation type="finished">Noch keine Aktivitäten mit HF-Daten</translation>
+    </message>
+    <message>
+      <source>ACWR: {:.2f} ({})</source>
+      <translation type="finished">ACWR: {:.2f} ({})</translation>
+    </message>
+    <message>
+      <source>ACWR: -</source>
+      <translation type="finished">ACWR: -</translation>
+    </message>
+    <message>
+      <source>Need 28 days</source>
+      <translation type="finished">Benötigt 28 Tage</translation>
+    </message>
+    <message>
+      <source>No activities yet</source>
+      <translation type="finished">Noch keine Aktivitäten</translation>
+    </message>
+    <message>
+      <source>⚠ ACWR is an indicator, not a diagnosis (Impellizzeri et al. 2020). Compare with how the runs feel.</source>
+      <translation type="finished">⚠ ACWR ist ein Indikator, keine Diagnose (Impellizzeri et al. 2020). Vergleiche mit dem subjektiven Lauf-Empfinden.</translation>
     </message>
   </context>
   <context>

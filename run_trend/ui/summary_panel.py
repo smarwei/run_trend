@@ -276,12 +276,23 @@ class SummaryPanel(QWidget):
         load_layout.addLayout(_row_with_help(
             self.load_score_label,
             self.tr(
-                "ACWR — Acute:Chronic Workload Ratio.\n\n"
-                "Formula: TRIMP of last 7 days ÷ average TRIMP of last 28 days.\n"
-                "TRIMP (Banister, 1991) = duration × HR-zone intensity.\n\n"
+                "ACWR — Acute:Chronic Workload Ratio (Gabbett 2016).\n\n"
+                "Today's value: load of the last 7 days ÷ average daily "
+                "load over the last 28 days (both expressed in weekly "
+                "units). Updates every day — not only at week boundaries.\n\n"
+                "Load source: Banister TRIMP when Resting HR, Gender and "
+                "either Max HR or Date of Birth are configured. Falls back "
+                "to daily kilometres otherwise.\n\n"
                 "Sweet-spot: 0.8–1.3 (sustainable progression).\n"
                 "Caution:    1.3–1.5 (monitor recovery).\n"
-                "Danger:     ≥1.5    (elevated injury risk)."
+                "Danger:     ≥1.5    (elevated injury risk).\n\n"
+                "Cold-start: ACWR needs 28 days of history before a value "
+                "appears.\n\n"
+                "Caveat: Gabbett's bands (2016) are widespread but "
+                "scientifically contested — Impellizzeri et al. 2020 "
+                "documented mathematical artefacts at small chronic values "
+                "and weak injury correlations in follow-up studies. Read "
+                "ACWR as an indicator, not a diagnosis."
             ),
         ))
         load_layout.addWidget(self.load_status_label)
@@ -585,42 +596,48 @@ class SummaryPanel(QWidget):
             reason = race_predictions.get('message', self.tr('Insufficient data')) if race_predictions else self.tr('No data')
             self.race_info_label.setText(self.tr("⚠️ {}").format(reason))
 
-        # Training Load (ACWR)
+        # Training Load (ACWR) — T40 now shows TODAY'S daily Gabbett ACWR
+        # ratio (e.g. "ACWR: 1.05") with status colour and variant suffix,
+        # instead of the old 0-100 weekly score. The data shape comes from
+        # ``latest_acwr`` in analytics/training_load.py.
         load_data = data.get('training_load')
-        if load_data and load_data.get('has_load'):
-            load_score = load_data['training_load']
-            status = load_data.get('status', 'unknown')
-            message = load_data.get('message', '')
+        if load_data and load_data.get('has_acwr'):
+            acwr = load_data['acwr']
+            status = load_data.get('status', 'safe')
+            variant = load_data.get('variant', 'trimp')
+            variant_text = self.tr("TRIMP") if variant == 'trimp' else self.tr("Distance")
 
-            self.load_score_label.setText(self.tr("Load: {:.0f}").format(load_score))
+            self.load_score_label.setText(
+                self.tr("ACWR: {:.2f} ({})").format(acwr, variant_text)
+            )
 
-            # Color coding
-            if load_score >= 90:
-                color = "#e74c3c"  # Red
-                status_text = self.tr("DANGER")
-            elif load_score >= 80:
-                color = "#e67e22"  # Orange
-                status_text = self.tr("WARNING")
-            elif load_score >= 70:
-                color = "#f39c12"  # Yellow
-                status_text = self.tr("CAUTION")
-            elif load_score >= 40:
-                color = "#27ae60"  # Green
-                status_text = self.tr("SAFE")
-            else:
-                color = "#3498db"  # Blue
-                status_text = self.tr("LOW")
+            # Gabbett bands → colour + status word.
+            if status == 'danger':
+                color, status_text = "#e74c3c", self.tr("DANGER")
+            elif status == 'caution':
+                color, status_text = "#f39c12", self.tr("CAUTION")
+            elif status == 'safe':
+                color, status_text = "#27ae60", self.tr("SAFE")
+            else:  # undertraining
+                color, status_text = "#3498db", self.tr("LOW")
 
-            self.load_score_label.setStyleSheet(f"font-size: 20px; font-weight: bold; color: {color};")
+            self.load_score_label.setStyleSheet(
+                f"font-size: 20px; font-weight: bold; color: {color};"
+            )
             self.load_status_label.setText(self.tr("Status: {}").format(status_text))
 
-            # Show warning if score >= 80
-            if load_score >= 80:
-                self.load_warning_label.setText(message)
+            # Show the Impellizzeri caveat banner only when we're in the
+            # caution/danger zone — it would be noise during normal weeks.
+            if status in ('caution', 'danger'):
+                self.load_warning_label.setText(self.tr(
+                    "⚠ ACWR is an indicator, not a diagnosis (Impellizzeri "
+                    "et al. 2020). Compare with how the runs feel."
+                ))
                 self.load_warning_label.setVisible(True)
             else:
                 self.load_warning_label.setVisible(False)
         else:
-            self.load_score_label.setText(self.tr("Load: -"))
-            self.load_status_label.setText(self.tr("Status: Need 5+ weeks"))
+            self.load_score_label.setText(self.tr("ACWR: -"))
+            message = (load_data or {}).get('message') or self.tr("Need 28 days")
+            self.load_status_label.setText(self.tr("Status: {}").format(message))
             self.load_warning_label.setVisible(False)

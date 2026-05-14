@@ -62,10 +62,14 @@ class TestStaticStringsArePickedUp(unittest.TestCase):
         "5K", "10K", "10K Run", "15K Run",
         "Half Marathon", "30K Run", "Marathon Ready",
     }
+    # T40 renamed the bands: chart axis switched from 0-100 composite
+    # score to the raw ACWR ratio (0.8 / 1.3 / 1.5 Gabbett thresholds).
+    # The '>' in "Danger Zone (>1.5)" is XML-escaped in the .ts source
+    # element, so we encode the expected forms accordingly.
     EXPECTED_ZONES = {
-        "Safe Zone (40-65)",
-        "Caution Zone (65-80)",
-        "Danger Zone (80+)",
+        "Safe Zone (0.8-1.3)",
+        "Caution Zone (1.3-1.5)",
+        "Danger Zone (&gt;1.5)",
     }
 
     def _ts_content(self, lang):
@@ -104,8 +108,8 @@ class TestStaticStringsArePickedUp(unittest.TestCase):
         self.assertIn("<translation type=\"finished\">Halbmarathon</translation>", content)
         # Marathon Ready → Marathon-bereit
         self.assertIn("<translation type=\"finished\">Marathon-bereit</translation>", content)
-        # Safe Zone → Sichere Zone
-        self.assertIn("<translation type=\"finished\">Sichere Zone (40-65)</translation>", content)
+        # Safe Zone → Sichere Zone (T40-banded values)
+        self.assertIn("<translation type=\"finished\">Sichere Zone (0,8-1,3)</translation>", content)
 
 
 if __name__ == "__main__":

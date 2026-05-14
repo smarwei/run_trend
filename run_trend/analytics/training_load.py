@@ -2,9 +2,204 @@
 Training load calculation using ACWR (Acute:Chronic Workload Ratio).
 
 Based on Gabbett et al. (2016) methodology for injury prevention.
+
+T40 adds a daily-rolling variant (``daily_acwr_series`` /
+``latest_acwr``) that walks day-by-day over a {date: load} map and
+computes 7-day acute against 28-day chronic averages — the form used in
+the original Gabbett paper. The older ``TrainingLoadCalculator``
+class-based path operates on weekly aggregates and remains in place so
+existing chart / aggregator code keeps working, but new UI callers
+should prefer the daily variant.
 """
-from typing import List, Dict, Any
+from __future__ import annotations
+
+from datetime import date, timedelta
+from typing import Any, Dict, Iterable, List, Mapping, Optional
+
 import numpy as np
+
+
+# Threshold constants used by both the daily and the legacy ACWR paths.
+# Kept at module level so the daily helpers don't have to reach into the
+# class.
+ACWR_SAFE_MIN = 0.8
+ACWR_SAFE_MAX = 1.3
+ACWR_CAUTION_MAX = 1.5
+
+
+def _classify_acwr(acwr: float) -> str:
+    """Map a single ACWR value to a coarse status bucket."""
+    if acwr < ACWR_SAFE_MIN:
+        return 'undertraining'
+    if acwr <= ACWR_SAFE_MAX:
+        return 'safe'
+    if acwr <= ACWR_CAUTION_MAX:
+        return 'caution'
+    return 'danger'
+
+
+def daily_acwr_series(
+    daily_loads: Mapping[date, float],
+    *,
+    acute_window: int = 7,
+    chronic_window: int = 28,
+    start: Optional[date] = None,
+    end: Optional[date] = None,
+) -> List[Dict[str, Any]]:
+    """Walk day-by-day over ``daily_loads`` and compute Gabbett ACWR.
+
+    For each day ``t`` in ``[start, end]`` (defaults inferred from
+    ``daily_loads`` keys):
+
+        acute_t   = sum(load[t-acute_window+1 ... t])
+        chronic_t = sum(load[t-chronic_window+1 ... t]) / (chronic_window / acute_window)
+        acwr_t    = acute_t / chronic_t
+
+    The chronic value is normalised to the same window length as the
+    acute one — that's what makes the ratio dimensionally comparable
+    (week-vs-week, not week-vs-month). For the default 7:28 windows the
+    divisor is 4, i.e. chronic_t is the 28-day-mean *scaled* to weekly
+    units.
+
+    Cold-start: until day ``t`` has at least ``chronic_window`` days of
+    history available (counting from the earliest known day, even with
+    zero load), the entry's ``has_acwr`` is False. Same when chronic is
+    zero (avoids the small-denominator artefact Impellizzeri 2020
+    documents).
+
+    Returns one record per day in the range:
+        {'date', 'acute', 'chronic', 'acwr' | None, 'status' | None, 'has_acwr'}
+    """
+    if not daily_loads and (start is None or end is None):
+        return []
+
+    if start is None:
+        start = min(daily_loads.keys())
+    if end is None:
+        end = max(daily_loads.keys())
+    if end < start:
+        return []
+
+    # Expand the input dict to a list aligned with [start, end] so the
+    # rolling-sum step doesn't need date arithmetic at every iteration.
+    span = (end - start).days + 1
+    loads = [float(daily_loads.get(start + timedelta(days=i), 0.0))
+             for i in range(span)]
+
+    # Normaliser converts the chronic sum-over-W_chronic into a unit
+    # comparable to acute (sum-over-W_acute). For 7:28 → 4.0.
+    chronic_divisor = chronic_window / acute_window
+
+    series: List[Dict[str, Any]] = []
+    for i in range(span):
+        # Acute window: last ``acute_window`` days including today.
+        a_lo = max(0, i - acute_window + 1)
+        acute = sum(loads[a_lo:i + 1])
+        # Chronic window: last ``chronic_window`` days including today.
+        c_lo = max(0, i - chronic_window + 1)
+        chronic_sum = sum(loads[c_lo:i + 1])
+        chronic = chronic_sum / chronic_divisor
+
+        # Cold-start: not enough history yet for the chronic window.
+        has_full_chronic = (i + 1) >= chronic_window
+        if not has_full_chronic or chronic <= 0:
+            series.append({
+                'date': start + timedelta(days=i),
+                'acute': acute,
+                'chronic': chronic,
+                'acwr': None,
+                'status': None,
+                'has_acwr': False,
+            })
+            continue
+
+        acwr = acute / chronic
+        series.append({
+            'date': start + timedelta(days=i),
+            'acute': acute,
+            'chronic': chronic,
+            'acwr': acwr,
+            'status': _classify_acwr(acwr),
+            'has_acwr': True,
+        })
+    return series
+
+
+def latest_acwr(
+    daily_loads: Mapping[date, float],
+    *,
+    on_date: Optional[date] = None,
+    acute_window: int = 7,
+    chronic_window: int = 28,
+) -> Dict[str, Any]:
+    """Convenience: only today's ACWR record from the daily series.
+
+    Returns ``{'has_acwr': False, 'message': ...}`` when the input is
+    empty or the cold-start period hasn't elapsed. Otherwise returns
+    the same shape as one entry of ``daily_acwr_series``.
+    """
+    if not daily_loads:
+        return {
+            'has_acwr': False,
+            'acwr': None,
+            'status': None,
+            'message': 'No daily load data',
+        }
+    target = on_date or max(daily_loads.keys())
+    start = min(daily_loads.keys())
+    series = daily_acwr_series(
+        daily_loads,
+        acute_window=acute_window,
+        chronic_window=chronic_window,
+        start=start,
+        end=target,
+    )
+    if not series:
+        return {
+            'has_acwr': False,
+            'acwr': None,
+            'status': None,
+            'message': 'No data in range',
+        }
+    last = series[-1]
+    if not last.get('has_acwr'):
+        return {
+            'has_acwr': False,
+            'acwr': None,
+            'status': None,
+            'date': last['date'],
+            'acute': last['acute'],
+            'chronic': last['chronic'],
+            'message': f'Need {chronic_window} days of history',
+        }
+    return last
+
+
+def daily_distance_loads(activities: Iterable[Dict[str, Any]]) -> Dict[date, float]:
+    """TRIMP-less fallback: per-day total distance in km as the "load".
+
+    Used by the daily-ACWR path when the user hasn't set up the HR
+    prerequisites (hr_rest / hr_max / gender) needed for Banister TRIMP.
+    Distance is a coarser load proxy — it ignores intensity — but it
+    still produces a reasonable ratio for users without HR data, and
+    the tooltip flags which variant was used.
+    """
+    from datetime import datetime
+    out: Dict[date, float] = {}
+    for a in activities:
+        dist_m = a.get('distance') or 0
+        if dist_m <= 0:
+            continue
+        start_str = a.get('start_date')
+        if not start_str:
+            continue
+        try:
+            dt = datetime.fromisoformat(str(start_str).replace('Z', '+00:00'))
+        except (ValueError, TypeError):
+            continue
+        day = dt.date()
+        out[day] = out.get(day, 0.0) + (dist_m / 1000.0)
+    return out
 
 
 class TrainingLoadCalculator:

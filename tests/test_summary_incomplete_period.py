@@ -265,22 +265,53 @@ class TestScoreUsesLastCompletePeriod(unittest.TestCase, _MwFixture):
         subtitle = self.window.summary_panel.trend_subtitle_label
         self.assertIn("baseline", subtitle.text())
 
-    def test_training_load_pulled_from_last_complete(self):
-        # Different load values across periods to verify which one wins.
+    def test_acwr_label_without_activities_shows_placeholder(self):
+        # T40: the panel now sources ACWR from the daily-load pipeline,
+        # not from aggregate periods. With no activities the daily map
+        # is empty → label reads "ACWR: -" rather than a stale period
+        # value. (Replaces the pre-T40 last-complete-period guard;
+        # there is no periodic ACWR anymore.)
         base = datetime(2026, 1, 5)
-        complete = _aggregate(base, complete=True, num_runs=4)
-        complete['training_load']['training_load'] = 70.0
-        inprogress = _aggregate(base + timedelta(weeks=1), complete=False, num_runs=1)
-        inprogress['training_load']['training_load'] = 12.0
-        self.window.aggregates = [complete, inprogress]
+        self.window.aggregates = [
+            _aggregate(base, complete=True, num_runs=4),
+        ]
         self.window.activities = []
         self._run_update()
 
         load_score_text = self.window.summary_panel.load_score_label.text()
-        # We don't know the exact formatting, but 70 should appear (the
-        # last-complete value), not 12.
-        self.assertIn("70", load_score_text)
-        self.assertNotIn("12.0", load_score_text)
+        self.assertIn("ACWR", load_score_text)
+        self.assertIn("-", load_score_text)
+
+    def test_acwr_label_shows_ratio_with_28_days_of_activities(self):
+        # T40 happy path: 30 days of HR-equipped runs → daily TRIMP
+        # populated → ACWR computed from the rolling window. Expect
+        # roughly 1.0 (steady-state, acute ≈ chronic).
+        self.window.settings.set('birth_date', '1990-01-01')
+        self.window.settings.set('gender', 'male')
+        self.window.settings.set('manual_hrmax', 195)
+        self.window.settings.set('hr_rest', 50)
+        base = datetime(2026, 1, 1)
+        self.window.aggregates = [
+            _aggregate(base, complete=True, num_runs=4),
+        ]
+        self.window.activities = [
+            {
+                'strava_id': i,
+                'name': f'Run {i}',
+                'type': 'Run',
+                'start_date': (base + timedelta(days=i)).isoformat(),
+                'distance': 10000.0,
+                'moving_time': 3000,
+                'average_heartrate': 145,
+            }
+            for i in range(30)
+        ]
+        self._run_update()
+
+        label_text = self.window.summary_panel.load_score_label.text()
+        self.assertIn("ACWR", label_text)
+        self.assertRegex(label_text, r"\d\.\d{2}")  # has a 1.05-shaped value
+        self.assertIn("TRIMP", label_text)
 
 
 if __name__ == "__main__":

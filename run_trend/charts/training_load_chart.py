@@ -1,16 +1,24 @@
 """
-Training Load (ACWR) chart widget with safe zones.
+Training Load (ACWR) chart — daily Gabbett 7:28 ratio with safe zones.
+
+T40 reworked this chart from weekly aggregates (one point per week, 0-100
+"score" axis) to a daily-rolling ratio (one point per day, 0-2 ACWR
+axis). The zone bands now match the Gabbett thresholds directly: safe
+0.8-1.3, caution 1.3-1.5, danger ≥ 1.5.
 """
+from datetime import date as _date_type
+from typing import Mapping
+
 from PySide6.QtCharts import QChart, QLineSeries, QAreaSeries
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPen, QColor, QBrush
-from typing import List, Dict, Any
 
 from .base_chart import BaseChart
+from ..analytics.training_load import daily_acwr_series
 
 
 class TrainingLoadChart(BaseChart):
-    """Chart displaying Training Load (ACWR) over time."""
+    """Chart displaying daily Gabbett ACWR over time with zone backgrounds."""
 
     def __init__(self):
         super().__init__()
@@ -20,18 +28,20 @@ class TrainingLoadChart(BaseChart):
         self._setup_chart_view(
             self.tr("Training Load (ACWR)"),
             help_tooltip=self.tr(
-                "ACWR — Acute:Chronic Workload Ratio.\n\n"
-                "Formula: TRIMP of last 7 days ÷ average TRIMP of last 28 days.\n"
-                "TRIMP (Banister, 1991) = duration × HR-zone intensity.\n\n"
+                "ACWR — Acute:Chronic Workload Ratio (Gabbett 2016).\n\n"
+                "Formula: load of last 7 days ÷ average daily load over the "
+                "last 28 days (both expressed in weekly units). Computed "
+                "daily — the line updates every day rather than jumping at "
+                "week boundaries.\n\n"
+                "Load source: Banister TRIMP when Resting HR, Gender, and "
+                "either Max HR or Date of Birth are configured; otherwise "
+                "daily kilometres (a coarser load proxy that ignores "
+                "intensity).\n\n"
                 "Sweet-spot: 0.8–1.3 (sustainable progression).\n"
                 "Caution:    1.3–1.5 (monitor recovery).\n"
                 "Danger:     ≥1.5    (elevated injury risk).\n\n"
-                "Needs ≥5 weeks of data to be meaningful.\n\n"
-                "Caveat: this app's composite ACWR includes a pace component "
-                "(faster pace = higher load). A sustained fitness-driven pace "
-                "improvement can therefore push the score upward even if your "
-                "volume and HR are stable — read elevated values in that "
-                "context, not as automatic overtraining warnings.\n\n"
+                "Cold-start: the line only appears after 28 days of "
+                "history; before that the chronic window isn't full.\n\n"
                 "Caveat: Gabbett's Sweet-Spot bands (2016) are empirically "
                 "widespread but scientifically contested — Impellizzeri et "
                 "al. 2020 documented mathematical artefacts at small chronic "
@@ -43,39 +53,44 @@ class TrainingLoadChart(BaseChart):
         # in AreaBoundItem::updateGeometry — see tickets/22-*.md.
         self.chart.setAnimationOptions(QChart.NoAnimation)
 
-    def update_chart(self, aggregates: List[Dict[str, Any]]):
+    def update_chart(
+        self,
+        daily_loads: Mapping[_date_type, float],
+        *,
+        variant: str = 'trimp',
+    ):
         self._clear_chart()
-        if not aggregates:
+        if not daily_loads:
+            self.chart.setTitle(self.tr("Training Load (Need activities)"))
             return
 
-        # Custom filter: only periods that have training_load data
-        load_aggregates = [
-            agg for agg in aggregates
-            if agg.get('training_load', {}).get('has_load', False)
-        ]
-
-        if len(load_aggregates) < 2:
-            self.chart.setTitle(self.tr("Training Load (Need 5+ weeks)"))
+        series_records = daily_acwr_series(daily_loads)
+        plotted = [rec for rec in series_records if rec['has_acwr']]
+        if not plotted:
+            self.chart.setTitle(self.tr("Training Load (Need 28 days)"))
             return
 
-        period_dates = [agg['period_date'] for agg in load_aggregates]
-        load_scores  = [agg['training_load']['training_load'] for agg in load_aggregates]
+        # Variant tag in the title so users see which load proxy is in play.
+        variant_label = self.tr("TRIMP") if variant == 'trimp' else self.tr("Distance")
+        self.chart.setTitle(self.tr("Training Load (ACWR) — {}").format(variant_label))
 
-        axis_x = self._create_datetime_axis(period_dates, self.tr("Date"))
+        from datetime import datetime as _dt
+        plotted_dts = [_dt(rec['date'].year, rec['date'].month, rec['date'].day)
+                       for rec in plotted]
+
+        axis_x = self._create_datetime_axis(plotted_dts, self.tr("Date"))
         axis_y = self._create_value_axis(
-            self.tr("Training Load Score"), fmt="%d", min_val=0, max_val=100
+            self.tr("ACWR"), fmt="%.2f", min_val=0.0, max_val=2.0,
         )
         self.chart.addAxis(axis_x, Qt.AlignBottom)
         self.chart.addAxis(axis_y, Qt.AlignLeft)
 
         # Zone backgrounds — instance vars required to prevent GC (PYSIDE-1285).
-        # Name passed in already-translated form so pylupdate6 sees the source
-        # string as a static literal at the call site (T25).
         def _zone(lo, hi, color_rgba, translated_name):
             lower = QLineSeries()
             upper = QLineSeries()
-            for date in [period_dates[0], period_dates[-1]]:
-                ts = int(date.timestamp() * 1000)
+            for dt in [plotted_dts[0], plotted_dts[-1]]:
+                ts = int(dt.timestamp() * 1000)
                 lower.append(ts, lo)
                 upper.append(ts, hi)
             area = QAreaSeries(upper, lower)
@@ -87,21 +102,27 @@ class TrainingLoadChart(BaseChart):
             area.attachAxis(axis_y)
             return lower, upper, area
 
-        self._safe_lower,    self._safe_upper,    self._safe_area    = _zone(40, 65,  (39, 174,  96, 30), self.tr("Safe Zone (40-65)"))
-        self._caution_lower, self._caution_upper, self._caution_area = _zone(65, 80,  (243, 156, 18, 30), self.tr("Caution Zone (65-80)"))
-        self._danger_lower,  self._danger_upper,  self._danger_area  = _zone(80, 100, (231,  76, 60, 30), self.tr("Danger Zone (80+)"))
+        self._safe_lower, self._safe_upper, self._safe_area = _zone(
+            0.8, 1.3, (39, 174, 96, 30), self.tr("Safe Zone (0.8-1.3)")
+        )
+        self._caution_lower, self._caution_upper, self._caution_area = _zone(
+            1.3, 1.5, (243, 156, 18, 30), self.tr("Caution Zone (1.3-1.5)")
+        )
+        self._danger_lower, self._danger_upper, self._danger_area = _zone(
+            1.5, 2.0, (231, 76, 60, 30), self.tr("Danger Zone (>1.5)")
+        )
 
-        # Load line
-        load_series = QLineSeries()
-        load_series.setName(self.tr("Training Load"))
-        for i, score in enumerate(load_scores):
-            load_series.append(int(period_dates[i].timestamp() * 1000), score)
+        # ACWR line.
+        acwr_series = QLineSeries()
+        acwr_series.setName(self.tr("ACWR"))
+        for i, rec in enumerate(plotted):
+            acwr_series.append(int(plotted_dts[i].timestamp() * 1000), rec['acwr'])
         pen = QPen(QColor("#2c3e50"))
-        pen.setWidth(3)
-        load_series.setPen(pen)
-        self.chart.addSeries(load_series)
-        load_series.attachAxis(axis_x)
-        load_series.attachAxis(axis_y)
+        pen.setWidth(2)
+        acwr_series.setPen(pen)
+        self.chart.addSeries(acwr_series)
+        acwr_series.attachAxis(axis_x)
+        acwr_series.attachAxis(axis_y)
 
         self._add_race_markers(axis_x, axis_y)
 

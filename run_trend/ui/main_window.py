@@ -1041,11 +1041,6 @@ class MainWindow(QMainWindow):
                 manual_hrmax=manual_hrmax
             )
 
-        # Training Load (ACWR) — same problem as the score breakdown: an
-        # in-progress period under-counts TRIMP/volume against a full-period
-        # baseline. Use the last complete aggregate's load.
-        load_data = score_agg.get('training_load')
-
         # T38 — absolute training fitness via CTL/ATL/TSB. Needs:
         #   - hr_rest (Settings → Heart Rate)
         #   - gender (Settings → Profile)
@@ -1053,6 +1048,7 @@ class MainWindow(QMainWindow):
         # When prerequisites are missing, ship a one-line hint to the panel
         # so users know exactly which field to fill.
         from ..analytics import trimp as trimp_mod
+        from ..analytics import training_load as load_mod
         from ..analytics.age_grading import age_on_date, tanaka_hrmax
         from datetime import date as _date
         hr_rest_val = int(self.settings.get('hr_rest', 0) or 0)
@@ -1062,6 +1058,7 @@ class MainWindow(QMainWindow):
 
         fitness_state = None
         fitness_hint = None
+        trimp_daily: dict = {}
         if hr_rest_val <= 0:
             fitness_hint = self.tr("Set Resting HR in Settings")
         elif not gender_val:
@@ -1080,14 +1077,40 @@ class MainWindow(QMainWindow):
             if hrmax_for_trimp <= 0:
                 fitness_hint = self.tr("Set Max HR or Date of Birth in Settings")
             else:
-                daily = trimp_mod.daily_trimp_series(
+                trimp_daily = trimp_mod.daily_trimp_series(
                     self.activities, hr_rest=hr_rest_val,
                     hr_max=hrmax_for_trimp, gender=gender_val,
                 )
-                if not daily:
+                if not trimp_daily:
                     fitness_hint = self.tr("No HR-equipped activities yet")
                 else:
-                    fitness_state = trimp_mod.latest_fitness_state(daily)
+                    fitness_state = trimp_mod.latest_fitness_state(trimp_daily)
+
+        # T40 — daily ACWR (Gabbett 7:28). Prefer TRIMP if we already
+        # computed it for the CTL pipeline; otherwise fall back to a
+        # distance-based load so users without HR data still see a
+        # reasonable ratio. The chart and the summary panel read from
+        # the same source so they stay in sync.
+        if trimp_daily:
+            daily_loads = trimp_daily
+            load_variant = 'trimp'
+        else:
+            daily_loads = load_mod.daily_distance_loads(self.activities)
+            load_variant = 'distance'
+        # Stash so _update_charts can plot the same series without
+        # recomputing.
+        self._daily_loads = daily_loads
+        self._daily_load_variant = load_variant
+
+        if daily_loads:
+            acwr_today = load_mod.latest_acwr(daily_loads)
+            acwr_today['variant'] = load_variant
+        else:
+            acwr_today = {
+                'has_acwr': False,
+                'variant': load_variant,
+                'message': self.tr('No activities yet'),
+            }
 
         self.summary_panel.update_summary({
             'total_runs': total_runs,
@@ -1102,7 +1125,7 @@ class MainWindow(QMainWindow):
             'race_predictions': race_predictions,
             'hrmax_check': hrmax_check,
             'is_current_period_complete': is_current_period_complete,
-            'training_load': load_data,
+            'training_load': acwr_today,
             'active_days': latest_agg.get('active_days'),
             'consistency_ratio': latest_agg.get('consistency_ratio'),
             'score_components': score_agg.get('score_components'),
@@ -1156,7 +1179,12 @@ class MainWindow(QMainWindow):
         self.endurance_chart.update_chart(self.aggregates, smoothing_strength)
         self.structure_overview_chart.update_chart(self.aggregates, smoothing_strength)
         self.score_chart.update_chart(self.aggregates, smoothing_strength)
-        self.training_load_chart.update_chart(self.aggregates)
+        # T40: chart now takes the daily {date → load} map computed in
+        # _update_summary; it walks the daily ACWR series itself.
+        self.training_load_chart.update_chart(
+            getattr(self, '_daily_loads', {}),
+            variant=getattr(self, '_daily_load_variant', 'distance'),
+        )
         # Age-graded performance chart (T37)
         self.age_grading_chart.update_chart(
             self.aggregates,

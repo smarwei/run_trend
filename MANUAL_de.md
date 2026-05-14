@@ -541,42 +541,75 @@ Verfolge deinen EF über Monate, um aerobe Fitness-Verbesserungen zu sehen:
 
 #### Was ist ACWR?
 
-**ACWR** = **Acute:Chronic Workload Ratio** - eine wissenschaftlich validierte Metrik zur Erkennung von Übertraining und Verletzungsrisiko.
+**ACWR** = **Acute:Chronic Workload Ratio** — eine Sport-Wissenschafts-Metrik zur Erkennung von Übertraining und Verletzungsrisiko (Gabbett 2016).
+
+> **Wichtiger Caveat (zuerst lesen):** ACWR ist ein *Indikator*, keine Diagnose.
+> Impellizzeri et al. 2020 dokumentieren mathematische Artefakte bei kleinen
+> Chronic-Werten (eine normale Woche nach langer Pause kann irreführend
+> hohe Werte erzeugen) und schwache Verletzungs-Korrelationen in
+> Folgestudien. Die farbigen Bänder unten sind eine "Zweitmeinung gegen das
+> Lauf-Empfinden", keine Regel. RunTrend zeigt ACWR weil es die am
+> weitesten kommunizierte Sport-Wissenschafts-Metrik für Trainings-Last-
+> Progression ist — die letztgültige Beurteilung liegt beim Nutzer.
+>
+> Beachte zusätzlich: Seit **T40** berechnet RunTrend ACWR **täglich** auf
+> einem rollenden 7-Tage-akut / 28-Tage-chronisch-Fenster — nicht
+> wochenweise. Ältere Manual-Beispiele mit einem „ACWR-Score pro Woche"
+> spiegeln das Pre-T40-Design wider; das UI aktualisiert jetzt täglich.
 
 **Die Kernidee:**
-Dein Körper passt sich am besten an, wenn die Trainingsbelastung schrittweise steigt. ACWR vergleicht deine **aktuelle Belastung** (akut) mit deiner **Grundbelastung** (chronisch), um gefährliche Spitzen oder Einbrüche zu erkennen.
+Dein Körper passt sich am besten an, wenn die Trainingsbelastung schrittweise
+steigt. ACWR vergleicht deine **Last der letzten 7 Tage** (akut) mit der
+**rollenden täglichen Durchschnittslast der letzten 28 Tage** (chronisch,
+auf Wochen-Einheiten skaliert für direkte Vergleichbarkeit) — und der Wert
+wird jeden Tag neu berechnet.
 
-**Zentrale Formel:**
+**Zentrale Formel (T40):**
 ```
-ACWR = Akute Belastung / Chronische Durchschnittsbelastung
+acute_t   = sum(load[t-6 ... t])
+chronic_t = sum(load[t-27 ... t]) / 4         (4 = 28/7)
+ACWR_t    = acute_t / chronic_t
 
-Wobei:
-- Akute Belastung = Trainingsbelastung der letzten Woche
-- Chronische Belastung = Durchschnittliche Trainingsbelastung der 4 Wochen VOR der akuten Woche
+mit:
+- load_t = Banister-TRIMP für Tag t  (wenn HF-Einstellungen konfiguriert)
+        oder Kilometer für Tag t      (Fallback ohne HF-Daten)
 ```
 
-**Visuelles Beispiel:**
-```
-Woche:       -4    -3    -2    -1    Akut (Aktuell)
-Distanz:     20km  22km  21km  23km  | 26km  ← Aktuelle Woche
+Das Summary-Panel zeigt heutigen ACWR mit einem TRIMP/Distanz-Suffix, damit
+die Last-Quelle immer sichtbar ist.
 
-Chronischer Ø = (20 + 22 + 21 + 23) / 4 = 21,5 km
+**Visuelles Beispiel (gilt analog, auch wenn live täglich berechnet wird):**
+```
+Wochen-Äquivalent: -4    -3    -2    -1    Akut (letzte 7 d von heute)
+Distanz:           20km  22km  21km  23km  | 26km
+
+Chronischer Ø  = (20 + 22 + 21 + 23) / 4 = 21,5 km
 Akute Belastung = 26 km
-ACWR = 26 / 21,5 = 1,21 (SICHER - schrittweiser Anstieg)
+ACWR            = 26 / 21,5 = 1,21 (SICHER — schrittweiser Anstieg)
 ```
 
-**Warum ACWR wichtig ist:**
-- **ACWR > 1,5**: Scharfe Spitze = Hohes Verletzungsrisiko (2-4x höher laut Forschung)
-- **ACWR 0,8-1,3**: Sichere Zone = Körper kann sich anpassen
-- **ACWR < 0,8**: Detraining = Fitnessverlust
+**Warum ACWR wichtig ist (zusammen mit dem Caveat oben lesen):**
+- **ACWR > 1,5**: Scharfe Spitze — erhöhtes Verletzungsrisiko (Gabbett 2016 berichtet 2–4× im Team-Sport)
+- **ACWR 0,8–1,3**: Sichere Zone — Körper kann sich anpassen
+- **ACWR < 0,8**: Detraining — Fitness-Drift
 
-**Wichtig:** ACWR ist NICHT nur Distanz. Es berücksichtigt **Distanz**, **Pace** und **Herzfrequenz** zusammen für ein vollständiges Bild.
+**Cold-Start:** ACWR braucht 28 Tage Historie, bevor überhaupt ein Wert
+erscheint. Vorher ist das Chronic-Fenster nicht voll und jeder Quotient
+wäre Rauschen.
 
 ---
 
 #### Wie wird Training Load berechnet?
 
-RunTrend berechnet einen **kombinierten Training Load Score (0-100)** durch Kombination von drei ACWR-Komponenten:
+> **Pre-T40-Dokumentation unten.** Der 0-100-Composite-Score und die
+> Drei-Komponenten-Mischung (Distanz / Pace / HF) sind seit Ticket T40
+> nicht mehr in Verwendung. Die aktuelle Implementation nutzt eine
+> einzelne Last-Quelle pro Tag — Banister-TRIMP wenn HF-Einstellungen
+> erlauben, sonst Tageskilometer — und zeigt das Verhältnis direkt
+> (z. B. `ACWR: 1,05 (TRIMP)`). Der Composite-Rahmen wird hier nur als
+> Referenz / für ältere Release-Notes dokumentiert.
+
+RunTrend hat *historisch* einen **kombinierten Training Load Score (0-100)** durch Kombination von drei ACWR-Komponenten berechnet:
 
 **1. Komponenten-ACWRs:**
 ```

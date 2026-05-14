@@ -2,8 +2,13 @@
 Unit tests for training load calculation module.
 """
 import unittest
-from datetime import datetime, timedelta
-from run_trend.analytics.training_load import TrainingLoadCalculator
+from datetime import date, datetime, timedelta
+from run_trend.analytics.training_load import (
+    TrainingLoadCalculator,
+    daily_acwr_series,
+    daily_distance_loads,
+    latest_acwr,
+)
 
 
 class TestTrainingLoadCalculator(unittest.TestCase):
@@ -369,6 +374,158 @@ class TestTrainingLoadCalculator(unittest.TestCase):
         # Significant drop should result in low training load
         self.assertLess(result['training_load'], 50)
         self.assertIn(result['status'], ['undertraining', 'safe'])
+
+
+class TestDailyAcwrSeries(unittest.TestCase):
+    """T40 — daily-rolling Gabbett ACWR over a {date: load} map."""
+
+    def test_constant_load_converges_to_one(self):
+        # 60 days of constant 50 TRIMP/day → after the chronic window
+        # is fully populated, acute and chronic match → ACWR = 1.0.
+        start = date(2026, 1, 1)
+        loads = {start + timedelta(days=i): 50.0 for i in range(60)}
+        series = daily_acwr_series(loads)
+        self.assertEqual(len(series), 60)
+        # First 27 days: cold-start, no ACWR.
+        for entry in series[:27]:
+            self.assertFalse(entry['has_acwr'])
+            self.assertIsNone(entry['acwr'])
+        # Day 28 onwards: ACWR present and right around 1.0.
+        for entry in series[27:]:
+            self.assertTrue(entry['has_acwr'])
+            self.assertAlmostEqual(entry['acwr'], 1.0, places=6)
+            self.assertEqual(entry['status'], 'safe')
+
+    def test_spike_pushes_acwr_into_danger(self):
+        # 28 days at 50 to populate chronic, then 7 days at 200 — acute
+        # quadruples while chronic only crawls up → ACWR climbs > 1.5
+        # by the end of the spike week.
+        start = date(2026, 1, 1)
+        loads = {}
+        for i in range(28):
+            loads[start + timedelta(days=i)] = 50.0
+        for i in range(28, 35):
+            loads[start + timedelta(days=i)] = 200.0
+        series = daily_acwr_series(loads)
+        # Last day's ACWR: acute = 7*200 = 1400; chronic = (21*50 + 7*200)/4 = (1050+1400)/4 = 612.5
+        # acwr = 1400 / 612.5 ≈ 2.286 → danger.
+        last = series[-1]
+        self.assertTrue(last['has_acwr'])
+        self.assertGreater(last['acwr'], 1.5)
+        self.assertEqual(last['status'], 'danger')
+
+    def test_taper_drives_acute_to_zero(self):
+        # 28 days at 50, then 7 days of rest → acute crashes to 0,
+        # chronic still > 0 → ACWR = 0 → status 'undertraining'.
+        start = date(2026, 1, 1)
+        loads = {start + timedelta(days=i): 50.0 for i in range(28)}
+        # 7 days of complete rest follow (no key in dict → 0).
+        series = daily_acwr_series(loads, end=start + timedelta(days=34))
+        last = series[-1]
+        self.assertTrue(last['has_acwr'])
+        self.assertEqual(last['acute'], 0)
+        # chronic uses the trailing 28-day window: 21 days at 50 + 7 days at 0
+        # → sum=1050, divided by 4 (chronic_window/acute_window) = 262.5
+        self.assertAlmostEqual(last['chronic'], 262.5, places=4)
+        self.assertEqual(last['acwr'], 0.0)
+        self.assertEqual(last['status'], 'undertraining')
+
+    def test_cold_start_returns_no_acwr(self):
+        # Only 10 days of history → can never form a 28-day chronic
+        # window → has_acwr stays False throughout.
+        start = date(2026, 1, 1)
+        loads = {start + timedelta(days=i): 50.0 for i in range(10)}
+        series = daily_acwr_series(loads)
+        self.assertEqual(len(series), 10)
+        for entry in series:
+            self.assertFalse(entry['has_acwr'])
+            self.assertIsNone(entry['acwr'])
+            self.assertIsNone(entry['status'])
+
+    def test_empty_input_returns_empty_list(self):
+        self.assertEqual(daily_acwr_series({}), [])
+
+    def test_explicit_end_extends_past_last_load(self):
+        # Series can be asked to walk past the last known load — the
+        # missing days are treated as zero, which is exactly the taper
+        # scenario above.
+        start = date(2026, 1, 1)
+        loads = {start: 50.0}
+        series = daily_acwr_series(
+            loads,
+            start=start,
+            end=start + timedelta(days=4),
+        )
+        self.assertEqual(len(series), 5)
+        # All within cold-start (< 28 days history).
+        for entry in series:
+            self.assertFalse(entry['has_acwr'])
+
+    def test_custom_windows_supported(self):
+        # 14-day chronic vs 7-day acute — same constant-load shape →
+        # cold-start ends earlier, ACWR converges to 1.0.
+        start = date(2026, 1, 1)
+        loads = {start + timedelta(days=i): 50.0 for i in range(20)}
+        series = daily_acwr_series(loads, acute_window=7, chronic_window=14)
+        self.assertFalse(series[12]['has_acwr'])  # day 13: still cold
+        self.assertTrue(series[13]['has_acwr'])   # day 14: chronic full
+        self.assertAlmostEqual(series[-1]['acwr'], 1.0, places=6)
+
+
+class TestLatestAcwr(unittest.TestCase):
+    """T40 — single-day convenience wrapper."""
+
+    def test_returns_last_day_record(self):
+        start = date(2026, 1, 1)
+        loads = {start + timedelta(days=i): 50.0 for i in range(35)}
+        latest = latest_acwr(loads)
+        self.assertTrue(latest['has_acwr'])
+        self.assertAlmostEqual(latest['acwr'], 1.0, places=6)
+        self.assertEqual(latest['status'], 'safe')
+
+    def test_empty_input(self):
+        result = latest_acwr({})
+        self.assertFalse(result['has_acwr'])
+        self.assertIsNone(result['acwr'])
+
+    def test_cold_start_message(self):
+        start = date(2026, 1, 1)
+        loads = {start + timedelta(days=i): 50.0 for i in range(10)}
+        result = latest_acwr(loads)
+        self.assertFalse(result['has_acwr'])
+        self.assertIn('28 days', result['message'])
+
+
+class TestDailyDistanceLoads(unittest.TestCase):
+    """T40 — fallback load source when HR / TRIMP isn't available."""
+
+    def test_distance_aggregated_per_day_in_km(self):
+        activities = [
+            {'start_date': '2026-01-01T08:00:00', 'distance': 5000.0},
+            {'start_date': '2026-01-01T18:00:00', 'distance': 3000.0},
+            {'start_date': '2026-01-02T08:00:00', 'distance': 10000.0},
+        ]
+        out = daily_distance_loads(activities)
+        self.assertAlmostEqual(out[date(2026, 1, 1)], 8.0, places=6)
+        self.assertAlmostEqual(out[date(2026, 1, 2)], 10.0, places=6)
+
+    def test_zero_or_missing_distance_skipped(self):
+        activities = [
+            {'start_date': '2026-01-01T08:00:00', 'distance': 0.0},
+            {'start_date': '2026-01-01T18:00:00'},
+            {'start_date': '2026-01-02T08:00:00', 'distance': 5000.0},
+        ]
+        out = daily_distance_loads(activities)
+        self.assertNotIn(date(2026, 1, 1), out)
+        self.assertAlmostEqual(out[date(2026, 1, 2)], 5.0, places=6)
+
+    def test_bad_date_skipped(self):
+        activities = [
+            {'start_date': 'not-a-date', 'distance': 5000.0},
+            {'start_date': '2026-01-02T08:00:00', 'distance': 5000.0},
+        ]
+        out = daily_distance_loads(activities)
+        self.assertEqual(list(out.keys()), [date(2026, 1, 2)])
 
 
 if __name__ == '__main__':
