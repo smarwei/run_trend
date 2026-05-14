@@ -1,5 +1,19 @@
 # Running Progress Tracker - User Manual
 
+> **Recent changes (jump-points if you're returning):**
+> - **T37** — *Performance tab* with age-graded WMA + Aerobic Capacity views.
+> - **T38** — *Training Fitness (CTL)* and *Form (TSB)* added as the absolute
+>   counterpart to the self-relative Trend metric.
+> - **T39** — *"Training Score" renamed to "Training Trend"*. Same formula; the
+>   new label honestly reflects that the value is baseline-relative. CTL is
+>   now the prominent headline in the Training Status panel.
+> - **T40** — *ACWR rewritten to daily Gabbett 7:28 rolling sums* (TRIMP-based
+>   when HR is configured, daily-kilometres fallback otherwise). The Training
+>   Load chart now shows the raw ACWR ratio (0.0–2.0) with Gabbett zone bands.
+> - **T41** — Methodological caveats added to every contested metric tooltip
+>   plus a new Manual section that lists which numbers come from peer-reviewed
+>   work vs. RunTrend's own design.
+
 ## Table of Contents
 
 1. [Overview](#overview)
@@ -105,14 +119,16 @@ Shows current KPIs based on your data:
 - **Efficiency Factor**: Pace-normalized heart rate (aerobic fitness)
 
 **Progress Indicators:**
-- **Training Score**: Combined metric from volume, frequency, pace, and efficiency (0-100)
+- **Training Fitness (CTL)**: Absolute training load — Banister TRIMP averaged over 42 days (T38)
+- **Form (TSB)**: CTL − ATL (rested vs. fatigued)
+- **Training Trend**: Self-relative composite of volume, frequency, pace, and efficiency (0-100, T39 renamed from "Score")
 - **Marathon Milestone**: Estimated date for 32 km Long Run / Marathon-Ready (or "Milestone Reached!")
 - **Race Time Predictions**: Estimated race times for 5K, 10K, Half, and Marathon (HR-based)
 
 **Training Load (ACWR):**
-- **Load Score**: 0-100 scale showing overtraining risk based on Acute:Chronic Workload Ratio
-- **Status**: Current load classification (SAFE, CAUTION, WARNING, DANGER)
-- **Warning Message**: Appears when score ≥ 80 with specific recommendations to reduce injury risk
+- **ACWR**: Today's Gabbett 7:28 ratio (e.g. "ACWR: 1.05 (TRIMP)") — updated daily, with the load source tagged (TRIMP if HR settings are configured, daily distance otherwise)
+- **Status**: Current load classification (SAFE 0.8-1.3 / CAUTION 1.3-1.5 / DANGER ≥1.5 / LOW <0.8)
+- **Caveat banner**: Shown in caution/danger zones, repeats the Impellizzeri 2020 "indicator, not diagnosis" reminder
 
 ### Charts (right)
 
@@ -132,8 +148,8 @@ The charts are organized into 6 main categories:
 - **Longest Run**: Longest run per period
 - **Avg Distance/Run**: Average distance per run
 
-#### 4. Score Tab
-- **Training Score**: Combined training progress
+#### 4. Trend Tab
+- **Training Trend**: Self-relative composite progress indicator (renamed from "Score" in T39 — the underlying formula is unchanged; the new label reflects that the value is baseline-relative, not an absolute fitness rating)
 
 #### 5. Training Load Tab
 - **Training Load (ACWR)**: Overtraining risk detection with colored safe zones
@@ -168,7 +184,7 @@ The charts are organized into 6 main categories:
 - Shows your **current average weekly volume** (in weekly view)
 - Shows your **current average monthly volume** (in monthly view)
 - Displayed in the Summary Panel
-- Baseline for Training Score normalization
+- Baseline for Training Trend normalization (T39 renamed from "Score")
 
 **Example:**
 - Last 12 weeks: 20, 25, 30, 28, 22, 27, 30, 32, 28, 25, 30, 33 km
@@ -946,73 +962,74 @@ Week 3: 55km (resume normal training if score < 70)
 
 Training Load (ACWR) works best when combined with other RunTrend metrics:
 
-**1. Training Score**
+**1. Training Trend**
 ```
-What: Long-term progress (distance, pace, frequency combined)
-ACWR: Short-term injury risk (acute vs chronic load)
+What: Self-relative progress (T39 renamed from "Score") — current
+      training relative to your own rolling baseline.
+ACWR: Short-term injury risk (acute vs chronic load).
 
 Use together:
-✓ Training Score rising + ACWR 40-65 = Excellent (improving safely)
-⚠ Training Score rising + ACWR 80+ = Danger (improving too fast)
-✓ Training Score stable + ACWR 40-65 = Maintenance phase (OK)
-↓ Training Score falling + ACWR 0-40 = Detraining (expected)
+✓ Trend rising  + ACWR 0.8-1.3 = Excellent (improving safely)
+⚠ Trend rising  + ACWR ≥1.5    = Danger (improving too fast)
+✓ Trend stable  + ACWR 0.8-1.3 = Maintenance phase (OK)
+↓ Trend falling + ACWR <0.8    = Detraining (expected after race/break)
 
 Example:
-Training Score: 78 (rising trend)
-Training Load: 82 (WARNING)
-→ You're improving, but TOO FAST - risk injury
-→ Action: Hold current volume for 2 weeks, let body adapt
+Training Trend: 78 (rising)
+ACWR: 1.55 (DANGER)
+→ You're improving, but TOO FAST — injury risk
+→ Action: Hold current volume for 1-2 weeks, let body adapt
 ```
 
-**2. Efficiency Factor**
+**2. Training Fitness (CTL)**
 ```
-What: Aerobic fitness (pace normalized by heart rate)
-ACWR: Training load balance
+What: Absolute fitness — Banister TRIMP averaged over 42 days (T38).
+      Where Trend plateaus around 50 at steady state, CTL stays high.
+ACWR: Short-term injury risk.
 
 Use together:
-✓ EF rising + ACWR 40-65 = Optimal (fitness improving, safe load)
-⚠ EF falling + ACWR 80+ = Overtraining (body not recovering)
-⚠ EF falling + ACWR 40-65 = Possible fatigue, illness, or heat
+✓ CTL rising  + ACWR 0.8-1.3 = Building safely
+⚠ CTL rising  + ACWR ≥1.5    = Building too aggressively
+✓ CTL high + Form (TSB) positive + ACWR 0.8-1.3 = Race-ready window
+```
+
+**3. Efficiency Factor**
+```
+What: Aerobic fitness (pace normalized by heart rate).
+ACWR: Training load balance.
+
+Use together:
+✓ EF rising + ACWR 0.8-1.3 = Optimal (fitness improving, safe load)
+⚠ EF falling + ACWR ≥1.5    = Overtraining (body not recovering)
+⚠ EF falling + ACWR 0.8-1.3 = Possible fatigue, illness, or heat
 
 Example:
 Efficiency Factor: 11.2 → 10.8 (dropping)
-Training Load: 75 (CAUTION)
+ACWR: 1.35 (CAUTION)
 → Body is stressed despite "only" caution zone
 → Action: Extra rest days, check for illness/fatigue
 ```
 
-**3. Average Heart Rate**
+**4. Average Heart Rate**
 ```
-What: Cardiovascular stress per run
-ACWR: Composite load including HR
+What: Cardiovascular stress per run.
+ACWR: Today's daily training load ratio.
 
 Use together:
-↑ Avg HR rising + ACWR 80+ = High physiological stress
-↑ Avg HR rising + same pace = Possible fatigue/overtraining
-✓ Avg HR stable + ACWR 40-65 = Good recovery
-
-Example:
-Avg HR: 155 → 165 (same pace)
-Training Load: 78 (CAUTION)
-→ Heart working harder for same effort = fatigue
-→ Action: Easy week, prioritize recovery
+↑ Avg HR rising + ACWR ≥1.5  = High physiological stress
+↑ Avg HR rising + same pace  = Possible fatigue/overtraining
+✓ Avg HR stable + ACWR 0.8-1.3 = Good recovery
 ```
 
-**4. Longest Run**
+**5. Longest Run**
 ```
-What: Endurance capacity (single run distance)
-ACWR: Weekly load balance
+What: Endurance capacity (single run distance).
+ACWR: Daily training-load balance.
 
 Use together:
-✓ Long run increasing gradually + ACWR 40-65 = Safe endurance build
-⚠ Long run spike (15km → 30km) = Will trigger high ACWR
-→ Increase long run by 10-15% per week to keep ACWR safe
-
-Example:
-Longest Run: 20km → 32km (60% jump)
-Training Load: 85 (WARNING)
-→ Long run spike caused ACWR warning
-→ Action: Next week's long run: 25km (step back)
+✓ Long run increasing gradually + ACWR 0.8-1.3 = Safe endurance build
+⚠ Long run spike (15km → 30km)  = Will spike daily TRIMP → high ACWR
+→ Increase long run by 10-15% per week to keep ACWR in safe zone.
 ```
 
 **5. Rate of Change (RoC)**
@@ -1036,7 +1053,8 @@ Training Load: 82 (WARNING)
 
 | **Metric** | **What it Measures** | **Time Frame** | **Complements ACWR By** |
 |------------|----------------------|----------------|-------------------------|
-| Training Score | Overall fitness progress | Long-term (months) | Shows if improvements are sustainable |
+| Training Trend | Self-relative progress (vs own baseline) | Long-term (months) | Shows if improvements are sustainable |
+| Training Fitness (CTL) | Absolute training load (TRIMP-based) | 42-day EWMA | Confirms accumulated fitness; T38 |
 | Efficiency Factor | Aerobic fitness | Medium-term (weeks) | Detects fatigue/overtraining |
 | Average HR | Cardiovascular stress | Per-period (week/month) | Shows physiological response |
 | Longest Run | Endurance capacity | Per-period | Identifies long run spikes |
@@ -1687,10 +1705,14 @@ Track your Long Run progress:
 - Longest Run increases: 12 km → 20 km
 - **Interpretation**: Focus on weekly Long Run
 
-### Score Tab
+### Trend Tab
 
-#### Training Score Chart
-**Shows:** Combined training progress (0-100)
+#### Training Trend Chart
+**Shows:** Self-relative training progress (0-100). T39 renamed this from
+"Training Score" — the underlying formula is unchanged; the new label
+reflects that the value compares your current training to your own
+rolling baseline rather than measuring absolute fitness. For an absolute
+metric see **Training Fitness (CTL)** in the Training Status panel.
 
 **Components (with HR data):**
 - 30% Distance
@@ -1950,59 +1972,67 @@ Solution:
 
 #### Tips for Using Training Load Chart
 
-**1. Check After Every Week/Month**
-Review your latest Training Load score to plan next period:
-- GREEN (40-65): Continue as planned
-- YELLOW (65-80): Hold volume, don't increase
-- ORANGE/RED (80-100): Reduce volume, recovery needed
+**1. Check daily — the line updates every day**
+Since T40, ACWR is recomputed daily on a rolling 7:28 window, so a
+glance at the latest value tells you today's load balance:
+- GREEN  (ACWR 0.8-1.3): Continue as planned
+- YELLOW (ACWR 1.3-1.5): Hold volume, don't increase
+- RED    (ACWR ≥ 1.5):   Reduce volume, recovery needed
+- BLUE   (ACWR < 0.8):   Detraining zone (expected after a break/race)
 
 **2. Plan Recovery Weeks**
 Use the chart to schedule strategic recovery:
 - Every 3-4 weeks: Reduce volume by 20-30%
-- After races: Expect ORANGE/RED scores → plan recovery week
-- If score rises toward YELLOW: Hold load instead of increasing
+- After races: Expect RED → plan a recovery week
+- If the ratio drifts toward YELLOW: Hold load instead of increasing
 
-**3. Compare with Training Score**
-View both charts together for complete picture:
-- **Training Score**: Long-term progress (am I improving?)
-- **Training Load**: Short-term risk (am I training safely?)
+**3. Compare with Training Trend and Training Fitness (CTL)**
+View the three together for the complete picture:
+- **Training Trend**: Self-relative progress (am I training more than my baseline?)
+- **Training Fitness (CTL)**: Absolute load (how much have I accumulated?)
+- **Training Load (ACWR)**: Short-term risk (am I training safely?)
 
 **Ideal scenario:**
-✓ Training Score rising (making progress)
-✓ Training Load in GREEN zone (progressing safely)
+✓ Trend rising (above baseline) + CTL rising + ACWR in GREEN
 
 **Warning scenario:**
-⚠ Training Score rising (making progress)
-⚠ Training Load in ORANGE/RED (progressing too fast)
-→ You're improving, but risk injury - slow down progression
+⚠ Trend rising + CTL rising fast + ACWR in RED
+→ You're improving, but too fast — slow down progression.
 
 **4. Use with Rate of Change (RoC)**
 Enable RoC overlays on Distance/Pace/HR charts to see:
-- If trends are too steep (causes high Training Load)
+- If trends are too steep (causes high ACWR)
 - If progression rate is sustainable
 - When to flatten progression to avoid spikes
 
-**5. Track Patterns Over Months**
-Look for patterns in your Training Load:
-- Do you consistently spike after races?
-- Do certain training blocks trigger YELLOW/ORANGE zones?
+**5. Smoothing**
+The toolbar's Glättung combo applies an SMA to the daily ACWR line
+(3 / 5 / 7-day windows for light / medium / strong). Useful when
+day-to-day spikes from a single hard workout obscure the underlying
+trend; the raw values remain visible in the summary panel readout.
+
+**6. Track Patterns Over Months**
+Look for patterns in your ACWR line:
+- Do you consistently spike into RED after races?
+- Do certain training blocks trigger sustained YELLOW?
 - How long does it take to recover from spikes?
-- Learn your personal tolerance and adjust training accordingly
+- Learn your personal tolerance and adjust training accordingly.
 
 ---
 
 #### Important Notes
 
-**Training Load vs Training Score:**
+**Training Load vs Training Trend vs Training Fitness:**
 
 | Metric | Purpose | Time Frame | Interpretation |
 |--------|---------|------------|----------------|
-| **Training Score** | Measures progress/fitness | Long-term (months) | Higher = better fitness |
-| **Training Load (ACWR)** | Detects injury risk | Short-term (acute vs chronic) | GREEN zone = optimal, HIGH scores = danger |
+| **Training Trend (0-100)** | Self-relative progress | Long-term (months) | Plateaus around 50 at steady state — by design |
+| **Training Fitness (CTL)** | Absolute load (TRIMP-based) | 42-day EWMA | Grows with sustained training; doesn't reset |
+| **Training Load (ACWR)** | Today's injury-risk ratio | 7d acute / 28d chronic | GREEN 0.8-1.3 = optimal, ≥1.5 = elevated risk |
 
 They measure DIFFERENT things:
-- ✓ Training Score 75 + Training Load 52 (GREEN) = Excellent (fit AND safe)
-- ⚠ Training Score 75 + Training Load 85 (ORANGE) = Risky (fit BUT unsafe progression)
+- ✓ Trend 75 + ACWR 1.05 = Excellent (above baseline AND safe progression)
+- ⚠ Trend 75 + ACWR 1.55 = Risky (above baseline BUT unsafe acute spike)
 
 **Limitations:**
 - ACWR is a **risk indicator**, not a guarantee
@@ -2475,7 +2505,7 @@ A falling EF over several weeks can have various causes:
 **What to do:**
 - **Short-term fluctuation** (1-2 weeks): Probably normal (weather, stress)
 - **Constantly falling** (3+ weeks): Take a recovery week!
-- Compare with Training Score and feeling during runs
+- Compare with Training Trend / Fitness (CTL) and feeling during runs
 - Include more Easy Runs
 
 **Tip:** Use EF as early warning system for overtraining!
@@ -2497,7 +2527,9 @@ No, heart rate data must be recorded during the run with an HR monitor. Retrospe
 **Good (real fitness improvement):**
 - EF rises with constant or increasing volume
 - You feel good during training
-- Training Score is stable or rising
+- Training Trend is stable or rising (or — more reliably — Training
+  Fitness / CTL is rising, since the Trend plateaus around 50 at
+  steady state by design)
 
 **Caution (possible problems):**
 - EF rises, but only because you're running slower (lower HR at slow pace)
@@ -2509,9 +2541,10 @@ No, heart rate data must be recorded during the run with an HR monitor. Retrospe
 - HR stays same or falls ✓
 - → EF rises = real fitness improvement! ✓
 
-### Does the Efficiency Factor flow into the Training Score?
+### Does the Efficiency Factor flow into the Training Trend?
 
-**Yes!** Since the latest version, the Training Score considers the Efficiency Factor.
+**Yes!** Since EF was added to the composite, the Training Trend (renamed
+from "Training Score" in T39 — the formula is unchanged) factors EF in.
 
 **With HR data:**
 - 30% Distance
@@ -2531,18 +2564,18 @@ Weights automatically adapt:
 - **Frequency** (20%): Consistency is important, but less than performance
 
 **Benefits:**
-- Score now reflects real fitness improvement (not just volume)
-- EF improvement leads to higher score
-- Warning for overtraining: Falling EF = lower score
+- Trend reflects fitness improvement (not just volume)
+- EF improvement raises the Trend
+- Warning for overtraining: Falling EF → lower Trend
 - Works with mixed data (some runs with HR, some without)
 
-### Why has my Training Score decreased even though I'm running more?
+### Why has my Training Trend decreased even though I'm running more?
 
 This can have several reasons:
 
 **1. Pace has worsened**
 - More volume but slower tempo
-- Pace has 30% weighting in score
+- Pace has 30% weighting in the Trend
 
 **2. Efficiency Factor has fallen** (when HR data available)
 - Higher HR at same or slower pace
@@ -2551,20 +2584,25 @@ This can have several reasons:
 
 **3. Recovery week**
 - Deliberately less distance/intensity
-- Lower score is INTENDED and good here!
+- Lower Trend is INTENDED and good here!
 
-**4. Rolling baseline has adapted**
-- Score compares with your rolling average
-- If your average rises, current training must be even higher for same score
+**4. Rolling baseline has adapted (this is the most common cause)**
+- The Trend compares your *current* training to your *own* rolling
+  average. If your baseline rises, current training must be even
+  higher to keep the same Trend value — that's the T39 reason for the
+  rename: the number really tracks *change*, not absolute fitness.
+- For an absolute training-load measure that doesn't reset against
+  your baseline, look at **Training Fitness (CTL)** in the same panel.
 
 **Example:**
-- **2 months ago**: 20 km/week = Score 60
-- **Now**: 25 km/week = Score 55
+- **2 months ago**: 20 km/week = Trend 60
+- **Now**: 25 km/week = Trend 55
 
-→ Your baseline is now ~23 km/week (due to constant increase)
-→ 25 km is only slightly above new baseline
-→ At same time, pace has become slower (-10%)
-→ **Result**: Score falls despite higher volume
+→ Your baseline is now ~23 km/week (due to the constant increase)
+→ 25 km is only slightly above the new baseline
+→ At the same time, pace has become slower (−10%)
+→ **Result**: Trend falls despite higher volume — but CTL is likely
+  higher than it was two months ago, which is the absolute view.
 
 ### What does "Marathon Milestone: Keep training!" in Summary Panel mean?
 
@@ -2740,73 +2778,56 @@ Previous 4 weeks: 22, 24, 23, 25 km (avg: 23.5 km)
 ACWR = 30 / 23.5 = 1.28 (SAFE zone)
 ```
 
-**RunTrend's enhancement:**
-Instead of distance only, RunTrend calculates a **composite ACWR** using:
-- Distance (40%)
-- Pace (30%)
-- Heart Rate (30%)
+**RunTrend's implementation (since T40):**
+RunTrend computes ACWR daily on a rolling 7-day acute / 28-day chronic
+window. The per-day load is **Banister TRIMP** when Resting HR, Gender,
+and either Max HR or Date of Birth are configured; otherwise it falls
+back to **daily kilometres**. The summary panel tags which source is in
+play (e.g. "ACWR: 1.05 (TRIMP)" vs "ACWR: 1.05 (Distance)").
 
-This gives you a complete picture of training stress.
+> **Pre-T40 design (kept for older release notes / search hits):** an
+> earlier version blended three component ACWRs — Distance (40%), Pace
+> (30%), Heart Rate (30%) — into a "Composite ACWR" mapped to a 0-100
+> Load Score. That composite is no longer in use; the references to
+> "Training Load Score: NN" below describe that historical form.
 
 **Where to find it:**
-- **Summary Panel**: Shows current Training Load score (0-100) and status
-- **Training Load Tab**: Chart with colored safe zones
+- **Summary Panel**: Shows today's ACWR ratio (e.g. "ACWR: 1.05 (TRIMP)") and status word
+- **Training Load Tab**: Daily ACWR line with Gabbett zone bands (0.8 / 1.3 / 1.5)
 - **Metrics Explanations**: Full explanation of calculation and interpretation
 
 **See also:** Metrics Explanations → Training Load (ACWR) for detailed explanation.
 
-### Why is my Training Load score high even though I'm running the same distance?
+### Why is my ACWR high even though I'm running the same distance?
 
-Training Load (ACWR) considers **more than just distance**. A high score can occur even with stable distance due to:
+The TRIMP-based load (the default, when HR settings are configured)
+captures intensity, not just volume. So the ACWR ratio can rise even
+when weekly distance is flat:
 
-**1. Pace intensity increased**
-```
-Last 4 weeks: 30 km/week at 6:00 min/km
-This week: 30 km/week at 5:30 min/km
-→ Same distance, but MUCH higher intensity
-→ Pace ACWR = 1.55 (spike!)
-→ Training Load Score: 78 (CAUTION)
-```
+**1. Pace intensity increased** → higher HR for the same distance → higher TRIMP per day.
 
-**2. Heart rate increased** (fatigue/heat/illness)
-```
-Last 4 weeks: Avg HR 150 bpm
-This week: Avg HR 165 bpm (same pace!)
-→ Heart working harder = higher physiological stress
-→ HR ACWR = 1.10
-→ Combined with other factors → higher Training Load
-```
+**2. Heart rate increased** (fatigue / heat / illness) → again, higher
+TRIMP per day even at the same pace.
 
-**3. Combination of multiple factors**
-```
-Small distance increase (+10%) +
-Slightly faster pace (+5%) +
-Slightly elevated HR (+3%)
-= Composite ACWR 1.42 → Score 72 (CAUTION)
+**3. Race effort** → one hard day spikes acute load disproportionately.
 
-Each factor alone is small, but combined = spike!
-```
-
-**4. Race effort**
-```
-Week 1-4: 35 km easy pace
-Week 5: 35 km including 10K race effort
-→ Distance same, but race = HIGH intensity + HR spike
-→ Training Load Score: 85 (WARNING)
-```
+(The distance-fallback variant ignores intensity; it will only spike if
+weekly kilometres themselves rise. The tooltip / summary suffix tells
+you which variant your line is using.)
 
 **What to do:**
-- Check **Training Load Chart** to see which component spiked
-- Look at **Pace Chart**: Did pace improve too fast?
-- Look at **HR Chart**: Is average HR rising?
-- Use **RoC overlays** to see if trends are too steep
-- If score high: Hold current load, prioritize recovery
+- Use the **Training Load Chart** to see the trajectory; smoothing
+  helps separate a single hard day from a real trend.
+- Look at **Pace / HR charts** for the underlying cause.
+- Use **RoC overlays** to see if trends are too steep.
+- If ACWR ≥ 1.5: hold current load, prioritize recovery.
 
-**Remember:** Training Load protects you by detecting ALL forms of training stress, not just volume.
+**Remember:** ACWR is an *indicator*, not a diagnosis (Impellizzeri 2020).
+Cross-check with how the runs actually feel.
 
-### What should I do if my Training Load is in the WARNING zone?
+### What should I do if my ACWR is in the DANGER zone (≥ 1.5)?
 
-A **WARNING zone** score (80-90) indicates HIGH injury risk - immediate action needed!
+A DANGER ACWR (≥ 1.5) indicates elevated injury risk — action recommended.
 
 **Step 1: Don't Panic**
 - One WARNING score ≠ guaranteed injury
@@ -3073,8 +3094,9 @@ Best practice: Use BOTH
 
 **✓ Summary Panel:**
 - Total Distance, Pace, Frequency, Longest Run
-- Training Score (adapted weighting without EF component)
-- Training Load (ACWR) - uses Distance + Pace only (HR defaults to 1.0)
+- Training Trend (adapted weighting without EF component; T39 renamed
+  from "Score")
+- Training Load (ACWR) — falls back to daily-kilometre load source (T40)
 - Marathon Milestone
 - Race Time Predictions (based on pace only)
 
@@ -3087,12 +3109,12 @@ Best practice: Use BOTH
 - Longest Run Chart
 - Average Distance per Run Chart
 
-**✓ Charts - Score Tab:**
-- Training Score (adapted formula)
+**✓ Charts - Trend Tab:**
+- Training Trend (adapted formula — drops the EF component)
 
 **✓ Charts - Training Load Tab:**
-- Training Load Chart (Distance + Pace components only)
-- Colored safe zones still work
+- Training Load Chart — falls back to daily-kilometre ACWR (T40)
+- Gabbett zone bands (0.8 / 1.3 / 1.5) still work
 
 **✓ Charts - Projection Tab:**
 - Volume Projection
@@ -3107,15 +3129,20 @@ Best practice: Use BOTH
 
 **✗ Efficiency Factor:**
 - Not calculated without HR
-- Training Score uses adapted weighting (no EF component)
+- Training Trend uses adapted weighting (no EF component)
 
-**✗ HR-specific Training Load component:**
-- ACWR HR component defaults to 1.0 (neutral)
-- Training Load still works, but slightly less accurate
+**✗ Training Fitness (CTL) / Form (TSB):**
+- Need HR + hr_rest + gender to compute TRIMP per activity (T38).
+- Without HR the panel shows a "Set Resting HR in Settings" hint.
+
+**✗ ACWR load source:**
+- Falls back to daily kilometres instead of Banister TRIMP (T40).
+- Tooltip / summary tags the variant ("ACWR: 1.05 (Distance)") so
+  the lower precision is always visible.
 
 **Adapted metrics without HR:**
 
-**Training Score weighting:**
+**Training Trend weighting (T39 renamed from "Score"; formula unchanged):**
 ```
 With HR:
 - 30% Distance
@@ -3131,18 +3158,19 @@ Without HR (automatic adaptation):
 → Total still 100%, weights adjusted proportionally
 ```
 
-**Training Load (ACWR) without HR:**
+**ACWR (Training Load) without HR:**
 ```
-Composite ACWR = (Distance ACWR × 50%) +
-                 (Pace ACWR × 50%) +
-                 (1.0 × 0%)  ← HR defaults to neutral
+Load source = daily total distance in kilometres.
+Acute  = sum of last 7 days.
+Chronic = sum of last 28 days / 4 (weekly-equivalent units).
+ACWR    = acute / chronic.
 
 Still detects:
-✓ Volume spikes (Distance ACWR)
-✓ Intensity spikes (Pace ACWR)
-✗ Physiological stress (HR ACWR missing)
+✓ Volume spikes (sudden km increase)
+✗ Intensity spikes (HR-only, not visible)
 
-Still useful! Catches most overtraining risks.
+Still useful, but a hard race within stable weekly mileage will not
+register the same way it would with TRIMP-based load.
 ```
 
 **Benefits of adding HR monitor:**
@@ -3150,9 +3178,9 @@ Still useful! Catches most overtraining risks.
 With HR monitor you gain:
 ✓ Efficiency Factor (best aerobic fitness indicator)
 ✓ HR Range visualization (training intensity distribution)
-✓ More accurate Training Load (includes physiological stress)
+✓ Banister-TRIMP load source for ACWR (catches intensity spikes)
+✓ Training Fitness (CTL) and Form (TSB) — the absolute load picture (T38)
 ✓ Early fatigue detection (rising HR at same pace)
-✓ Better Training Score (includes fitness component)
 
 Recommended devices:
 - Chest strap: Most accurate (Garmin HRM-Dual, Polar H10)
@@ -3173,7 +3201,8 @@ Intermediate (6-12 months):
 
 Advanced/Marathon training:
 → HR monitor highly recommended
-→ Training Load with HR = much more accurate
+→ Training Load with HR (TRIMP) = much more accurate
+→ Training Fitness (CTL) becomes available
 → Catch fatigue earlier
 ```
 
