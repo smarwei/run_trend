@@ -46,7 +46,7 @@ Issues = "https://github.com/smarwei/run_trend/issues"
 run-trend = "run_trend.main:main"
 
 [tool.setuptools]
-packages = ["run_trend", "run_trend.analytics", "run_trend.analytics.wma_data", "run_trend.charts", "run_trend.projection", "run_trend.settings", "run_trend.storage", "run_trend.strava", "run_trend.sync", "run_trend.ui", "run_trend.translations"]
+packages = ["run_trend", "run_trend.analytics", "run_trend.analytics.wma_data", "run_trend.charts", "run_trend.io", "run_trend.projection", "run_trend.settings", "run_trend.storage", "run_trend.strava", "run_trend.sync", "run_trend.ui", "run_trend.translations"]
 include-package-data = true
 
 [tool.setuptools.package-data]
