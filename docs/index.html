@@ -9,68 +9,167 @@
     <title>RunTrend — Persönliches Strava-Analyse-Tool</title>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/smarwei/run_trend/master/logo.png">
     <style>
+        /* ============================================================
+         * Palette — light is the default; dark mode is enabled either
+         * by the OS `prefers-color-scheme` or by an explicit toggle
+         * (stored in localStorage as 'runtrend-theme').
+         * ============================================================ */
         :root {
-            --bg:     #fafaf7;
-            --text:   #1f1f1f;
-            --muted:  #6b6b6b;
-            --accent: #2c7a7b;
-            --accent-hover: #285e5e;
-            --rule:   #e2e2dc;
-            --code-bg: #efeee8;
+            --bg:        #f7f6f2;
+            --surface:   #ffffff;
+            --surface-2: #f0eee8;
+            --text:      #15181d;
+            --muted:     #5b6470;
+            --rule:      #e0ddd5;
+            --accent:    #0d8a8c;
+            --accent-2:  #0a6f70;
+            --accent-soft: rgba(13, 138, 140, 0.10);
+            --shadow:    0 1px 2px rgba(15, 23, 42, 0.04),
+                         0 8px 24px rgba(15, 23, 42, 0.05);
+            --code-bg:   rgba(15, 23, 42, 0.05);
+            --tag-pub-bg: rgba(13, 138, 140, 0.10);
+            --tag-pub-fg: #0a6f70;
+            --tag-mix-bg: rgba(202, 138, 4, 0.12);
+            --tag-mix-fg: #92660d;
+            --tag-own-bg: rgba(100, 116, 139, 0.14);
+            --tag-own-fg: #475569;
+        }
+        html[data-theme="dark"] {
+            --bg:        #0b0d10;
+            --surface:   #14171c;
+            --surface-2: #1a1f26;
+            --text:      #e6e8ec;
+            --muted:     #8a93a1;
+            --rule:      #262b33;
+            --accent:    #34d4c5;
+            --accent-2:  #5eead4;
+            --accent-soft: rgba(52, 212, 197, 0.10);
+            --shadow:    0 1px 2px rgba(0, 0, 0, 0.40),
+                         0 8px 24px rgba(0, 0, 0, 0.25);
+            --code-bg:   rgba(255, 255, 255, 0.06);
+            --tag-pub-bg: rgba(52, 212, 197, 0.12);
+            --tag-pub-fg: #5eead4;
+            --tag-mix-bg: rgba(250, 204, 21, 0.14);
+            --tag-mix-fg: #facc15;
+            --tag-own-bg: rgba(148, 163, 184, 0.16);
+            --tag-own-fg: #94a3b8;
+        }
+        @media (prefers-color-scheme: dark) {
+            html:not([data-theme="light"]) {
+                --bg:        #0b0d10;
+                --surface:   #14171c;
+                --surface-2: #1a1f26;
+                --text:      #e6e8ec;
+                --muted:     #8a93a1;
+                --rule:      #262b33;
+                --accent:    #34d4c5;
+                --accent-2:  #5eead4;
+                --accent-soft: rgba(52, 212, 197, 0.10);
+                --shadow:    0 1px 2px rgba(0, 0, 0, 0.40),
+                             0 8px 24px rgba(0, 0, 0, 0.25);
+                --code-bg:   rgba(255, 255, 255, 0.06);
+                --tag-pub-bg: rgba(52, 212, 197, 0.12);
+                --tag-pub-fg: #5eead4;
+                --tag-mix-bg: rgba(250, 204, 21, 0.14);
+                --tag-mix-fg: #facc15;
+                --tag-own-bg: rgba(148, 163, 184, 0.16);
+                --tag-own-fg: #94a3b8;
+            }
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        html { scroll-behavior: smooth; }
-
+        /* ============================================================
+         * Reset + base
+         * ============================================================ */
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
         body {
+            margin: 0;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-feature-settings: 'ss01', 'cv11';
             line-height: 1.6;
             color: var(--text);
             background: var(--bg);
             -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
         }
 
-        .wrap {
+        /* ============================================================
+         * Layout
+         * ============================================================ */
+        .container {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        .reading {
             max-width: 720px;
             margin: 0 auto;
-            padding: 32px 24px 96px;
         }
 
-        /* Header */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
+        /* ============================================================
+         * Top nav — sticky, frosted, modern
+         * ============================================================ */
+        .site-nav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: color-mix(in srgb, var(--bg) 85%, transparent);
+            backdrop-filter: saturate(180%) blur(12px);
+            -webkit-backdrop-filter: saturate(180%) blur(12px);
             border-bottom: 1px solid var(--rule);
-            padding-bottom: 16px;
-            margin-bottom: 48px;
-            gap: 16px;
-            flex-wrap: wrap;
         }
-        header .name {
-            font-size: 18px;
-            font-weight: 600;
-            letter-spacing: -0.01em;
-        }
-        header nav {
+        .site-nav .inner {
             display: flex;
-            gap: 20px;
-            align-items: baseline;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 24px;
+            max-width: 980px;
+            margin: 0 auto;
+            gap: 18px;
             flex-wrap: wrap;
         }
-        header nav a {
-            color: var(--muted);
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: -0.005em;
+            color: var(--text);
             text-decoration: none;
+        }
+        .brand-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 999px;
+            background: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-soft);
+        }
+        .site-nav nav {
+            display: flex;
+            gap: 22px;
+            align-items: center;
             font-size: 14px;
         }
-        header nav a:hover { color: var(--accent); }
-        .lang {
-            display: inline-flex;
-            gap: 6px;
+        .site-nav nav a {
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.15s ease;
+        }
+        .site-nav nav a:hover { color: var(--text); }
+        .nav-tools {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             font-size: 13px;
             color: var(--muted);
-            margin-left: 4px;
+        }
+        .lang {
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid var(--rule);
+            border-radius: 999px;
+            overflow: hidden;
         }
         .lang button {
             background: none;
@@ -78,439 +177,865 @@
             color: var(--muted);
             font: inherit;
             cursor: pointer;
-            padding: 2px 4px;
+            padding: 4px 10px;
+            transition: background 0.15s, color 0.15s;
         }
         .lang button.active {
             color: var(--text);
+            background: var(--surface-2);
             font-weight: 600;
         }
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--rule);
+            color: var(--muted);
+            cursor: pointer;
+            border-radius: 999px;
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .theme-toggle:hover { color: var(--text); border-color: var(--text); }
+        .theme-toggle svg { width: 15px; height: 15px; }
 
-        /* Type */
+        /* ============================================================
+         * Hero
+         * ============================================================ */
+        .hero {
+            padding: 64px 0 32px;
+            position: relative;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 720px;
+            height: 360px;
+            background: radial-gradient(ellipse at top, var(--accent-soft), transparent 65%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--accent-2);
+            background: var(--accent-soft);
+            border-radius: 999px;
+            margin: 0 0 20px;
+        }
         h1 {
             font-family: Charter, 'Iowan Old Style', 'Source Serif Pro', Georgia, serif;
-            font-size: 36px;
+            font-size: clamp(36px, 5.5vw, 52px);
+            font-weight: 700;
+            line-height: 1.08;
+            letter-spacing: -0.02em;
+            margin: 0 0 20px;
+            max-width: 18ch;
+        }
+        h1 em {
+            color: var(--accent);
+            font-style: italic;
+            font-weight: 700;
+        }
+        .lede {
+            font-family: Charter, 'Iowan Old Style', 'Source Serif Pro', Georgia, serif;
+            font-size: clamp(17px, 1.8vw, 19px);
+            line-height: 1.55;
+            color: var(--text);
+            opacity: 0.92;
+            margin: 0 0 28px;
+            max-width: 60ch;
+        }
+        .hero-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 56px;
+        }
+        .hero-links a {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 18px;
+            border-radius: 999px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: transform 0.15s ease, background 0.15s, color 0.15s, border-color 0.15s;
+        }
+        .hero-links .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+        html[data-theme="dark"] .hero-links .btn-primary,
+        html:not([data-theme="light"]) .hero-links .btn-primary {
+            color: #0b0d10;
+        }
+        @media (prefers-color-scheme: dark) {
+            html:not([data-theme="light"]) .hero-links .btn-primary { color: #0b0d10; }
+        }
+        .hero-links .btn-primary:hover { background: var(--accent-2); }
+        .hero-links .btn-secondary {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--rule);
+        }
+        .hero-links .btn-secondary:hover {
+            border-color: var(--text);
+        }
+        .hero-links a:hover { transform: translateY(-1px); }
+
+        /* ============================================================
+         * Screenshot frame with mock window chrome
+         * ============================================================ */
+        .screenshot {
+            margin: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--surface);
+            border: 1px solid var(--rule);
+            box-shadow: var(--shadow);
+        }
+        .window-chrome {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 16px;
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--rule);
+        }
+        .window-dots {
+            display: inline-flex;
+            gap: 7px;
+        }
+        .window-dots span {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: var(--rule);
+        }
+        .window-title {
+            font-size: 12px;
+            color: var(--muted);
+            font-feature-settings: 'tnum';
+            margin: 0 auto;
+            padding-right: 50px; /* visual offset for the dots on the left */
+        }
+        .screenshot img {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: #0b0d10;
+        }
+        .screenshot figcaption {
+            font-size: 13px;
+            color: var(--muted);
+            padding: 12px 16px;
+            border-top: 1px solid var(--rule);
+            background: var(--surface);
+        }
+
+        /* ============================================================
+         * Sections
+         * ============================================================ */
+        section.block {
+            padding: 80px 0;
+            border-top: 1px solid var(--rule);
+        }
+        section.block.tinted {
+            background: var(--surface-2);
+        }
+        h2 {
+            font-family: Charter, 'Iowan Old Style', 'Source Serif Pro', Georgia, serif;
+            font-size: clamp(26px, 3.5vw, 34px);
             font-weight: 700;
             line-height: 1.15;
             letter-spacing: -0.015em;
-            margin-bottom: 8px;
+            margin: 0 0 14px;
         }
-        h1 .accent { color: var(--accent); font-style: italic; }
-        h2 {
-            font-size: 22px;
+        h2 + .sub {
+            font-size: 16px;
+            color: var(--muted);
+            margin: 0 0 40px;
+            max-width: 62ch;
+        }
+
+        /* Feature grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+        .feat {
+            position: relative;
+            padding: 22px;
+            background: var(--surface);
+            border: 1px solid var(--rule);
+            border-radius: 12px;
+            transition: border-color 0.18s ease, transform 0.18s ease;
+        }
+        .feat:hover {
+            border-color: color-mix(in srgb, var(--accent) 50%, var(--rule));
+            transform: translateY(-1px);
+        }
+        .feat-num {
+            position: absolute;
+            top: 18px;
+            right: 22px;
+            font-size: 11px;
+            font-family: ui-monospace, 'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace;
+            color: var(--muted);
+            opacity: 0.6;
+            letter-spacing: 0.05em;
+        }
+        .feat h3 {
+            margin: 0 0 6px;
+            font-size: 16px;
             font-weight: 600;
-            margin: 56px 0 16px;
             letter-spacing: -0.005em;
         }
-        h3 {
+        .feat p {
+            margin: 0;
+            font-size: 14.5px;
+            color: var(--muted);
+            line-height: 1.55;
+        }
+
+        /* Summary callout */
+        .callout {
+            margin-top: 32px;
+            padding: 24px 28px;
+            background: var(--surface);
+            border: 1px solid var(--rule);
+            border-left: 3px solid var(--accent);
+            border-radius: 8px;
+        }
+        .callout h3 {
+            margin: 0 0 8px;
             font-size: 16px;
             font-weight: 600;
-            margin: 24px 0 6px;
         }
-        p { margin-bottom: 16px; }
-
-        .lede {
-            font-family: Charter, 'Iowan Old Style', 'Source Serif Pro', Georgia, serif;
-            font-size: 18px;
-            line-height: 1.55;
+        .callout p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 15px;
+        }
+        .callout strong {
             color: var(--text);
-            margin-bottom: 24px;
-        }
-        .muted { color: var(--muted); }
-
-        a {
-            color: var(--accent);
-            text-decoration: none;
-            border-bottom: 1px solid transparent;
-            transition: border-color 0.15s;
-        }
-        a:hover { border-bottom-color: var(--accent); }
-
-        /* Inline links in hero */
-        .hero-links {
-            margin: 24px 0 32px;
-            display: flex;
-            gap: 24px;
-            flex-wrap: wrap;
-            font-size: 16px;
+            font-weight: 600;
         }
 
-        figure {
-            margin: 24px -24px 32px;
-            border: 1px solid var(--rule);
-            background: #fff;
-        }
-        figure img { display: block; width: 100%; height: auto; }
-        figure figcaption {
-            font-size: 13px;
-            color: var(--muted);
-            padding: 8px 16px;
-            border-top: 1px solid var(--rule);
-        }
-
-        /* Methodology — book-like list */
+        /* Methodology */
         .methods {
-            font-family: Charter, 'Iowan Old Style', 'Source Serif Pro', Georgia, serif;
-            font-size: 16px;
-            line-height: 1.55;
-        }
-        .methods dt {
-            font-weight: 600;
-            margin-top: 14px;
-        }
-        .methods dd {
-            color: var(--muted);
-        }
-        .methods dd code, code {
-            background: var(--code-bg);
-            padding: 1px 6px;
-            border-radius: 3px;
-            font-size: 0.9em;
-        }
-
-        /* Lists */
-        ul.plain {
-            list-style: none;
-            padding: 0;
-        }
-        ul.plain li {
-            padding: 10px 0;
-            border-bottom: 1px solid var(--rule);
-        }
-        ul.plain li:last-child { border-bottom: none; }
-        ul.plain li strong {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        /* Donation block */
-        .donate {
-            border: 1px solid var(--rule);
-            padding: 20px 24px;
-            margin: 24px 0;
-            background: #fff;
-        }
-        .donate p { margin: 0 0 12px; }
-        .donate-buttons {
             display: flex;
+            flex-direction: column;
+            gap: 0;
+            margin: 0;
+        }
+        .method {
+            padding: 22px 0;
+            border-bottom: 1px solid var(--rule);
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 6px 18px;
+            align-items: start;
+        }
+        .method:last-child { border-bottom: none; }
+        .method dt {
+            font-weight: 600;
+            font-size: 15.5px;
+            letter-spacing: -0.005em;
+            display: flex;
+            align-items: center;
             gap: 10px;
             flex-wrap: wrap;
         }
-        .donate-buttons a {
-            display: inline-block;
-            padding: 8px 14px;
-            border: 1px solid var(--accent);
-            color: var(--accent);
-            font-size: 14px;
-            border-radius: 3px;
+        .method dd {
+            grid-column: 1 / -1;
+            margin: 0;
+            font-size: 15px;
+            color: var(--muted);
+            line-height: 1.6;
+            max-width: 70ch;
         }
-        .donate-buttons a:hover {
-            background: var(--accent);
-            color: #fff;
-            border-bottom-color: var(--accent);
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            padding: 2px 9px;
+            border-radius: 999px;
+            text-transform: uppercase;
+        }
+        .tag-pub { background: var(--tag-pub-bg); color: var(--tag-pub-fg); }
+        .tag-mix { background: var(--tag-mix-bg); color: var(--tag-mix-fg); }
+        .tag-own { background: var(--tag-own-bg); color: var(--tag-own-fg); }
+
+        code {
+            font-family: ui-monospace, 'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace;
+            background: var(--code-bg);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
         }
 
-        /* Get RunTrend section */
-        .get-options {
-            margin-top: 16px;
+        /* Get RunTrend grid */
+        .get-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
         }
-        .get-options strong { display: inline-block; min-width: 100px; }
+        .get-card {
+            padding: 24px;
+            background: var(--surface);
+            border: 1px solid var(--rule);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .get-card h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .get-card p {
+            margin: 0;
+            font-size: 14.5px;
+            color: var(--muted);
+            line-height: 1.55;
+            flex-grow: 1;
+        }
+        .get-card .cta-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: gap 0.15s;
+        }
+        .get-card .cta-link:hover { gap: 8px; }
+
+        /* Donation block */
+        .donate-card {
+            text-align: center;
+            max-width: 580px;
+            margin: 0 auto;
+            padding: 36px 32px;
+            background: var(--surface);
+            border: 1px solid var(--rule);
+            border-radius: 12px;
+        }
+        .donate-card p {
+            margin: 0 0 20px;
+            color: var(--muted);
+            font-size: 16px;
+        }
+        .donate-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .donate-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: transform 0.15s, background 0.15s;
+        }
+        .donate-btn.coffee {
+            background: var(--accent);
+            color: #fff;
+        }
+        html[data-theme="dark"] .donate-btn.coffee,
+        html:not([data-theme="light"]) .donate-btn.coffee {
+            color: #0b0d10;
+        }
+        @media (prefers-color-scheme: dark) {
+            html:not([data-theme="light"]) .donate-btn.coffee { color: #0b0d10; }
+        }
+        .donate-btn.sponsors {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--rule);
+        }
+        .donate-btn.sponsors:hover { border-color: var(--text); }
+        .donate-btn:hover { transform: translateY(-1px); }
 
         /* Footer */
         footer {
+            padding: 40px 0 60px;
             border-top: 1px solid var(--rule);
-            margin-top: 64px;
-            padding-top: 24px;
+            background: var(--bg);
+        }
+        footer .inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             font-size: 13px;
             color: var(--muted);
-            display: flex;
+            gap: 24px;
             flex-wrap: wrap;
-            gap: 16px 24px;
-            justify-content: space-between;
         }
-        footer a { color: var(--muted); }
+        footer a {
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.15s;
+        }
         footer a:hover { color: var(--accent); }
+        footer .links {
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
         footer .legal {
-            font-size: 12px;
-            margin-top: 12px;
             width: 100%;
-            line-height: 1.4;
+            font-size: 12px;
+            line-height: 1.5;
+            opacity: 0.85;
+            margin-top: 16px;
         }
 
+        /* Type rhythm in long paragraphs */
+        p, dd {
+            margin: 0 0 16px;
+        }
+        p:last-child, dd:last-child { margin-bottom: 0; }
+
         /* Responsive */
-        @media (max-width: 600px) {
-            h1 { font-size: 28px; }
-            h2 { font-size: 20px; margin: 40px 0 12px; }
-            .lede { font-size: 17px; }
-            figure { margin-left: -12px; margin-right: -12px; }
-            .wrap { padding: 24px 16px 64px; }
-            header nav { gap: 14px; }
-            header nav a { font-size: 13px; }
+        @media (max-width: 760px) {
+            .container { padding: 0 18px; }
+            .hero { padding: 40px 0 16px; }
+            .feature-grid, .get-grid { grid-template-columns: 1fr; }
+            section.block { padding: 56px 0; }
+            .site-nav .inner { padding: 12px 16px; gap: 12px; }
+            .site-nav nav { gap: 14px; font-size: 13px; }
+            .window-title { display: none; }
+        }
+        @media (max-width: 480px) {
+            .hero-links { flex-direction: column; align-items: stretch; }
+            .hero-links a { justify-content: center; }
         }
     </style>
 </head>
 <body>
-    <div class="wrap">
 
-        <header>
-            <span class="name">RunTrend</span>
+    <header class="site-nav">
+        <div class="inner">
+            <a href="#top" class="brand">
+                <span class="brand-dot" aria-hidden="true"></span>
+                RunTrend
+            </a>
             <nav>
                 <a href="#funktionen" data-i18n="nav.features">Funktionen</a>
                 <a href="#methodik" data-i18n="nav.methods">Methodik</a>
                 <a href="#holen" data-i18n="nav.get">Holen</a>
                 <a href="#spenden" data-i18n="nav.support">Unterstützen</a>
-                <span class="lang">
-                    <button type="button" data-lang="de" class="active">DE</button>
-                    <span>·</span>
-                    <button type="button" data-lang="en">EN</button>
-                </span>
             </nav>
-        </header>
-
-        <h1 data-i18n="hero.title">Ein persönliches Strava-<span class="accent">Analyse-Tool</span>.</h1>
-
-        <p class="lede" data-i18n="hero.lede">
-            Ich habe RunTrend gebaut, weil ich wissen wollte, ob ich tatsächlich
-            fitter werde oder einfach nur mehr laufe. Strava zeigt die Daten —
-            die Antworten liegen hinter einer Paywall, und auch dort fehlen
-            mir oft die Metriken, die ich beim Marathon-Aufbau wirklich
-            brauche. Also habe ich mir selbst eine Desktop-App geschrieben,
-            die Strava-Daten lokal auswertet. Vielleicht hilft sie dir auch.
-        </p>
-
-        <div class="hero-links">
-            <a href="#holen" data-i18n="hero.cta.get">→ RunTrend holen</a>
-            <a href="#methodik" data-i18n="hero.cta.methods">→ Methodik im Detail</a>
-        </div>
-
-        <figure>
-            <img src="https://raw.githubusercontent.com/smarwei/run_trend/master/screenshots/main-window.png"
-                 alt="RunTrend main window screenshot"
-                 onerror="this.parentElement.style.display='none'">
-            <figcaption data-i18n="figure.main">
-                Die Hauptansicht: Trainingsstatus links, ausgewählter Chart rechts.
-                Im Beispiel das Training-Load-Tab mit täglichem ACWR-Verlauf.
-            </figcaption>
-        </figure>
-
-        <h2 id="funktionen" data-i18n="features.title">Was die App zeigt</h2>
-
-        <p data-i18n="features.intro">
-            Die Charts und Metriken sind so geordnet, dass jeder Tab eine
-            konkrete Trainingsfrage beantwortet — nicht „mehr Diagramme",
-            sondern „eine Antwort pro Reiter":
-        </p>
-
-        <ul class="plain">
-            <li>
-                <strong data-i18n="feat.overview.title">Overview</strong>
-                <span data-i18n="feat.overview.text">Distanz, Pace, Frequenz pro Periode (Woche oder Monat), mit
-                wählbarer Glättung. Beantwortet: laufe ich mehr / schneller /
-                regelmäßiger als sonst?</span>
-            </li>
-            <li>
-                <strong data-i18n="feat.hr.title">Heart Rate</strong>
-                <span data-i18n="feat.hr.text">HF-Range, Durchschnitts-HF, Efficiency Factor (Pace ÷ HF) und
-                Zonen-Verteilung. Beantwortet: arbeitet mein aerobes
-                System besser bei gleichem Tempo?</span>
-            </li>
-            <li>
-                <strong data-i18n="feat.endurance.title">Endurance</strong>
-                <span data-i18n="feat.endurance.text">Längster Lauf und durchschnittliche Distanz pro Lauf.
-                Beantwortet: baue ich mein Long-Run-Plateau Stück für Stück
-                hoch?</span>
-            </li>
-            <li>
-                <strong data-i18n="feat.performance.title">Performance — WMA &amp; Aerobic Capacity</strong>
-                <span data-i18n="feat.performance.text">Altersadjustierte Leistung nach WMA-2023-Faktoren plus
-                Aerobic-Capacity-% via Tanaka-HRmax (T37). Beantwortet:
-                wie nah bin ich an meiner möglichen Höchstform für mein
-                Alter?</span>
-            </li>
-            <li>
-                <strong data-i18n="feat.trend.title">Trend (0–100)</strong>
-                <span data-i18n="feat.trend.text">Selbst-relativer Composite aus Volumen, Frequenz, Pace und
-                Effizienz — gemessen gegen das eigene rollende Baseline.
-                Vorher hieß die Metrik „Score"; T39 hat sie umbenannt, weil
-                der Wert eben kein absolutes Fitness-Maß ist und im
-                Steady-State per Design um 50 pendelt.</span>
-            </li>
-            <li>
-                <strong data-i18n="feat.load.title">Training Load (ACWR)</strong>
-                <span data-i18n="feat.load.text">Tagesweises Gabbett-Verhältnis (akute 7 Tage / chronische
-                28 Tage). Last-Quelle ist Banister-TRIMP, wenn Ruhe-HF und
-                Geschlecht gesetzt sind — sonst Tageskilometer als Fallback
-                (T40).</span>
-            </li>
-        </ul>
-
-        <h3 data-i18n="feat.summary.title">Im Zusammenfassungs-Panel</h3>
-        <p data-i18n="feat.summary.text">
-            Links neben den Charts zeigt das Panel kontinuierlich
-            <strong>Training Fitness (CTL)</strong> als absolute Trainingslast
-            (42-Tage-EWMA über Banister-TRIMP) und <strong>Form (TSB)</strong>
-            als Differenz von CTL und ATL — ist eingeführt mit T38 und ist
-            das, woran man tatsächlich ablesen kann, ob Form gerade aufbaut
-            oder vor einem Rennen ankommt.
-        </p>
-
-        <h2 id="methodik" data-i18n="methods.title">Methodik &amp; Quellen</h2>
-
-        <p data-i18n="methods.intro">
-            RunTrend versucht ehrlich zu sein darüber, welche Zahlen aus
-            peer-reviewed Forschung kommen, welche aus etablierten,
-            aber kontroversen Quellen, und welche RunTrend selbst
-            zusammengestellt hat. Jede Metrik in der App hat einen
-            Tooltip mit Quelle und Caveat. Die Kurzfassung:
-        </p>
-
-        <dl class="methods">
-            <dt data-i18n="m.trimp.t">Banister-TRIMP (1991)</dt>
-            <dd data-i18n="m.trimp.d">Tägliche Trainingslast aus Dauer × HF-Zonen-Intensität.
-                Geschlechts-spezifisch (b = 1,92 ♂ / 1,67 ♀). Quelle:
-                Banister 1991, „Modeling Elite Athletic Performance".</dd>
-
-            <dt data-i18n="m.ctl.t">CTL / ATL / TSB (Coggan Performance Manager)</dt>
-            <dd data-i18n="m.ctl.d">EWMA über tägliche TRIMP mit 42-Tage-Zeitkonstante (CTL),
-                7-Tage (ATL), Differenz = TSB. Das Banding ist qualitativ
-                mit TrainingPeaks vergleichbar; absolute Werte
-                unterscheiden sich (TRIMP- vs. TSS-basiert).</dd>
-
-            <dt data-i18n="m.acwr.t">ACWR — Gabbett 2016, Caveat Impellizzeri 2020</dt>
-            <dd data-i18n="m.acwr.d">7-Tage-akut / 28-Tage-chronisch. Sweet-Spot 0,8–1,3 ist
-                empirisch verbreitet, aber wissenschaftlich umstritten:
-                Impellizzeri et al. dokumentieren mathematische
-                Artefakte bei kleinen Chronic-Werten und schwache
-                Verletzungs-Korrelation in Folgestudien. ACWR als
-                Indikator lesen, nicht als Diagnose.</dd>
-
-            <dt data-i18n="m.tanaka.t">HRmax — Tanaka 2001</dt>
-            <dd data-i18n="m.tanaka.d"><code>HRmax = 208 − 0,7 × Alter</code>. Fallback, wenn keine
-                manuelle HRmax eingetragen ist. Bevölkerungs-Schätzung —
-                individuelle Abweichungen ±10 bpm sind normal.</dd>
-
-            <dt data-i18n="m.wma.t">WMA 2023 — Age-Grading</dt>
-            <dd data-i18n="m.wma.d">Faktor-Tabellen der World Masters Athletics (Datensatz
-                2,8 Mio. Wettkampfzeiten). Im Performance-Tab als
-                altersadjustierter Prozentwert. Ab Alter 30 wirksam;
-                jüngere bekommen 1,0 (offene Klasse).</dd>
-
-            <dt data-i18n="m.mcmillan.t">Race Predictor — McMillan</dt>
-            <dd data-i18n="m.mcmillan.d">Aus dem Easy-Pace (HF-klassifiziert) auf 5K / 10K /
-                Halbmarathon / Marathon. Weit verbreitet, aber nicht
-                peer-reviewed. 5K-Vorhersagen sind eng; Marathon-
-                Vorhersagen können ±10 % danebenliegen.</dd>
-
-            <dt data-i18n="m.trend.t">Training Trend (0–100) — eigene Definition</dt>
-            <dd data-i18n="m.trend.d">RunTrend-intern (Spec §10). Gewichtung 30 % Distanz /
-                20 % Frequenz / 30 % Pace / 20 % EF ist plausibel, aber
-                nicht empirisch optimiert. Selbst-relativ — pendelt im
-                Steady-State um 50. Absolute Fitness besser über CTL
-                lesen.</dd>
-        </dl>
-
-        <p style="margin-top: 24px;" data-i18n="methods.outro">
-            Die vollständige Caveat-Tabelle steht im Manual unter
-            <em>Methodische Caveats</em>: <a
-            href="https://github.com/smarwei/run_trend/blob/master/MANUAL_de.md#methodische-caveats">MANUAL_de.md</a>
-            (bzw. <a href="https://github.com/smarwei/run_trend/blob/master/MANUAL_en.md#methodological-caveats">MANUAL_en.md</a>).
-        </p>
-
-        <h2 id="holen" data-i18n="get.title">RunTrend holen</h2>
-
-        <p data-i18n="get.intro">
-            RunTrend läuft auf Linux, macOS und Windows. Aktuell ist
-            <strong>Linux via Flatpak (Flathub)</strong> der gepflegte
-            Distributionsweg; auf den anderen Plattformen baust du es
-            selbst aus dem Quellcode. Daten bleiben lokal auf deinem
-            Gerät — keine Server-Komponente.
-        </p>
-
-        <div class="get-options">
-            <p>
-                <strong data-i18n="get.flathub.t">Linux (Flatpak):</strong>
-                <span data-i18n="get.flathub.d">Einreichung bei Flathub ist vorbereitet
-                (<code>FLATHUB_SUBMISSION.md</code>). Sobald freigeschaltet,
-                erscheint der Link hier — bis dahin lokal bauen:</span>
-                <code>flatpak-builder build-dir de.arneweiss.RunTrend.json</code>
-            </p>
-            <p>
-                <strong data-i18n="get.source.t">Quellcode:</strong>
-                <a href="https://github.com/smarwei/run_trend" data-i18n="get.source.link">github.com/smarwei/run_trend</a>
-                — <span data-i18n="get.source.d">Python 3.13, PySide6, Nix-Flake. Build-Anweisungen im
-                <code>README.md</code>.</span>
-            </p>
-            <p>
-                <strong data-i18n="get.strava.t">Strava-Konto:</strong>
-                <span data-i18n="get.strava.d">RunTrend nutzt Stravas OAuth-API mit
-                read-only-Scope. Du brauchst keinen Strava-Premium-Account.</span>
-            </p>
-        </div>
-
-        <h2 id="spenden" data-i18n="support.title">Unterstützen</h2>
-
-        <p data-i18n="support.text">
-            RunTrend ist und bleibt kostenlos (MIT + Commons Clause —
-            kommerzielle Weitergabe ausgeschlossen). Wenn die App dir
-            beim Training hilft und vielleicht eine Strava-Premium-
-            Subscription spart, freue ich mich über einen Kaffee. Aber
-            kein Druck: ich entwickle RunTrend ohnehin für mich selbst.
-        </p>
-
-        <div class="donate">
-            <p data-i18n="support.cta">
-                Wenn dir das Tool gefällt:
-            </p>
-            <div class="donate-buttons">
-                <!-- TODO: replace href="#" with real Buy Me a Coffee URL
-                     once the account is set up (e.g.
-                     https://www.buymeacoffee.com/yourname). -->
-                <a href="#" data-todo="bmac-url" data-i18n="support.bmac">☕ Buy me a Coffee</a>
-                <!-- TODO: replace href="#" with real GitHub Sponsors URL
-                     once configured (e.g.
-                     https://github.com/sponsors/smarwei). -->
-                <a href="#" data-todo="ghs-url" data-i18n="support.sponsors">♡ GitHub Sponsors</a>
+            <div class="nav-tools">
+                <div class="lang" role="group" aria-label="Language">
+                    <button type="button" data-lang="de" class="active">DE</button>
+                    <button type="button" data-lang="en">EN</button>
+                </div>
+                <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 3a9 9 0 1 0 9 9c-4.97 0-9-4.03-9-9z"/>
+                    </svg>
+                </button>
             </div>
         </div>
+    </header>
 
-        <footer>
-            <div>
+    <main id="top" class="container">
+
+        <section class="hero">
+            <p class="eyebrow" data-i18n="hero.eyebrow">Persönliches Strava-Tool</p>
+            <h1 data-i18n="hero.title">Ein persönliches Strava-<em>Analyse-Tool</em>.</h1>
+            <p class="lede" data-i18n="hero.lede">
+                Ich habe RunTrend gebaut, weil ich wissen wollte, ob ich tatsächlich
+                fitter werde oder einfach nur mehr laufe. Strava zeigt die Daten —
+                die Antworten liegen hinter einer Paywall, und auch dort fehlen mir
+                oft die Metriken, die ich beim Marathon-Aufbau wirklich brauche.
+                Also habe ich mir selbst eine Desktop-App geschrieben, die
+                Strava-Daten lokal auswertet. Vielleicht hilft sie dir auch.
+            </p>
+            <div class="hero-links">
+                <a href="#holen" class="btn-primary" data-i18n="hero.cta.get">RunTrend holen →</a>
+                <a href="#methodik" class="btn-secondary" data-i18n="hero.cta.methods">Methodik im Detail</a>
+            </div>
+
+            <figure class="screenshot">
+                <div class="window-chrome" aria-hidden="true">
+                    <span class="window-dots">
+                        <span></span><span></span><span></span>
+                    </span>
+                    <p class="window-title">Running Progress Tracker — Training Load</p>
+                </div>
+                <img src="https://raw.githubusercontent.com/smarwei/run_trend/master/screenshots/main-window.png"
+                     alt="RunTrend main window — Training Load tab with daily ACWR plot"
+                     onerror="this.parentElement.style.display='none'">
+                <figcaption data-i18n="figure.main">
+                    Trainingsstatus links (CTL, Form, Trend, ACWR), ausgewählter Chart
+                    rechts. Im Beispiel das Training-Load-Tab mit täglichem
+                    ACWR-Verlauf.
+                </figcaption>
+            </figure>
+        </section>
+
+        <section id="funktionen" class="block">
+            <h2 data-i18n="features.title">Was die App zeigt</h2>
+            <p class="sub" data-i18n="features.intro">
+                Die Charts und Metriken sind so geordnet, dass jeder Tab eine
+                konkrete Trainingsfrage beantwortet — nicht „mehr Diagramme",
+                sondern „eine Antwort pro Reiter".
+            </p>
+
+            <div class="feature-grid">
+                <article class="feat">
+                    <span class="feat-num">01</span>
+                    <h3 data-i18n="feat.overview.title">Overview</h3>
+                    <p data-i18n="feat.overview.text">
+                        Distanz, Pace, Frequenz pro Periode (Woche oder Monat), mit
+                        wählbarer Glättung. Beantwortet: laufe ich mehr / schneller /
+                        regelmäßiger als sonst?
+                    </p>
+                </article>
+                <article class="feat">
+                    <span class="feat-num">02</span>
+                    <h3 data-i18n="feat.hr.title">Heart Rate</h3>
+                    <p data-i18n="feat.hr.text">
+                        HF-Range, Durchschnitts-HF, Efficiency Factor (Pace ÷ HF) und
+                        Zonen-Verteilung. Beantwortet: arbeitet mein aerobes System
+                        besser bei gleichem Tempo?
+                    </p>
+                </article>
+                <article class="feat">
+                    <span class="feat-num">03</span>
+                    <h3 data-i18n="feat.endurance.title">Endurance</h3>
+                    <p data-i18n="feat.endurance.text">
+                        Längster Lauf und durchschnittliche Distanz pro Lauf.
+                        Beantwortet: baue ich mein Long-Run-Plateau Stück für Stück
+                        hoch?
+                    </p>
+                </article>
+                <article class="feat">
+                    <span class="feat-num">04</span>
+                    <h3 data-i18n="feat.performance.title">Performance — WMA &amp; Aerobic Capacity</h3>
+                    <p data-i18n="feat.performance.text">
+                        Altersadjustierte Leistung nach WMA-2023-Faktoren plus
+                        Aerobic-Capacity-% via Tanaka-HRmax. Beantwortet: wie nah bin
+                        ich an meiner möglichen Höchstform für mein Alter?
+                    </p>
+                </article>
+                <article class="feat">
+                    <span class="feat-num">05</span>
+                    <h3 data-i18n="feat.trend.title">Trend (0–100)</h3>
+                    <p data-i18n="feat.trend.text">
+                        Selbst-relativer Composite aus Volumen, Frequenz, Pace und
+                        Effizienz — gemessen gegen das eigene rollende Baseline.
+                        Pendelt im Steady-State per Design um 50.
+                    </p>
+                </article>
+                <article class="feat">
+                    <span class="feat-num">06</span>
+                    <h3 data-i18n="feat.load.title">Training Load (ACWR)</h3>
+                    <p data-i18n="feat.load.text">
+                        Tagesweises Gabbett-Verhältnis (akute 7 Tage / chronische 28
+                        Tage). Last-Quelle ist Banister-TRIMP wenn Ruhe-HF und
+                        Geschlecht gesetzt sind — sonst Tageskilometer als Fallback.
+                    </p>
+                </article>
+            </div>
+
+            <div class="callout">
+                <h3 data-i18n="feat.summary.title">Im Zusammenfassungs-Panel</h3>
+                <p data-i18n="feat.summary.text">
+                    Links neben den Charts zeigt das Panel kontinuierlich
+                    <strong>Training Fitness (CTL)</strong> als absolute Trainingslast
+                    (42-Tage-EWMA über Banister-TRIMP) und <strong>Form (TSB)</strong>
+                    als Differenz von CTL und ATL — das ist die Lesart, an der man
+                    tatsächlich ablesen kann, ob Form gerade aufbaut oder vor einem
+                    Rennen ankommt.
+                </p>
+            </div>
+        </section>
+
+        <section id="methodik" class="block tinted">
+            <h2 data-i18n="methods.title">Methodik &amp; Quellen</h2>
+            <p class="sub" data-i18n="methods.intro">
+                RunTrend versucht ehrlich zu sein darüber, welche Zahlen aus
+                peer-reviewed Forschung kommen, welche aus etablierten, aber
+                kontroversen Quellen, und welche RunTrend selbst zusammengestellt
+                hat. Jede Metrik in der App hat einen Tooltip mit Quelle und Caveat.
+            </p>
+
+            <dl class="methods reading">
+                <div class="method">
+                    <dt>
+                        <span data-i18n="m.trimp.t">Banister-TRIMP</span>
+                        <span class="tag tag-pub" data-i18n="tag.pub">Peer-reviewed</span>
+                    </dt>
+                    <dd data-i18n="m.trimp.d">
+                        Tägliche Trainingslast aus Dauer × HF-Zonen-Intensität.
+                        Geschlechts-spezifisch (b = 1,92 ♂ / 1,67 ♀). Quelle:
+                        Banister 1991, „Modeling Elite Athletic Performance".
+                    </dd>
+                </div>
+                <div class="method">
+                    <dt>
+                        <span data-i18n="m.ctl.t">CTL / ATL / TSB</span>
+                        <span class="tag tag-pub" data-i18n="tag.established">Etabliert</span>
+                    </dt>
+                    <dd data-i18n="m.ctl.d">
+                        Coggan Performance Manager: EWMA über tägliche TRIMP mit
+                        42-Tage-Zeitkonstante (CTL), 7-Tage (ATL), Differenz = TSB.
+                        Banding qualitativ vergleichbar mit TrainingPeaks; absolute
+                        Werte unterscheiden sich (TRIMP- vs. TSS-basiert).
+                    </dd>
+                </div>
+                <div class="method">
+                    <dt>
+                        <span data-i18n="m.acwr.t">ACWR — Gabbett 2016</span>
+                        <span class="tag tag-mix" data-i18n="tag.contested">Kontrovers</span>
+                    </dt>
+                    <dd data-i18n="m.acwr.d">
+                        7-Tage-akut / 28-Tage-chronisch. Sweet-Spot 0,8–1,3 ist
+                        empirisch verbreitet, aber wissenschaftlich umstritten:
+                        Impellizzeri et al. 2020 dokumentieren mathematische
+                        Artefakte bei kleinen Chronic-Werten und schwache
+                        Verletzungs-Korrelation in Folgestudien. ACWR als Indikator
+                        lesen, nicht als Diagnose.
+                    </dd>
+                </div>
+                <div class="method">
+                    <dt>
+                        <span data-i18n="m.tanaka.t">HRmax — Tanaka 2001</span>
+                        <span class="tag tag-pub" data-i18n="tag.pub">Peer-reviewed</span>
+                    </dt>
+                    <dd data-i18n="m.tanaka.d">
+                        <code>HRmax = 208 − 0,7 × Alter</code>. Fallback ohne manuelle
+                        HRmax. Bevölkerungs-Schätzung — individuelle Abweichungen
+                        ±10 bpm sind normal.
+                    </dd>
+                </div>
+                <div class="method">
+                    <dt>
+                        <span data-i18n="m.wma.t">WMA 2023 — Age-Grading</span>
+                        <span class="tag tag-pub" data-i18n="tag.published">Publiziert</span>
+                    </dt>
+                    <dd data-i18n="m.wma.d">
+                        Faktor-Tabellen der World Masters Athletics (Datensatz 2,8 Mio.
+                        Wettkampfzeiten). Im Performance-Tab als altersadjustierter
+                        Prozentwert. Ab Alter 30 wirksam; jüngere bekommen 1,0
+                        (offene Klasse).
+                    </dd>
+                </div>
+                <div class="method">
+                    <dt>
+                        <span data-i18n="m.mcmillan.t">Race Predictor — McMillan</span>
+                        <span class="tag tag-mix" data-i18n="tag.widespread">Verbreitet, nicht peer-reviewed</span>
+                    </dt>
+                    <dd data-i18n="m.mcmillan.d">
+                        Aus dem Easy-Pace (HF-klassifiziert) auf 5K / 10K /
+                        Halbmarathon / Marathon. 5K-Vorhersagen sind eng;
+                        Marathon-Vorhersagen können ±10 % danebenliegen.
+                    </dd>
+                </div>
+                <div class="method">
+                    <dt>
+                        <span data-i18n="m.trend.t">Training Trend (0–100)</span>
+                        <span class="tag tag-own" data-i18n="tag.internal">Eigene Definition</span>
+                    </dt>
+                    <dd data-i18n="m.trend.d">
+                        RunTrend-intern (Spec §10). Gewichtung 30 % Distanz /
+                        20 % Frequenz / 30 % Pace / 20 % EF ist plausibel, aber nicht
+                        empirisch optimiert. Selbst-relativ — pendelt im
+                        Steady-State um 50. Absolute Fitness besser über CTL lesen.
+                    </dd>
+                </div>
+            </dl>
+
+            <p class="reading" style="margin-top: 32px; font-size: 15px; color: var(--muted);" data-i18n="methods.outro">
+                Die vollständige Caveat-Tabelle steht im Manual unter
+                <em>Methodische Caveats</em>:
+                <a href="https://github.com/smarwei/run_trend/blob/master/MANUAL_de.md#methodische-caveats"
+                   style="color: var(--accent);">MANUAL_de.md</a>
+                (bzw. <a href="https://github.com/smarwei/run_trend/blob/master/MANUAL_en.md#methodological-caveats"
+                style="color: var(--accent);">MANUAL_en.md</a>).
+            </p>
+        </section>
+
+        <section id="holen" class="block">
+            <h2 data-i18n="get.title">RunTrend holen</h2>
+            <p class="sub" data-i18n="get.intro">
+                RunTrend läuft auf Linux, macOS und Windows. Daten bleiben lokal auf
+                deinem Gerät — keine Server-Komponente.
+            </p>
+            <div class="get-grid">
+                <div class="get-card">
+                    <h3 data-i18n="get.flathub.t">Linux (Flatpak)</h3>
+                    <p data-i18n="get.flathub.d">
+                        Einreichung bei Flathub ist vorbereitet. Sobald freigeschaltet,
+                        erscheint der direkte Link hier — bis dahin lokal bauen via
+                        <code>flatpak-builder</code>.
+                    </p>
+                    <a href="https://github.com/smarwei/run_trend/blob/master/FLATHUB_SUBMISSION.md" class="cta-link" data-i18n="get.flathub.cta">Status &amp; Anleitung →</a>
+                </div>
+                <div class="get-card">
+                    <h3 data-i18n="get.source.t">Aus dem Quellcode</h3>
+                    <p data-i18n="get.source.d">
+                        Python 3.13, PySide6, Nix-Flake. Build-Anweisungen im README.
+                        Funktioniert plattformunabhängig, solange Qt für Python
+                        verfügbar ist.
+                    </p>
+                    <a href="https://github.com/smarwei/run_trend" class="cta-link" data-i18n="get.source.cta">Repository ansehen →</a>
+                </div>
+                <div class="get-card">
+                    <h3 data-i18n="get.strava.t">Strava-Konto</h3>
+                    <p data-i18n="get.strava.d">
+                        RunTrend nutzt Stravas OAuth-API mit read-only-Scope. Du
+                        brauchst keinen Strava-Premium-Account, ein normales Konto
+                        reicht.
+                    </p>
+                    <a href="https://www.strava.com" class="cta-link" data-i18n="get.strava.cta">strava.com →</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="spenden" class="block tinted">
+            <div class="donate-card">
+                <h2 data-i18n="support.title" style="margin-bottom: 12px;">Unterstützen</h2>
+                <p data-i18n="support.text">
+                    RunTrend ist und bleibt kostenlos (MIT + Commons Clause —
+                    kommerzielle Weitergabe ausgeschlossen). Wenn die App dir beim
+                    Training hilft und vielleicht eine Strava-Premium-Subscription
+                    spart, freue ich mich über einen Kaffee. Aber kein Druck: ich
+                    entwickle RunTrend ohnehin für mich selbst.
+                </p>
+                <div class="donate-buttons">
+                    <!-- TODO: replace href="#" with real Buy Me a Coffee URL once
+                         the account is set up (e.g. https://www.buymeacoffee.com/yourname). -->
+                    <a href="#" data-todo="bmac-url" class="donate-btn coffee" data-i18n="support.bmac">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M18 8h1a4 4 0 0 1 0 8h-1"/>
+                            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+                            <line x1="6" y1="1" x2="6" y2="4"/>
+                            <line x1="10" y1="1" x2="10" y2="4"/>
+                            <line x1="14" y1="1" x2="14" y2="4"/>
+                        </svg>
+                        Buy me a Coffee
+                    </a>
+                    <!-- TODO: replace href="#" with real GitHub Sponsors URL once
+                         configured (e.g. https://github.com/sponsors/smarwei). -->
+                    <a href="#" data-todo="ghs-url" class="donate-btn sponsors" data-i18n="support.sponsors">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                        GitHub Sponsors
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <div class="container inner">
+            <div class="links">
                 <a href="https://github.com/smarwei/run_trend">GitHub</a>
-                ·
                 <a href="https://github.com/smarwei/run_trend/blob/master/MANUAL_de.md" data-i18n="footer.manual">Manual</a>
-                ·
                 <a href="https://github.com/smarwei/run_trend/issues" data-i18n="footer.issues">Issues</a>
             </div>
-            <div>
+            <div class="links">
                 <a href="impressum.html" data-i18n="footer.imprint">Impressum</a>
-                ·
                 <a href="privacy.html" data-i18n="footer.privacy">Datenschutz</a>
             </div>
-            <div class="legal" data-i18n="footer.legal">
-                © 2026 Arne Weiß. RunTrend ist Open-Source-Software unter MIT
-                mit Commons Clause. Strava ist eine Marke von Strava, Inc.;
-                RunTrend ist nicht mit Strava verbunden.
-            </div>
-        </footer>
-
-    </div>
+            <p class="legal" data-i18n="footer.legal">
+                © 2026 Arne Weiß. RunTrend ist Open-Source-Software unter MIT mit
+                Commons Clause. Strava ist eine Marke von Strava, Inc.; RunTrend
+                ist nicht mit Strava verbunden.
+            </p>
+        </div>
+    </footer>
 
     <script>
-        // Bilingual strings. Keep keys stable across versions so old
-        // bookmarks don't break.
+        // ============================================================
+        // Theme handling — auto by default, with a manual toggle that
+        // overrides the OS preference and is persisted in localStorage.
+        // ============================================================
+        function currentTheme() {
+            const saved = localStorage.getItem('runtrend-theme');
+            if (saved === 'light' || saved === 'dark') return saved;
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('runtrend-theme', theme);
+            updateThemeIcon(theme);
+        }
+        function updateThemeIcon(theme) {
+            const btn = document.getElementById('theme-toggle');
+            if (!btn) return;
+            // Crescent (moon) for dark, sun for light.
+            btn.innerHTML = theme === 'dark'
+                ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>'
+                : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9c-4.97 0-9-4.03-9-9z"/></svg>';
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const initial = currentTheme();
+            // Only set explicit data-theme if user has a saved choice,
+            // otherwise let the @media query handle it for auto-mode.
+            if (localStorage.getItem('runtrend-theme')) {
+                document.documentElement.setAttribute('data-theme', initial);
+            }
+            updateThemeIcon(initial);
+            document.getElementById('theme-toggle').addEventListener('click', () => {
+                const next = currentTheme() === 'dark' ? 'light' : 'dark';
+                setTheme(next);
+            });
+        });
+
+        // ============================================================
+        // Bilingual strings — DE default, EN one click away.
+        // ============================================================
         const translations = {
             de: {
                 'nav.features': 'Funktionen',
                 'nav.methods':  'Methodik',
                 'nav.get':      'Holen',
                 'nav.support':  'Unterstützen',
-                'hero.title': 'Ein persönliches Strava-<span class="accent">Analyse-Tool</span>.',
-                'hero.lede': 'Ich habe RunTrend gebaut, weil ich wissen wollte, ob ich tatsächlich fitter werde oder einfach nur mehr laufe. Strava zeigt die Daten — die Antworten liegen hinter einer Paywall, und auch dort fehlen mir oft die Metriken, die ich beim Marathon-Aufbau wirklich brauche. Also habe ich mir selbst eine Desktop-App geschrieben, die Strava-Daten lokal auswertet. Vielleicht hilft sie dir auch.',
-                'hero.cta.get':     '→ RunTrend holen',
-                'hero.cta.methods': '→ Methodik im Detail',
-                'figure.main': 'Die Hauptansicht: Trainingsstatus links, ausgewählter Chart rechts. Im Beispiel das Training-Load-Tab mit täglichem ACWR-Verlauf.',
+                'hero.eyebrow': 'Persönliches Strava-Tool',
+                'hero.title':   'Ein persönliches Strava-<em>Analyse-Tool</em>.',
+                'hero.lede':    'Ich habe RunTrend gebaut, weil ich wissen wollte, ob ich tatsächlich fitter werde oder einfach nur mehr laufe. Strava zeigt die Daten — die Antworten liegen hinter einer Paywall, und auch dort fehlen mir oft die Metriken, die ich beim Marathon-Aufbau wirklich brauche. Also habe ich mir selbst eine Desktop-App geschrieben, die Strava-Daten lokal auswertet. Vielleicht hilft sie dir auch.',
+                'hero.cta.get':     'RunTrend holen →',
+                'hero.cta.methods': 'Methodik im Detail',
+                'figure.main': 'Trainingsstatus links (CTL, Form, Trend, ACWR), ausgewählter Chart rechts. Im Beispiel das Training-Load-Tab mit täglichem ACWR-Verlauf.',
                 'features.title': 'Was die App zeigt',
-                'features.intro': 'Die Charts und Metriken sind so geordnet, dass jeder Tab eine konkrete Trainingsfrage beantwortet — nicht „mehr Diagramme", sondern „eine Antwort pro Reiter":',
+                'features.intro': 'Die Charts und Metriken sind so geordnet, dass jeder Tab eine konkrete Trainingsfrage beantwortet — nicht „mehr Diagramme", sondern „eine Antwort pro Reiter".',
                 'feat.overview.title': 'Overview',
                 'feat.overview.text':  'Distanz, Pace, Frequenz pro Periode (Woche oder Monat), mit wählbarer Glättung. Beantwortet: laufe ich mehr / schneller / regelmäßiger als sonst?',
                 'feat.hr.title': 'Heart Rate',
@@ -518,44 +1043,51 @@
                 'feat.endurance.title': 'Endurance',
                 'feat.endurance.text':  'Längster Lauf und durchschnittliche Distanz pro Lauf. Beantwortet: baue ich mein Long-Run-Plateau Stück für Stück hoch?',
                 'feat.performance.title': 'Performance — WMA &amp; Aerobic Capacity',
-                'feat.performance.text':  'Altersadjustierte Leistung nach WMA-2023-Faktoren plus Aerobic-Capacity-% via Tanaka-HRmax (T37). Beantwortet: wie nah bin ich an meiner möglichen Höchstform für mein Alter?',
+                'feat.performance.text':  'Altersadjustierte Leistung nach WMA-2023-Faktoren plus Aerobic-Capacity-% via Tanaka-HRmax. Beantwortet: wie nah bin ich an meiner möglichen Höchstform für mein Alter?',
                 'feat.trend.title': 'Trend (0–100)',
-                'feat.trend.text':  'Selbst-relativer Composite aus Volumen, Frequenz, Pace und Effizienz — gemessen gegen das eigene rollende Baseline. Vorher hieß die Metrik „Score"; T39 hat sie umbenannt, weil der Wert eben kein absolutes Fitness-Maß ist und im Steady-State per Design um 50 pendelt.',
+                'feat.trend.text':  'Selbst-relativer Composite aus Volumen, Frequenz, Pace und Effizienz — gemessen gegen das eigene rollende Baseline. Pendelt im Steady-State per Design um 50.',
                 'feat.load.title': 'Training Load (ACWR)',
-                'feat.load.text':  'Tagesweises Gabbett-Verhältnis (akute 7 Tage / chronische 28 Tage). Last-Quelle ist Banister-TRIMP, wenn Ruhe-HF und Geschlecht gesetzt sind — sonst Tageskilometer als Fallback (T40).',
+                'feat.load.text':  'Tagesweises Gabbett-Verhältnis (akute 7 Tage / chronische 28 Tage). Last-Quelle ist Banister-TRIMP wenn Ruhe-HF und Geschlecht gesetzt sind — sonst Tageskilometer als Fallback.',
                 'feat.summary.title': 'Im Zusammenfassungs-Panel',
-                'feat.summary.text':  'Links neben den Charts zeigt das Panel kontinuierlich <strong>Training Fitness (CTL)</strong> als absolute Trainingslast (42-Tage-EWMA über Banister-TRIMP) und <strong>Form (TSB)</strong> als Differenz von CTL und ATL — ist eingeführt mit T38 und ist das, woran man tatsächlich ablesen kann, ob Form gerade aufbaut oder vor einem Rennen ankommt.',
+                'feat.summary.text':  'Links neben den Charts zeigt das Panel kontinuierlich <strong>Training Fitness (CTL)</strong> als absolute Trainingslast (42-Tage-EWMA über Banister-TRIMP) und <strong>Form (TSB)</strong> als Differenz von CTL und ATL — das ist die Lesart, an der man tatsächlich ablesen kann, ob Form gerade aufbaut oder vor einem Rennen ankommt.',
                 'methods.title': 'Methodik &amp; Quellen',
-                'methods.intro': 'RunTrend versucht ehrlich zu sein darüber, welche Zahlen aus peer-reviewed Forschung kommen, welche aus etablierten, aber kontroversen Quellen, und welche RunTrend selbst zusammengestellt hat. Jede Metrik in der App hat einen Tooltip mit Quelle und Caveat. Die Kurzfassung:',
-                'm.trimp.t': 'Banister-TRIMP (1991)',
+                'methods.intro': 'RunTrend versucht ehrlich zu sein darüber, welche Zahlen aus peer-reviewed Forschung kommen, welche aus etablierten, aber kontroversen Quellen, und welche RunTrend selbst zusammengestellt hat. Jede Metrik in der App hat einen Tooltip mit Quelle und Caveat.',
+                'tag.pub':         'Peer-reviewed',
+                'tag.established': 'Etabliert',
+                'tag.contested':   'Kontrovers',
+                'tag.published':   'Publiziert',
+                'tag.widespread':  'Verbreitet, nicht peer-reviewed',
+                'tag.internal':    'Eigene Definition',
+                'm.trimp.t': 'Banister-TRIMP',
                 'm.trimp.d': 'Tägliche Trainingslast aus Dauer × HF-Zonen-Intensität. Geschlechts-spezifisch (b = 1,92 ♂ / 1,67 ♀). Quelle: Banister 1991, „Modeling Elite Athletic Performance".',
-                'm.ctl.t': 'CTL / ATL / TSB (Coggan Performance Manager)',
-                'm.ctl.d': 'EWMA über tägliche TRIMP mit 42-Tage-Zeitkonstante (CTL), 7-Tage (ATL), Differenz = TSB. Das Banding ist qualitativ mit TrainingPeaks vergleichbar; absolute Werte unterscheiden sich (TRIMP- vs. TSS-basiert).',
-                'm.acwr.t': 'ACWR — Gabbett 2016, Caveat Impellizzeri 2020',
-                'm.acwr.d': '7-Tage-akut / 28-Tage-chronisch. Sweet-Spot 0,8–1,3 ist empirisch verbreitet, aber wissenschaftlich umstritten: Impellizzeri et al. dokumentieren mathematische Artefakte bei kleinen Chronic-Werten und schwache Verletzungs-Korrelation in Folgestudien. ACWR als Indikator lesen, nicht als Diagnose.',
+                'm.ctl.t': 'CTL / ATL / TSB',
+                'm.ctl.d': 'Coggan Performance Manager: EWMA über tägliche TRIMP mit 42-Tage-Zeitkonstante (CTL), 7-Tage (ATL), Differenz = TSB. Banding qualitativ vergleichbar mit TrainingPeaks; absolute Werte unterscheiden sich (TRIMP- vs. TSS-basiert).',
+                'm.acwr.t': 'ACWR — Gabbett 2016',
+                'm.acwr.d': '7-Tage-akut / 28-Tage-chronisch. Sweet-Spot 0,8–1,3 ist empirisch verbreitet, aber wissenschaftlich umstritten: Impellizzeri et al. 2020 dokumentieren mathematische Artefakte bei kleinen Chronic-Werten und schwache Verletzungs-Korrelation in Folgestudien. ACWR als Indikator lesen, nicht als Diagnose.',
                 'm.tanaka.t': 'HRmax — Tanaka 2001',
-                'm.tanaka.d': '<code>HRmax = 208 − 0,7 × Alter</code>. Fallback, wenn keine manuelle HRmax eingetragen ist. Bevölkerungs-Schätzung — individuelle Abweichungen ±10 bpm sind normal.',
+                'm.tanaka.d': '<code>HRmax = 208 − 0,7 × Alter</code>. Fallback ohne manuelle HRmax. Bevölkerungs-Schätzung — individuelle Abweichungen ±10 bpm sind normal.',
                 'm.wma.t': 'WMA 2023 — Age-Grading',
                 'm.wma.d': 'Faktor-Tabellen der World Masters Athletics (Datensatz 2,8 Mio. Wettkampfzeiten). Im Performance-Tab als altersadjustierter Prozentwert. Ab Alter 30 wirksam; jüngere bekommen 1,0 (offene Klasse).',
                 'm.mcmillan.t': 'Race Predictor — McMillan',
-                'm.mcmillan.d': 'Aus dem Easy-Pace (HF-klassifiziert) auf 5K / 10K / Halbmarathon / Marathon. Weit verbreitet, aber nicht peer-reviewed. 5K-Vorhersagen sind eng; Marathon-Vorhersagen können ±10 % danebenliegen.',
-                'm.trend.t': 'Training Trend (0–100) — eigene Definition',
+                'm.mcmillan.d': 'Aus dem Easy-Pace (HF-klassifiziert) auf 5K / 10K / Halbmarathon / Marathon. 5K-Vorhersagen sind eng; Marathon-Vorhersagen können ±10 % danebenliegen.',
+                'm.trend.t': 'Training Trend (0–100)',
                 'm.trend.d': 'RunTrend-intern (Spec §10). Gewichtung 30 % Distanz / 20 % Frequenz / 30 % Pace / 20 % EF ist plausibel, aber nicht empirisch optimiert. Selbst-relativ — pendelt im Steady-State um 50. Absolute Fitness besser über CTL lesen.',
-                'methods.outro': 'Die vollständige Caveat-Tabelle steht im Manual unter <em>Methodische Caveats</em>: <a href="https://github.com/smarwei/run_trend/blob/master/MANUAL_de.md#methodische-caveats">MANUAL_de.md</a> (bzw. <a href="https://github.com/smarwei/run_trend/blob/master/MANUAL_en.md#methodological-caveats">MANUAL_en.md</a>).',
+                'methods.outro': 'Die vollständige Caveat-Tabelle steht im Manual unter <em>Methodische Caveats</em>: <a href="https://github.com/smarwei/run_trend/blob/master/MANUAL_de.md#methodische-caveats" style="color: var(--accent);">MANUAL_de.md</a> (bzw. <a href="https://github.com/smarwei/run_trend/blob/master/MANUAL_en.md#methodological-caveats" style="color: var(--accent);">MANUAL_en.md</a>).',
                 'get.title': 'RunTrend holen',
-                'get.intro': 'RunTrend läuft auf Linux, macOS und Windows. Aktuell ist <strong>Linux via Flatpak (Flathub)</strong> der gepflegte Distributionsweg; auf den anderen Plattformen baust du es selbst aus dem Quellcode. Daten bleiben lokal auf deinem Gerät — keine Server-Komponente.',
-                'get.flathub.t': 'Linux (Flatpak):',
-                'get.flathub.d': 'Einreichung bei Flathub ist vorbereitet (<code>FLATHUB_SUBMISSION.md</code>). Sobald freigeschaltet, erscheint der Link hier — bis dahin lokal bauen:',
-                'get.source.t':  'Quellcode:',
-                'get.source.link': 'github.com/smarwei/run_trend',
-                'get.source.d':  '— Python 3.13, PySide6, Nix-Flake. Build-Anweisungen im <code>README.md</code>.',
-                'get.strava.t':  'Strava-Konto:',
-                'get.strava.d':  'RunTrend nutzt Stravas OAuth-API mit read-only-Scope. Du brauchst keinen Strava-Premium-Account.',
+                'get.intro': 'RunTrend läuft auf Linux, macOS und Windows. Daten bleiben lokal auf deinem Gerät — keine Server-Komponente.',
+                'get.flathub.t': 'Linux (Flatpak)',
+                'get.flathub.d': 'Einreichung bei Flathub ist vorbereitet. Sobald freigeschaltet, erscheint der direkte Link hier — bis dahin lokal bauen via <code>flatpak-builder</code>.',
+                'get.flathub.cta': 'Status & Anleitung →',
+                'get.source.t':  'Aus dem Quellcode',
+                'get.source.d':  'Python 3.13, PySide6, Nix-Flake. Build-Anweisungen im README. Funktioniert plattformunabhängig, solange Qt für Python verfügbar ist.',
+                'get.source.cta': 'Repository ansehen →',
+                'get.strava.t':  'Strava-Konto',
+                'get.strava.d':  'RunTrend nutzt Stravas OAuth-API mit read-only-Scope. Du brauchst keinen Strava-Premium-Account, ein normales Konto reicht.',
+                'get.strava.cta': 'strava.com →',
                 'support.title': 'Unterstützen',
                 'support.text':  'RunTrend ist und bleibt kostenlos (MIT + Commons Clause — kommerzielle Weitergabe ausgeschlossen). Wenn die App dir beim Training hilft und vielleicht eine Strava-Premium-Subscription spart, freue ich mich über einen Kaffee. Aber kein Druck: ich entwickle RunTrend ohnehin für mich selbst.',
-                'support.cta':   'Wenn dir das Tool gefällt:',
-                'support.bmac':     '☕ Buy me a Coffee',
-                'support.sponsors': '♡ GitHub Sponsors',
+                'support.bmac':     'Buy me a Coffee',
+                'support.sponsors': 'GitHub Sponsors',
                 'footer.manual':  'Manual',
                 'footer.issues':  'Issues',
                 'footer.imprint': 'Impressum',
@@ -567,13 +1099,14 @@
                 'nav.methods':  'Methodology',
                 'nav.get':      'Get it',
                 'nav.support':  'Support',
-                'hero.title': 'A personal Strava <span class="accent">analytics tool</span>.',
-                'hero.lede': 'I built RunTrend because I wanted to know whether I am actually getting fitter or just running more. Strava shows the data — the analysis lives behind a paywall, and even there some of the metrics I care about for marathon training are missing. So I wrote a desktop app for myself that crunches Strava data locally. Maybe it helps you too.',
-                'hero.cta.get':     '→ Get RunTrend',
-                'hero.cta.methods': '→ Methodology in detail',
-                'figure.main': 'Main view: training status on the left, the selected chart on the right. The example shows the Training Load tab with the daily ACWR line.',
+                'hero.eyebrow': 'Personal Strava tool',
+                'hero.title':   'A personal Strava <em>analytics tool</em>.',
+                'hero.lede':    'I built RunTrend because I wanted to know whether I am actually getting fitter or just running more. Strava shows the data — the analysis lives behind a paywall, and even there some of the metrics I care about for marathon training are missing. So I wrote a desktop app for myself that crunches Strava data locally. Maybe it helps you too.',
+                'hero.cta.get':     'Get RunTrend →',
+                'hero.cta.methods': 'Methodology in detail',
+                'figure.main': 'Training status on the left (CTL, Form, Trend, ACWR), the selected chart on the right. The example shows the Training Load tab with the daily ACWR line.',
                 'features.title': 'What the app shows',
-                'features.intro': 'The charts and metrics are organised so each tab answers one concrete training question — not "more diagrams", but "one answer per tab":',
+                'features.intro': 'The charts and metrics are organised so each tab answers one concrete training question — not "more diagrams", but "one answer per tab".',
                 'feat.overview.title': 'Overview',
                 'feat.overview.text':  'Distance, pace, frequency per period (week or month), with selectable smoothing. Answers: am I running more / faster / more consistently than usual?',
                 'feat.hr.title': 'Heart Rate',
@@ -581,44 +1114,51 @@
                 'feat.endurance.title': 'Endurance',
                 'feat.endurance.text':  'Longest run and average distance per run. Answers: am I building my long-run plateau step by step?',
                 'feat.performance.title': 'Performance — WMA &amp; Aerobic Capacity',
-                'feat.performance.text':  'Age-adjusted performance via WMA-2023 factors plus Aerobic-Capacity-% from Tanaka HRmax (T37). Answers: how close am I to my possible peak form for my age?',
+                'feat.performance.text':  'Age-adjusted performance via WMA-2023 factors plus Aerobic-Capacity-% from Tanaka HRmax. Answers: how close am I to my possible peak form for my age?',
                 'feat.trend.title': 'Trend (0–100)',
-                'feat.trend.text':  'A self-relative composite of volume, frequency, pace and efficiency — measured against your own rolling baseline. Used to be called "Score"; T39 renamed it because the value is not an absolute fitness measure and plateaus around 50 at steady state by design.',
+                'feat.trend.text':  'A self-relative composite of volume, frequency, pace and efficiency — measured against your own rolling baseline. Plateaus around 50 at steady state by design.',
                 'feat.load.title': 'Training Load (ACWR)',
-                'feat.load.text':  'Daily Gabbett ratio (acute 7 days / chronic 28 days). The load source is Banister TRIMP if Resting HR and Gender are set — otherwise daily kilometres as a fallback (T40).',
+                'feat.load.text':  'Daily Gabbett ratio (acute 7 days / chronic 28 days). The load source is Banister TRIMP if Resting HR and Gender are set — otherwise daily kilometres as a fallback.',
                 'feat.summary.title': 'In the summary panel',
-                'feat.summary.text':  'To the left of the charts the panel continuously shows <strong>Training Fitness (CTL)</strong> as absolute training load (42-day EWMA over Banister TRIMP) and <strong>Form (TSB)</strong> as CTL − ATL — added in T38, and the actual readout that tells you whether form is building or peaking for a race.',
+                'feat.summary.text':  'To the left of the charts the panel continuously shows <strong>Training Fitness (CTL)</strong> as absolute training load (42-day EWMA over Banister TRIMP) and <strong>Form (TSB)</strong> as CTL − ATL — the actual readout that tells you whether form is building or peaking for a race.',
                 'methods.title': 'Methodology &amp; sources',
-                'methods.intro': 'RunTrend tries to be honest about which numbers come from peer-reviewed research, which from established but contested sources, and which RunTrend assembled itself. Every metric in the app has a tooltip with source and caveat. The short version:',
-                'm.trimp.t': 'Banister TRIMP (1991)',
+                'methods.intro': 'RunTrend tries to be honest about which numbers come from peer-reviewed research, which from established but contested sources, and which RunTrend assembled itself. Every metric in the app has a tooltip with source and caveat.',
+                'tag.pub':         'Peer-reviewed',
+                'tag.established': 'Established',
+                'tag.contested':   'Contested',
+                'tag.published':   'Published',
+                'tag.widespread':  'Widespread, not peer-reviewed',
+                'tag.internal':    'Own definition',
+                'm.trimp.t': 'Banister TRIMP',
                 'm.trimp.d': 'Daily training load from duration × HR-zone intensity. Sex-specific (b = 1.92 ♂ / 1.67 ♀). Source: Banister 1991, "Modeling Elite Athletic Performance".',
-                'm.ctl.t': 'CTL / ATL / TSB (Coggan Performance Manager)',
-                'm.ctl.d': 'EWMA over daily TRIMP with a 42-day time constant (CTL), 7-day (ATL), difference = TSB. The banding is qualitatively comparable to TrainingPeaks; absolute values differ (TRIMP- vs. TSS-based).',
-                'm.acwr.t': 'ACWR — Gabbett 2016, caveat Impellizzeri 2020',
-                'm.acwr.d': '7-day acute / 28-day chronic. The 0.8–1.3 sweet-spot is empirically widespread but scientifically contested: Impellizzeri et al. document mathematical artefacts at small chronic values and weak injury correlations in follow-up studies. Read ACWR as an indicator, not a diagnosis.',
+                'm.ctl.t': 'CTL / ATL / TSB',
+                'm.ctl.d': 'Coggan Performance Manager: EWMA over daily TRIMP with a 42-day time constant (CTL), 7-day (ATL), difference = TSB. Banding qualitatively comparable to TrainingPeaks; absolute values differ (TRIMP- vs. TSS-based).',
+                'm.acwr.t': 'ACWR — Gabbett 2016',
+                'm.acwr.d': '7-day acute / 28-day chronic. The 0.8–1.3 sweet-spot is empirically widespread but scientifically contested: Impellizzeri et al. 2020 document mathematical artefacts at small chronic values and weak injury correlations in follow-up studies. Read ACWR as an indicator, not a diagnosis.',
                 'm.tanaka.t': 'HRmax — Tanaka 2001',
                 'm.tanaka.d': '<code>HRmax = 208 − 0.7 × age</code>. Fallback when no manual HRmax is set. Population estimate — individual deviations of ±10 bpm are normal.',
                 'm.wma.t': 'WMA 2023 — Age-Grading',
                 'm.wma.d': 'Factor tables from World Masters Athletics (2.8 M competition times). In the Performance tab as an age-adjusted percentage. Active from age 30; younger runners get 1.0 (open class).',
                 'm.mcmillan.t': 'Race Predictor — McMillan',
-                'm.mcmillan.d': 'From easy pace (HR-classified) to 5K / 10K / Half / Marathon. Widely used but not peer-reviewed. 5K predictions are tight; Marathon predictions can be off by ±10%.',
-                'm.trend.t': 'Training Trend (0–100) — own definition',
+                'm.mcmillan.d': 'From easy pace (HR-classified) to 5K / 10K / Half / Marathon. 5K predictions are tight; Marathon predictions can be off by ±10%.',
+                'm.trend.t': 'Training Trend (0–100)',
                 'm.trend.d': 'RunTrend-internal (spec §10). The 30% distance / 20% frequency / 30% pace / 20% EF weighting is plausible but not empirically optimised. Self-relative — plateaus around 50 at steady state. Read absolute fitness off CTL instead.',
-                'methods.outro': 'The full caveat table lives in the Manual under <em>Methodological caveats</em>: <a href="https://github.com/smarwei/run_trend/blob/master/MANUAL_en.md#methodological-caveats">MANUAL_en.md</a> (or <a href="https://github.com/smarwei/run_trend/blob/master/MANUAL_de.md#methodische-caveats">MANUAL_de.md</a>).',
+                'methods.outro': 'The full caveat table lives in the Manual under <em>Methodological caveats</em>: <a href="https://github.com/smarwei/run_trend/blob/master/MANUAL_en.md#methodological-caveats" style="color: var(--accent);">MANUAL_en.md</a> (or <a href="https://github.com/smarwei/run_trend/blob/master/MANUAL_de.md#methodische-caveats" style="color: var(--accent);">MANUAL_de.md</a>).',
                 'get.title': 'Get RunTrend',
-                'get.intro': 'RunTrend runs on Linux, macOS and Windows. Today <strong>Linux via Flatpak (Flathub)</strong> is the maintained distribution path; on the other platforms you build it from source. Data stays local on your device — no server component.',
-                'get.flathub.t': 'Linux (Flatpak):',
-                'get.flathub.d': 'Flathub submission is prepared (<code>FLATHUB_SUBMISSION.md</code>). Once published, the link appears here — until then build locally:',
-                'get.source.t':  'Source:',
-                'get.source.link': 'github.com/smarwei/run_trend',
-                'get.source.d':  '— Python 3.13, PySide6, Nix flake. Build instructions in <code>README.md</code>.',
-                'get.strava.t':  'Strava account:',
-                'get.strava.d':  'RunTrend uses Strava\'s OAuth API with read-only scope. You don\'t need a Strava Premium subscription.',
+                'get.intro': 'RunTrend runs on Linux, macOS and Windows. Data stays local on your device — no server component.',
+                'get.flathub.t': 'Linux (Flatpak)',
+                'get.flathub.d': 'Flathub submission is prepared. Once published, the direct link appears here — until then build locally with <code>flatpak-builder</code>.',
+                'get.flathub.cta': 'Status & instructions →',
+                'get.source.t':  'From source',
+                'get.source.d':  'Python 3.13, PySide6, Nix flake. Build instructions in the README. Works on any platform that runs Qt for Python.',
+                'get.source.cta': 'View repository →',
+                'get.strava.t':  'Strava account',
+                'get.strava.d':  'RunTrend uses Strava\'s OAuth API with read-only scope. You don\'t need a Strava Premium subscription — a normal account is enough.',
+                'get.strava.cta': 'strava.com →',
                 'support.title': 'Support',
                 'support.text':  'RunTrend is and stays free (MIT + Commons Clause — commercial redistribution excluded). If the app helps your training and maybe saves you a Strava Premium subscription, I\'d appreciate a coffee. But no pressure: I develop RunTrend for myself anyway.',
-                'support.cta':   'If you like the tool:',
-                'support.bmac':     '☕ Buy me a Coffee',
-                'support.sponsors': '♡ GitHub Sponsors',
+                'support.bmac':     'Buy me a Coffee',
+                'support.sponsors': 'GitHub Sponsors',
                 'footer.manual':  'Manual',
                 'footer.issues':  'Issues',
                 'footer.imprint': 'Imprint',
@@ -639,7 +1179,6 @@
             localStorage.setItem('runtrend-lang', lang);
             document.documentElement.lang = lang;
 
-            // <title> + meta description
             if (lang === 'de') {
                 const tDe = document.querySelector('meta[name="title-de"]');
                 if (tDe) document.title = tDe.content;
@@ -651,7 +1190,6 @@
                 }
             }
 
-            // Apply translations
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (translations[lang][key]) {
@@ -659,19 +1197,17 @@
                 }
             });
 
-            // Highlight active language button
             document.querySelectorAll('.lang button').forEach(btn => {
                 btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
             });
         }
 
-        // Wire up language buttons
-        document.querySelectorAll('.lang button').forEach(btn => {
-            btn.addEventListener('click', () => setLanguage(btn.getAttribute('data-lang')));
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.lang button').forEach(btn => {
+                btn.addEventListener('click', () => setLanguage(btn.getAttribute('data-lang')));
+            });
+            setLanguage(detectLanguage());
         });
-
-        // Initialise
-        setLanguage(detectLanguage());
     </script>
 </body>
 </html>
