@@ -28,8 +28,12 @@ class _FakeMainWindow:
     def __init__(self, db):
         self.db = db
         self.auth = None  # not connected — exercises the "no auth" branch
-    def _load_data(self): pass
-    def _refresh_data(self): pass
+        self.load_data_calls = 0
+        self.refresh_data_calls = 0
+    def _load_data(self):
+        self.load_data_calls += 1
+    def _refresh_data(self):
+        self.refresh_data_calls += 1
 
 
 class TestSettingsDialogHr(unittest.TestCase):
@@ -132,6 +136,57 @@ class TestSettingsDialogHr(unittest.TestCase):
             dlg._save_settings()
 
         self.assertIsNone(self.db.get_activity_hr_zones(42))
+
+    def test_changing_hr_rest_triggers_refresh(self):
+        # Regression: changing only Resting HR used to be routed only
+        # through cache invalidation; the main window wasn't told to
+        # re-render, so the summary panel kept showing the "Set Resting
+        # HR in Settings" hint until the next app start.
+        self.settings.set('strava_client_id', 'x')
+        self.settings.set('strava_client_secret', 'y')
+        self.settings.set('manual_hrmax', 190)
+        self.settings.set('hr_rest', 0)
+        dlg = self._new_dialog()
+        dlg.hr_rest_input.setValue(55)  # only hr_rest changes
+
+        with patch.object(QMessageBox, 'information'):
+            dlg._save_settings()
+
+        self.assertEqual(self.main_window.refresh_data_calls, 1)
+
+    def test_changing_hr_zone_scheme_triggers_refresh(self):
+        # Same regression class: scheme switches (classic ↔ karvonen)
+        # change HR-zone classification and therefore TRIMP / ACWR / CTL
+        # downstream — they have to re-render too.
+        self.settings.set('strava_client_id', 'x')
+        self.settings.set('strava_client_secret', 'y')
+        self.settings.set('manual_hrmax', 190)
+        self.settings.set('hr_rest', 55)
+        self.settings.set('hr_zone_scheme', 'classic')
+        dlg = self._new_dialog()
+        dlg.hr_zone_scheme_combo.setCurrentIndex(
+            dlg.hr_zone_scheme_combo.findData('karvonen')
+        )
+
+        with patch.object(QMessageBox, 'information'):
+            dlg._save_settings()
+
+        self.assertEqual(self.main_window.refresh_data_calls, 1)
+
+    def test_unchanged_config_does_not_refresh(self):
+        # Negative: opening Settings, clicking Save without changing
+        # anything must not trigger a needless chart rebuild.
+        self.settings.set('strava_client_id', 'x')
+        self.settings.set('strava_client_secret', 'y')
+        self.settings.set('manual_hrmax', 190)
+        self.settings.set('hr_rest', 55)
+        dlg = self._new_dialog()
+
+        with patch.object(QMessageBox, 'information'):
+            dlg._save_settings()
+
+        self.assertEqual(self.main_window.refresh_data_calls, 0)
+        self.assertEqual(self.main_window.load_data_calls, 0)
 
     def test_unchanged_config_keeps_cache(self):
         self.db.upsert_activity_hr_zones(

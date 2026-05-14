@@ -493,10 +493,12 @@ class SettingsDialog(QDialog):
             if filters_changed:
                 # Filters affect the DB query — reload activities, not just charts
                 self.main_window._load_data()
-            elif hrmax_changed or profile_changed:
-                # HRmax changes propagate through race predictions;
-                # profile changes (birth_date/gender) drive the Performance
-                # tab. Either way, re-render charts without re-fetching.
+            elif hr_zone_config_changed or profile_changed:
+                # HR-zone config (HRmax / HR-Rest / scheme) feeds race
+                # predictions, TRIMP, daily ACWR, and the CTL/Form readout.
+                # Profile changes (birth_date/gender) drive the Performance
+                # tab and Tanaka HRmax fallback. Either way, re-render
+                # charts and summary without re-fetching activities.
                 self.main_window._refresh_data()
 
         self.accept()
