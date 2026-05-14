@@ -106,36 +106,103 @@ class SummaryPanel(QWidget):
         hr_group.setLayout(hr_layout)
         layout.addWidget(hr_group)
 
-        # Training score group
+        # Training score group. T39 reordered this: Training Fitness
+        # (CTL) is now the prominent 24px headline, the self-relative
+        # Score has been renamed "Trend" and demoted to 18px with a
+        # subtitle that calls out its baseline-relative nature.
         score_group = QGroupBox(self.tr("Training Status"))
         score_layout = QVBoxLayout()
 
-        self.score_label = QLabel(self.tr("Score: -"))
-        self.score_label.setStyleSheet("font-size: 24px; font-weight: bold;")
+        # --- Headline: absolute Training Fitness (CTL) ---
+        self.training_fitness_label = QLabel(self.tr("Training Fitness: -"))
+        self.training_fitness_label.setStyleSheet("font-size: 24px; font-weight: bold;")
+        score_layout.addLayout(_row_with_help(
+            self.training_fitness_label,
+            self.tr(
+                "Training Fitness (CTL — Chronic Training Load).\n\n"
+                "Exponentially weighted average of your daily Banister "
+                "TRIMP over the last 42 days. Unlike the Trend below, "
+                "this is an absolute number that grows with sustained "
+                "training and stays elevated as long as you keep "
+                "training — it does NOT reset against your own "
+                "baseline.\n\n"
+                "Typical ranges (TRIMP/day):\n"
+                "  • 30–50  recreational / casual\n"
+                "  • 60–90  well-trained\n"
+                "  • 100+   competitive\n\n"
+                "Needs Date of Birth, Gender and Resting Heart Rate to be "
+                "set (Settings → General → Profile / Heart Rate).\n\n"
+                "Caveat: RunTrend's CTL is TRIMP-based (Banister), not "
+                "TSS-based like TrainingPeaks. Absolute values aren't "
+                "directly comparable — the relative banding (recreational "
+                "/ trained / competitive) maps across, exact numbers will "
+                "differ. Expect a scale offset if you compare with CTL "
+                "from other apps."
+            ),
+        ))
 
+        # --- Companion: Form (TSB) ---
+        self.form_label = QLabel(self.tr("Form: -"))
+        self.form_label.setStyleSheet("font-size: 11px;")
+        score_layout.addLayout(_row_with_help(
+            self.form_label,
+            self.tr(
+                "Form (TSB — Training Stress Balance) = CTL − ATL.\n\n"
+                "ATL is the same exponential average over only the last "
+                "7 days (acute fatigue). A positive TSB means you've "
+                "rested faster than your fitness has decayed — race-ready. "
+                "Negative TSB means you're absorbing load — building.\n\n"
+                "Zones (Coggan):\n"
+                "  • > +25     transitional (over-rested)\n"
+                "  • +10..+25  race-fresh\n"
+                "  • −10..+10  neutral\n"
+                "  • −20..−10  productive overload (build phase)\n"
+                "  • −30..−20  approaching fatigue limit\n"
+                "  • < −30     overreaching risk"
+            ),
+        ))
+
+        # --- Trend (was "Score") — self-relative, smaller font ---
+        self.score_label = QLabel(self.tr("Trend: -"))
+        self.score_label.setStyleSheet("font-size: 18px; font-weight: bold; margin-top: 8px;")
         score_layout.addLayout(_row_with_help(
             self.score_label,
             self.tr(
-                "Training Score (0-100).\n\n"
+                "Training Trend (0-100).\n\n"
                 "Composite of recent training consistency, weekly distance, "
-                "and aerobic efficiency.\n\n"
-                "When the current period is still in progress, the score "
+                "and aerobic efficiency — measured RELATIVE TO YOUR OWN "
+                "rolling baseline. High values mean you are currently "
+                "training MORE than your own historical average, not that "
+                "you are absolutely fit. For absolute fitness see Training "
+                "Fitness (CTL) above.\n\n"
+                "When the current period is still in progress, the value "
                 "and its breakdown read from the last complete period — "
                 "otherwise partial-period runs would compare against a "
                 "full-period baseline and drag everything down.\n\n"
-                "Typical ranges:\n"
-                "  • 0-29  red   – minimal training\n"
-                "  • 30-59 amber – building up\n"
-                "  • 60-79 green – good\n"
-                "  • 80+   green – strong\n\n"
+                "Typical reading:\n"
+                "  • 0-29  red   – you're well below your usual training\n"
+                "  • 30-59 amber – approaching your baseline\n"
+                "  • 60-79 green – building above your usual\n"
+                "  • 80+   green – clear ramp-up phase\n\n"
+                "At steady-state high-volume training the value plateaus "
+                "around 50 — that's correct and by design, not a bad "
+                "result.\n\n"
                 "Caveat: this scale is self-assembled (spec §10), not "
                 "from a publication. The weights (30 % distance / 20 % "
                 "frequency / 30 % pace / 20 % EF) are plausible but not "
-                "empirically optimised. At steady state the value plateaus "
-                "around 50 — that's by design, not a bad result. For "
-                "absolute fitness see Training Fitness (CTL) below."
+                "empirically optimised."
             ),
         ))
+
+        # Subtitle directly under the Trend value so the baseline-
+        # relative nature is visible without needing to hover the help
+        # icon — addresses the user complaint that "Frequency 3.7/20"
+        # read like a bad score when it was just mid-week math.
+        self.trend_subtitle_label = QLabel(self.tr("relative to your baseline"))
+        self.trend_subtitle_label.setStyleSheet(
+            "font-size: 9px; color: gray; font-style: italic;"
+        )
+        score_layout.addWidget(self.trend_subtitle_label)
 
         # Score breakdown — shows how each weighted component contributes
         # so users can see what to improve to raise the score.
@@ -184,60 +251,6 @@ class SummaryPanel(QWidget):
                 "Efficiency contribution to the training score.\n\n"
                 "Based on Efficiency Factor (pace ÷ HR). Needs heart-rate data.\n"
                 "Same pace at lower HR = better aerobic fitness raises this value."
-            ),
-        ))
-
-        # T38 — absolute fitness companion: CTL (Coggan Performance
-        # Manager) so a steady-state runner sees their absolute level,
-        # not just relative trending.
-        fitness_header = QLabel(self.tr("Fitness:"))
-        fitness_header.setStyleSheet("font-size: 10px; color: gray; margin-top: 8px;")
-        score_layout.addWidget(fitness_header)
-
-        self.training_fitness_label = QLabel(self.tr("Training Fitness: -"))
-        self.training_fitness_label.setStyleSheet("font-size: 11px;")
-        score_layout.addLayout(_row_with_help(
-            self.training_fitness_label,
-            self.tr(
-                "Training Fitness (CTL — Chronic Training Load).\n\n"
-                "Exponentially weighted average of your daily Banister "
-                "TRIMP over the last 42 days. Unlike the Score above, "
-                "this is an absolute number that grows with sustained "
-                "training and stays elevated as long as you keep "
-                "training — it does NOT reset against your own "
-                "baseline.\n\n"
-                "Typical ranges (TRIMP/day):\n"
-                "  • 30–50  recreational / casual\n"
-                "  • 60–90  well-trained\n"
-                "  • 100+   competitive\n\n"
-                "Needs Date of Birth, Gender and Resting Heart Rate to be "
-                "set (Settings → General → Profile / Heart Rate).\n\n"
-                "Caveat: RunTrend's CTL is TRIMP-based (Banister), not "
-                "TSS-based like TrainingPeaks. Absolute values aren't "
-                "directly comparable — the relative banding (recreational "
-                "/ trained / competitive) maps across, exact numbers will "
-                "differ. Expect a scale offset if you compare with CTL "
-                "from other apps."
-            ),
-        ))
-
-        self.form_label = QLabel(self.tr("Form: -"))
-        self.form_label.setStyleSheet("font-size: 11px;")
-        score_layout.addLayout(_row_with_help(
-            self.form_label,
-            self.tr(
-                "Form (TSB — Training Stress Balance) = CTL − ATL.\n\n"
-                "ATL is the same exponential average over only the last "
-                "7 days (acute fatigue). A positive TSB means you've "
-                "rested faster than your fitness has decayed — race-ready. "
-                "Negative TSB means you're absorbing load — building.\n\n"
-                "Zones (Coggan):\n"
-                "  • > +25     transitional (over-rested)\n"
-                "  • +10..+25  race-fresh\n"
-                "  • −10..+10  neutral\n"
-                "  • −20..−10  productive overload (build phase)\n"
-                "  • −30..−20  approaching fatigue limit\n"
-                "  • < −30     overreaching risk"
             ),
         ))
 
@@ -418,13 +431,11 @@ class SummaryPanel(QWidget):
         else:
             self.hrmax_suggestion_label.setVisible(False)
 
-        # Training score. The underlying fallback to the last complete
-        # period happens in MainWindow when the current period is in
-        # progress; the score label here just shows the number. The
-        # help tooltip on the score label documents the fallback so
-        # users can find out without UI clutter.
+        # Training Trend (renamed from "Score" in T39 — same value, the
+        # text "Trend:" reflects its baseline-relative nature). Underlying
+        # fallback to the last complete period happens in MainWindow.
         score = data.get('current_score', 0)
-        self.score_label.setText(self.tr("Score: {:.1f}").format(score))
+        self.score_label.setText(self.tr("Trend: {:.1f}").format(score))
 
         # Set color based on score
         if score < 30:
@@ -436,7 +447,9 @@ class SummaryPanel(QWidget):
         else:
             color = "#2ecc71"  # Bright green
 
-        self.score_label.setStyleSheet(f"font-size: 24px; font-weight: bold; color: {color};")
+        self.score_label.setStyleSheet(
+            f"font-size: 18px; font-weight: bold; margin-top: 8px; color: {color};"
+        )
 
         # Score breakdown
         components = data.get('score_components')

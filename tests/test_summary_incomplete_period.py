@@ -230,6 +230,41 @@ class TestScoreUsesLastCompletePeriod(unittest.TestCase, _MwFixture):
         form_text = self.window.summary_panel.form_label.text()
         self.assertRegex(form_text, r"[+-]?\d")
 
+    def test_label_says_trend_not_score(self):
+        # T39: the old "Score:" label is now "Trend:" — semantically more
+        # honest since the underlying value is baseline-relative, not
+        # absolute fitness.
+        self.window.settings.set('birth_date', '1990-01-01')
+        self.window.settings.set('gender', 'male')
+        self.window.settings.set('manual_hrmax', 195)
+        self.window.settings.set('hr_rest', 50)
+        self.window.aggregates = [
+            _aggregate(datetime(2026, 1, 5), complete=True, num_runs=4),
+        ]
+        self.window.activities = []
+        self._run_update()
+
+        text = self.window.summary_panel.score_label.text()
+        self.assertIn("Trend", text)
+        self.assertNotIn("Score:", text)
+
+    def test_trend_subtitle_visible_static(self):
+        # T39: the "relative to your baseline" subtitle is statically
+        # present (no hover required) so the baseline-relative reading
+        # is obvious.
+        self.window.settings.set('birth_date', '1990-01-01')
+        self.window.settings.set('gender', 'male')
+        self.window.settings.set('manual_hrmax', 195)
+        self.window.settings.set('hr_rest', 50)
+        self.window.aggregates = [
+            _aggregate(datetime(2026, 1, 5), complete=True, num_runs=4),
+        ]
+        self.window.activities = []
+        self._run_update()
+
+        subtitle = self.window.summary_panel.trend_subtitle_label
+        self.assertIn("baseline", subtitle.text())
+
     def test_training_load_pulled_from_last_complete(self):
         # Different load values across periods to verify which one wins.
         base = datetime(2026, 1, 5)

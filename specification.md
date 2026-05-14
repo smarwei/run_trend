@@ -286,13 +286,21 @@ Recommended default interpretation:
 
 This is a training volume milestone, not a prediction that the user can race a marathon at a certain pace.
 
-## 10. Training Status Score
+## 10. Training Status Trend Indicator
+
+> **Naming note (T39):** The metric defined in this section is the *self-relative*
+> Training Trend (0-100). It tells the user whether they are currently training
+> *more or less than their own historical baseline*. For an *absolute* training
+> fitness measure that grows with sustained training, see §10a (Training Fitness —
+> CTL/ATL/TSB, T38). The two are complementary: the Trend answers "is my
+> training ramping up or tapering?" and the Fitness answers "how much load
+> have I accumulated?".
 
 ## 10.1 Purpose
 
-The application should compute a simple composite score that reflects whether training is trending in a positive direction.
+The application should compute a simple composite indicator that reflects whether training is trending in a positive direction *relative to the user's own rolling baseline*.
 
-The score should be transparent and explainable.
+The indicator should be transparent and explainable. It is explicitly **not** an absolute fitness measure — at steady-state training the value plateaus around ~50 by design (current / baseline ≈ 1.0). Absolute fitness is reported separately as Training Fitness / CTL (§10a).
 
 ## 10.2 Inputs
 
@@ -338,7 +346,46 @@ The score should:
 * not overreact to a single outlier workout
 * remain explainable in the UI
 
-The UI shall provide a small explanation panel describing exactly how the score is computed.
+The UI shall provide a small explanation panel describing exactly how the indicator is computed.
+
+## 10a. Training Fitness (CTL / ATL / TSB) — absolute companion metric
+
+> Added in T38. This is the **absolute** counterpart to the self-relative
+> §10 Training Trend. Together they answer "am I training more or less than
+> usual?" (§10) and "how much load have I accumulated?" (this section).
+
+The application computes a Coggan-style Performance Manager triple from
+Banister TRIMP daily totals:
+
+* **Daily TRIMP per activity** (Banister, 1991):
+
+  ```
+  TRIMP = duration_min × HRr × 0.64 × e^(b × HRr)
+  ```
+
+  where `HRr = (HR_avg − HR_rest) / (HR_max − HR_rest)` clamped to `[0, 1]`,
+  and `b = 1.92` (men) / `1.67` (women).
+
+* **CTL (Chronic Training Load)** — EWMA of daily TRIMP over a 42-day
+  time-constant:
+
+  ```
+  CTL_today = CTL_yesterday × (1 − 1/42) + daily_TRIMP × (1/42)
+  ```
+
+* **ATL (Acute Training Load)** — EWMA over a 7-day time-constant.
+
+* **Form (TSB, Training Stress Balance)** = `CTL − ATL`.
+
+The CTL is the headline value in the Training Status panel (large bold
+number labelled "Training Fitness"). It grows with sustained training and
+stays elevated as long as training continues — it does not reset against
+the user's own baseline. Form (TSB) sits underneath as a smaller line and
+indicates whether the runner is rested (positive) or fatigued (negative).
+
+Prerequisites for display: Date of Birth, Gender, Resting Heart Rate, and
+at least one HR-equipped activity. When prerequisites are missing the panel
+shows a hint pointing to the relevant Settings page rather than a number.
 
 ## 11. Filters and Settings
 

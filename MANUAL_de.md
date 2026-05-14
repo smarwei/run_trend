@@ -267,12 +267,21 @@ Längere Läufe beeinflussen den Durchschnitt stärker.
 
 **Beziehung zu Pace:** Kehrwert des Pace, in km/h statt min/km
 
-#### Training Score (0-100)
-**Was es ist:** Kombinierte Metrik aus Volumen, Frequenz, Pace-Fortschritt und aerober Fitness.
+#### Training Trend (0-100)
+**Was es ist:** Ein selbst-relativer Trainings-Trend-Indikator aus Volumen, Frequenz, Pace-Fortschritt und aerober Fitness — gemessen gegen dein eigenes gleitendes Baseline.
+
+> **Warum „Trend" statt „Score" (T39)?** Die zugrundeliegende Formel hat
+> sich nicht geändert; geändert hat sich das Label. Der Wert vergleicht
+> dein *aktuelles* Training mit deinem *eigenen historischen
+> Durchschnitt*: er sagt also aus, ob du gerade **mehr** oder **weniger**
+> als üblich trainierst — nicht, wie fit du in absoluten Werten bist. Bei
+> dauerhaft hohem Trainingsvolumen pendelt er sich um ~50 ein (Verhältnis
+> `aktuell / Baseline ≈ 1,0`). Für eine absolute Fitness-Größe nutze
+> **Training Fitness (CTL)** im selben Panel weiter oben.
 
 **Berechnung (mit HR-Daten):**
 ```
-training_score = (
+training_trend = (
     0.30 × normalized_distance +
     0.20 × normalized_frequency +
     0.30 × normalized_pace +
@@ -313,7 +322,7 @@ training_score = (
 #### Training Fitness (CTL) und Form (TSB)
 
 **Was es ist:** Eine **absolute** Trainingsfitness-Größe neben dem
-selbst-relativen Training Score (T38). Während der Score auf ein eigenes
+selbst-relativen Training Trend (T38). Während der Trend auf ein eigenes
 rollendes Baseline normalisiert ist und im Steady-State auf ~50 pendelt
 (`current_runs / baseline_runs ≈ 1.0`), bleibt CTL bei dauerhaftem
 Training **hoch**.
@@ -2284,7 +2293,7 @@ als Diagnose-Tool.
 
 | Metrik | Quelle | Status | Wichtigste Limitation |
 |---|---|---|---|
-| **Training Score (0–100)** | `specification.md` §10 (eigene Definition) | selbst-zusammengestellt | Gewichte (30/20/30/20) ad-hoc gewählt; im Steady-State pendelt der Wert um ~50, das ist Design — für absolute Fitness siehe **Training Fitness (CTL)** |
+| **Training Trend (0–100)** | `specification.md` §10 (eigene Definition) | selbst-zusammengestellt | Gewichte (30/20/30/20) ad-hoc gewählt; im Steady-State pendelt der Wert um ~50, das ist Design — für absolute Fitness siehe **Training Fitness (CTL)** |
 | **Training Fitness (CTL)** | Coggan (TrainingPeaks Performance Manager), Banister 1991 (TRIMP) | publiziert / etabliert | TRIMP-Skala ist nicht 1:1 mit TSS-CTL aus dem Radsport vergleichbar — relative Einordnung gilt, absolute Zahlen unterscheiden sich |
 | **Form (TSB)** | Coggan | publiziert | Zonen-Schwellen (+25 / +10 / −10 / −20 / −30) sind Richtwerte, nicht Schwellen mit kausaler Validierung |
 | **ACWR (Training Load)** | Gabbett 2016 | publiziert, kontrovers | Impellizzeri et al. 2020 zeigen mathematische Artefakte bei kleinen Chronic-Werten und schwache Verletzungs-Korrelation in Follow-up-Studien — Schwellen als Indikator, nicht Diagnose |

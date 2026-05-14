@@ -2035,8 +2035,8 @@ Caveat: Gabbett's Sweet-Spot-Bänder (2016) sind empirisch verbreitet, aber wiss
     </message>
     <message>
       <location filename="../ui/summary_panel.py" line="75" />
-      <source>Score: -</source>
-      <translation type="finished">Bewertung: -</translation>
+      <source>Trend: -</source>
+      <translation type="finished">Trend: -</translation>
     </message>
     <message>
       <location filename="../ui/summary_panel.py" line="83" />
@@ -2135,8 +2135,13 @@ Caveat: Gabbett's Sweet-Spot-Bänder (2016) sind empirisch verbreitet, aber wiss
     </message>
     <message>
       <location filename="../ui/summary_panel.py" line="179" />
-      <source>Score: {:.1f}</source>
-      <translation type="finished">Bewertung: {:.1f}</translation>
+      <source>Trend: {:.1f}</source>
+      <translation type="finished">Trend: {:.1f}</translation>
+    </message>
+    <message>
+      <location filename="../ui/summary_panel.py" line="201" />
+      <source>relative to your baseline</source>
+      <translation type="finished">relativ zu deinem Baseline</translation>
     </message>
     <message>
       <source>Active Days: {} ({:.0%} so far)</source>
@@ -2295,24 +2300,36 @@ Benötigt HF-Sensor-Daten.</translation>
     </message>
     <message>
       <location filename="../ui/summary_panel.py" line="98" />
-      <source>Training Score (0-100).
+      <source>Training Trend (0-100).
 
-Composite of recent training consistency, weekly distance, and aerobic efficiency.
+Composite of recent training consistency, weekly distance, and aerobic efficiency — measured RELATIVE TO YOUR OWN rolling baseline. High values mean you are currently training MORE than your own historical average, not that you are absolutely fit. For absolute fitness see Training Fitness (CTL) above.
 
-Typical ranges:
-  • 0-29  red   – minimal training
-  • 30-59 amber – building up
-  • 60-79 green – good
-  • 80+   green – strong</source>
-      <translation type="finished">Trainings-Bewertung (0-100).
+When the current period is still in progress, the value and its breakdown read from the last complete period — otherwise partial-period runs would compare against a full-period baseline and drag everything down.
 
-Zusammensetzung aus Trainingskonsistenz, Wochendistanz und aerober Effizienz.
+Typical reading:
+  • 0-29  red   – you're well below your usual training
+  • 30-59 amber – approaching your baseline
+  • 60-79 green – building above your usual
+  • 80+   green – clear ramp-up phase
 
-Typische Bereiche:
-  • 0-29  rot   – wenig Training
-  • 30-59 gelb  – im Aufbau
-  • 60-79 grün  – gut
-  • 80+   grün  – stark</translation>
+At steady-state high-volume training the value plateaus around 50 — that's correct and by design, not a bad result.
+
+Caveat: this scale is self-assembled (spec §10), not from a publication. The weights (30 % distance / 20 % frequency / 30 % pace / 20 % EF) are plausible but not empirically optimised.</source>
+      <translation type="finished">Trainings-Trend (0-100).
+
+Zusammensetzung aus Trainingskonsistenz, Wochendistanz und aerober Effizienz — gemessen RELATIV ZU DEINEM EIGENEN gleitenden Baseline. Hohe Werte bedeuten, dass du aktuell MEHR trainierst als dein eigener historischer Durchschnitt — nicht, dass du absolut fit bist. Für absolute Fitness siehe Training Fitness (CTL) oben.
+
+Wenn die aktuelle Periode noch läuft, werden Wert und Aufschlüsselung aus der letzten abgeschlossenen Periode gelesen — andernfalls würden Teilperioden gegen ein Vollperioden-Baseline verglichen und alles nach unten ziehen.
+
+Typische Lesart:
+  • 0-29  rot   – deutlich unter deinem gewohnten Training
+  • 30-59 gelb  – nähert sich deinem Baseline
+  • 60-79 grün  – baust über dein gewohntes Niveau hinaus auf
+  • 80+   grün  – klare Steigerungsphase
+
+Bei dauerhaft hohem Trainingsvolumen pendelt sich der Wert um 50 ein — das ist korrekt und so gewollt, kein schlechtes Ergebnis.
+
+Caveat: diese Skala ist intern zusammengesetzt (Spec §10), nicht aus einer Publikation. Die Gewichte (30 % Distanz / 20 % Häufigkeit / 30 % Pace / 20 % EF) sind plausibel, aber nicht empirisch optimiert.</translation>
     </message>
     <message>
       <location filename="../ui/summary_panel.py" line="116" />
@@ -2449,7 +2466,7 @@ Gleiche Pace bei niedrigerer HF = bessere aerobe Fitness steigert diesen Wert.</
     <message>
       <source>Training Fitness (CTL — Chronic Training Load).
 
-Exponentially weighted average of your daily Banister TRIMP over the last 42 days. Unlike the Score above, this is an absolute number that grows with sustained training and stays elevated as long as you keep training — it does NOT reset against your own baseline.
+Exponentially weighted average of your daily Banister TRIMP over the last 42 days. Unlike the Trend below, this is an absolute number that grows with sustained training and stays elevated as long as you keep training — it does NOT reset against your own baseline.
 
 Typical ranges (TRIMP/day):
   • 30–50  recreational / casual
@@ -2461,7 +2478,7 @@ Needs Date of Birth, Gender and Resting Heart Rate to be set (Settings → Gener
 Caveat: RunTrend's CTL is TRIMP-based (Banister), not TSS-based like TrainingPeaks. Absolute values aren't directly comparable — the relative banding (recreational / trained / competitive) maps across, exact numbers will differ. Expect a scale offset if you compare with CTL from other apps.</source>
       <translation type="finished">Training Fitness (CTL — Chronic Training Load).
 
-Exponentiell gewichteter Mittelwert deines täglichen Banister-TRIMP über die letzten 42 Tage. Anders als der Score oben ist das ein absoluter Wert: er wächst bei dauerhaftem Training und bleibt hoch, solange du weiter trainierst — er resettet sich NICHT gegen dein eigenes Baseline.
+Exponentiell gewichteter Mittelwert deines täglichen Banister-TRIMP über die letzten 42 Tage. Anders als der Trend unten ist das ein absoluter Wert: er wächst bei dauerhaftem Training und bleibt hoch, solange du weiter trainierst — er resettet sich NICHT gegen dein eigenes Baseline.
 
 Typische Bereiche (TRIMP/Tag):
   • 30–50  freizeitsportlich / locker
