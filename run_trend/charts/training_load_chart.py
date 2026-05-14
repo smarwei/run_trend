@@ -56,6 +56,7 @@ class TrainingLoadChart(BaseChart):
     def update_chart(
         self,
         daily_loads: Mapping[_date_type, float],
+        smoothing: str = 'off',
         *,
         variant: str = 'trimp',
     ):
@@ -69,6 +70,15 @@ class TrainingLoadChart(BaseChart):
         if not plotted:
             self.chart.setTitle(self.tr("Training Load (Need 28 days)"))
             return
+
+        # Smoothing applies after we drop cold-start days — a window
+        # spanning the cold-start boundary would smear in zero-loads and
+        # under-state today's ratio. Smoother is the same SMA used by the
+        # other charts, but indices here are days, not periods, so the
+        # 'light' / 'medium' / 'strong' windows give a finer effect.
+        smoothed_values = self._smooth_data(
+            [rec['acwr'] for rec in plotted], smoothing,
+        )
 
         # Variant tag in the title so users see which load proxy is in play.
         variant_label = self.tr("TRIMP") if variant == 'trimp' else self.tr("Distance")
@@ -112,11 +122,11 @@ class TrainingLoadChart(BaseChart):
             1.5, 2.0, (231, 76, 60, 30), self.tr("Danger Zone (>1.5)")
         )
 
-        # ACWR line.
+        # ACWR line (smoothed if requested by the toolbar combo).
         acwr_series = QLineSeries()
         acwr_series.setName(self.tr("ACWR"))
-        for i, rec in enumerate(plotted):
-            acwr_series.append(int(plotted_dts[i].timestamp() * 1000), rec['acwr'])
+        for i, value in enumerate(smoothed_values):
+            acwr_series.append(int(plotted_dts[i].timestamp() * 1000), value)
         pen = QPen(QColor("#2c3e50"))
         pen.setWidth(2)
         acwr_series.setPen(pen)

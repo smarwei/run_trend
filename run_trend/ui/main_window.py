@@ -1184,9 +1184,11 @@ class MainWindow(QMainWindow):
         self.structure_overview_chart.update_chart(self.aggregates, smoothing_strength)
         self.score_chart.update_chart(self.aggregates, smoothing_strength)
         # T40: chart now takes the daily {date → load} map computed in
-        # _update_summary; it walks the daily ACWR series itself.
+        # _update_summary; it walks the daily ACWR series itself. The
+        # smoothing combo applies a day-window SMA over the ratio line.
         self.training_load_chart.update_chart(
             getattr(self, '_daily_loads', {}),
+            smoothing_strength,
             variant=getattr(self, '_daily_load_variant', 'distance'),
         )
         # Age-graded performance chart (T37)
