@@ -111,7 +111,11 @@ class AgeGradingChart(BaseChart):
                 "Linear decline is a first approximation; real decline "
                 "accelerates past age 70 as mitochondrial mechanisms take "
                 "over. Treat the gap between measured and expected as a "
-                "training-response indicator, not a diagnosis."
+                "training-response indicator, not a diagnosis.\n\n"
+                "Caveat: the personal-peak methodology itself is not "
+                "published — it uses Friel's EF convention consistently, "
+                "but the specific peak-extraction model is RunTrend-"
+                "internal design."
             ),
         )
         self.tabs.addTab(self.wma_view['widget'], self.tr("WMA Age-Graded %"))

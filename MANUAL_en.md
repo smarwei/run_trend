@@ -2264,6 +2264,65 @@ On next start, these settings are restored.
 
 ---
 
+## Methodological Caveats
+
+RunTrend uses established methods wherever possible and explicitly
+flags self-assembled components. This section lists the substantive
+metrics with their source and known limitations. When in doubt: use
+the values as an **indicator**, not as a diagnostic tool.
+
+### Metric overview
+
+| Metric | Source | Status | Most important limitation |
+|---|---|---|---|
+| **Training Score (0–100)** | `specification.md` §10 (own definition) | self-assembled | Weights (30/20/30/20) chosen ad-hoc; at steady state the value plateaus around ~50 by design — see **Training Fitness (CTL)** for an absolute measure |
+| **Training Fitness (CTL)** | Coggan (TrainingPeaks Performance Manager), Banister 1991 (TRIMP) | published / established | TRIMP scale isn't directly 1:1 with TSS-CTL from cycling — relative banding maps across, absolute numbers differ |
+| **Form (TSB)** | Coggan | published | Zone thresholds (+25 / +10 / −10 / −20 / −30) are guidelines, not causally validated cutoffs |
+| **ACWR (Training Load)** | Gabbett 2016 | published, contested | Impellizzeri et al. 2020 demonstrate mathematical artefacts at small chronic values and weak injury correlations in follow-up studies — read thresholds as indicator, not diagnosis |
+| **Race Predictions** | McMillan Running Calculator | empirically widespread | Not peer-reviewed. 5K predictions tend to be tight; Marathon predictions ±10% typical |
+| **WMA Age-Graded % (Performance tab)** | WMA 2023 factor tables (derived from 2.8M competition times) | published | Factors start at age 30; younger → factor 1.0 (open class) |
+| **Aerobic Capacity % (Performance tab)** | Friel/TrainingPeaks (EF), Tanaka 2001 (HRmax), Coppola 2022 (decline) | published building blocks, own composite | The personal-peak extraction methodology is RunTrend-internal design, not published. Linear decline imprecise past age 70 |
+| **Tanaka HRmax** (`208 − 0.7 × age`) | Tanaka 2001 (meta-analysis n=18,712) | published | More accurate than `220 − age` from ~age 40 on, gender-independent |
+| **Banister TRIMP** | Banister 1991 | published, gold standard | Edwards' zone-TRIMP would be a simpler alternative without the HR-reserve requirement |
+| **HR Zones (Performance tab)** | classic 5-zone model or Karvonen | established | Classic model ignores HR reserve; Karvonen variant corrects for that (needs HR-rest) |
+
+### What "indicator vs. diagnosis" means
+
+Sport-science metrics are **statistical correlations across athlete
+populations**. They tell you where your training point typically falls
+and which direction it's moving. They do **not** tell you with
+certainty whether you're currently overtraining or building form —
+that requires heart-rate variability, sleep quality, RPE, blood
+markers, and other inputs taken together.
+
+**Practical implications:**
+
+- Trust the **direction** more than the absolute number. CTL rising
+  over weeks = you're building fitness; TSB falling = you're absorbing
+  load — both are robust statements.
+- Trust your **body sensation** over a red number. ACWR > 1.5 while
+  you feel good is probably not a crisis signal. ACWR in the sweet
+  spot while you're exhausted means take a rest day.
+- Compare **yourself to yourself over time**, not against other apps
+  or other athletes. CTL from RunTrend is not directly comparable to
+  CTL from TrainingPeaks (TRIMP vs TSS scale).
+
+### Sources
+
+- Banister, E. W. (1991). "Modeling Elite Athletic Performance."
+- Coggan, A., "Performance Manager" — <https://www.trainingpeaks.com/learn/articles/the-science-of-the-performance-manager/>
+- Coppola et al. 2022 — <https://pmc.ncbi.nlm.nih.gov/articles/PMC9517884/>
+- Gabbett, T. J. (2016). "The training-injury prevention paradox" —
+  *Br J Sports Med* 50(5): 273–280
+- Impellizzeri, F. M., et al. (2020). "Acute:chronic workload ratio:
+  conceptual issues and fundamental pitfalls" — *Int J Sports Physiol
+  Perform* 15(6): 907–913
+- McMillan Running Calculator — <https://www.mcmillanrunning.com/>
+- Tanaka et al. 2001 — <https://pubmed.ncbi.nlm.nih.gov/11153730/>
+- WMA 2023 Age Factors — <https://world-masters-athletics.org/wp-content/uploads/2023/02/2023-Age-Factors-WMA.pdf>
+
+---
+
 ## Frequently Asked Questions
 
 ### Why aren't my treadmill runs displayed?

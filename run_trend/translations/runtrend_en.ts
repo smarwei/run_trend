@@ -778,12 +778,16 @@ Each line is a 3-month rolling prediction (5K/10K/HM/Marathon) from your HR-clas
 
 We do NOT compare your EF to other athletes — Friel and TrainingPeaks explicitly warn against that. Instead the reference line is your best 4-week EF mean in the past year, extrapolated forward using the age-driven decline rate from the literature (Coppola et al. 2022): 0.55 %/yr at full training volume, rising to ~3 %/yr at sedentary.
 
-Linear decline is a first approximation; real decline accelerates past age 70 as mitochondrial mechanisms take over. Treat the gap between measured and expected as a training-response indicator, not a diagnosis.</source>
+Linear decline is a first approximation; real decline accelerates past age 70 as mitochondrial mechanisms take over. Treat the gap between measured and expected as a training-response indicator, not a diagnosis.
+
+Caveat: the personal-peak methodology itself is not published — it uses Friel's EF convention consistently, but the specific peak-extraction model is RunTrend-internal design.</source>
       <translation type="finished">Efficiency Factor (EF) over time compared to your own personal peak in the last 12 months, adjusted for age.
 
 We do NOT compare your EF to other athletes — Friel and TrainingPeaks explicitly warn against that. Instead the reference line is your best 4-week EF mean in the past year, extrapolated forward using the age-driven decline rate from the literature (Coppola et al. 2022): 0.55 %/yr at full training volume, rising to ~3 %/yr at sedentary.
 
-Linear decline is a first approximation; real decline accelerates past age 70 as mitochondrial mechanisms take over. Treat the gap between measured and expected as a training-response indicator, not a diagnosis.</translation>
+Linear decline is a first approximation; real decline accelerates past age 70 as mitochondrial mechanisms take over. Treat the gap between measured and expected as a training-response indicator, not a diagnosis.
+
+Caveat: the personal-peak methodology itself is not published — it uses Friel's EF convention consistently, but the specific peak-extraction model is RunTrend-internal design.</translation>
     </message>
     <message>
       <source>WMA Age-Graded %</source>
@@ -1932,7 +1936,9 @@ Danger:     ≥1.5    (elevated injury risk).
 
 Needs ≥5 weeks of data to be meaningful.
 
-Caveat: this app's composite ACWR includes a pace component (faster pace = higher load). A sustained fitness-driven pace improvement can therefore push the score upward even if your volume and HR are stable — read elevated values in that context, not as automatic overtraining warnings.</source>
+Caveat: this app's composite ACWR includes a pace component (faster pace = higher load). A sustained fitness-driven pace improvement can therefore push the score upward even if your volume and HR are stable — read elevated values in that context, not as automatic overtraining warnings.
+
+Caveat: Gabbett's Sweet-Spot bands (2016) are empirically widespread but scientifically contested — Impellizzeri et al. 2020 documented mathematical artefacts at small chronic values and weak injury correlations in follow-up studies. Treat ACWR as an indicator, not a diagnosis.</source>
       <translation type="finished">ACWR — Acute:Chronic Workload Ratio.
 
 Formula: TRIMP of last 7 days ÷ average TRIMP of last 28 days.
@@ -1944,7 +1950,9 @@ Danger:     ≥1.5    (elevated injury risk).
 
 Needs ≥5 weeks of data to be meaningful.
 
-Caveat: this app's composite ACWR includes a pace component (faster pace = higher load). A sustained fitness-driven pace improvement can therefore push the score upward even if your volume and HR are stable — read elevated values in that context, not as automatic overtraining warnings.</translation>
+Caveat: this app's composite ACWR includes a pace component (faster pace = higher load). A sustained fitness-driven pace improvement can therefore push the score upward even if your volume and HR are stable — read elevated values in that context, not as automatic overtraining warnings.
+
+Caveat: Gabbett's Sweet-Spot bands (2016) are empirically widespread but scientifically contested — Impellizzeri et al. 2020 documented mathematical artefacts at small chronic values and weak injury correlations in follow-up studies. Treat ACWR as an indicator, not a diagnosis.</translation>
     </message>
     <message>
       <location filename="../charts/training_load_chart.py" line="83" />
@@ -2311,12 +2319,16 @@ Danger:     ≥1.5    (elevated injury risk).</translation>
 
 Predicts 5K / 10K / Half / Marathon times from your easy-run pace using the McMillan formula and your HR zones.
 
-⚠ Only an estimate — actual race performance depends on tapering, course, weather, and pacing strategy.</source>
+⚠ Only an estimate — actual race performance depends on tapering, course, weather, and pacing strategy.
+
+Caveat: McMillan's calculator is widely used but not peer-reviewed. 5K predictions tend to be tight; Marathon predictions can be off by ±10% even when your training pace is well-classified.</source>
       <translation type="finished">Race-Time Predictor.
 
 Predicts 5K / 10K / Half / Marathon times from your easy-run pace using the McMillan formula and your HR zones.
 
-⚠ Only an estimate — actual race performance depends on tapering, course, weather, and pacing strategy.</translation>
+⚠ Only an estimate — actual race performance depends on tapering, course, weather, and pacing strategy.
+
+Caveat: McMillan's calculator is widely used but not peer-reviewed. 5K predictions tend to be tight; Marathon predictions can be off by ±10% even when your training pace is well-classified.</translation>
     </message>
     <message>
       <source>Breakdown:</source>
@@ -2424,7 +2436,9 @@ Typical ranges (TRIMP/day):
   • 60–90  well-trained
   • 100+   competitive
 
-Needs Date of Birth, Gender and Resting Heart Rate to be set (Settings → General → Profile / Heart Rate).</source>
+Needs Date of Birth, Gender and Resting Heart Rate to be set (Settings → General → Profile / Heart Rate).
+
+Caveat: RunTrend's CTL is TRIMP-based (Banister), not TSS-based like TrainingPeaks. Absolute values aren't directly comparable — the relative banding (recreational / trained / competitive) maps across, exact numbers will differ. Expect a scale offset if you compare with CTL from other apps.</source>
       <translation type="finished">Training Fitness (CTL — Chronic Training Load).
 
 Exponentially weighted average of your daily Banister TRIMP over the last 42 days. Unlike the Score above, this is an absolute number that grows with sustained training and stays elevated as long as you keep training — it does NOT reset against your own baseline.
@@ -2434,7 +2448,9 @@ Typical ranges (TRIMP/day):
   • 60–90  well-trained
   • 100+   competitive
 
-Needs Date of Birth, Gender and Resting Heart Rate to be set (Settings → General → Profile / Heart Rate).</translation>
+Needs Date of Birth, Gender and Resting Heart Rate to be set (Settings → General → Profile / Heart Rate).
+
+Caveat: RunTrend's CTL is TRIMP-based (Banister), not TSS-based like TrainingPeaks. Absolute values aren't directly comparable — the relative banding (recreational / trained / competitive) maps across, exact numbers will differ. Expect a scale offset if you compare with CTL from other apps.</translation>
     </message>
     <message>
       <source>Form: -</source>

@@ -127,7 +127,13 @@ class SummaryPanel(QWidget):
                 "  • 0-29  red   – minimal training\n"
                 "  • 30-59 amber – building up\n"
                 "  • 60-79 green – good\n"
-                "  • 80+   green – strong"
+                "  • 80+   green – strong\n\n"
+                "Caveat: this scale is self-assembled (spec §10), not "
+                "from a publication. The weights (30 % distance / 20 % "
+                "frequency / 30 % pace / 20 % EF) are plausible but not "
+                "empirically optimised. At steady state the value plateaus "
+                "around 50 — that's by design, not a bad result. For "
+                "absolute fitness see Training Fitness (CTL) below."
             ),
         ))
 
@@ -205,7 +211,13 @@ class SummaryPanel(QWidget):
                 "  • 60–90  well-trained\n"
                 "  • 100+   competitive\n\n"
                 "Needs Date of Birth, Gender and Resting Heart Rate to be "
-                "set (Settings → General → Profile / Heart Rate)."
+                "set (Settings → General → Profile / Heart Rate).\n\n"
+                "Caveat: RunTrend's CTL is TRIMP-based (Banister), not "
+                "TSS-based like TrainingPeaks. Absolute values aren't "
+                "directly comparable — the relative banding (recreational "
+                "/ trained / competitive) maps across, exact numbers will "
+                "differ. Expect a scale offset if you compare with CTL "
+                "from other apps."
             ),
         ))
 
@@ -294,7 +306,11 @@ class SummaryPanel(QWidget):
                 "Predicts 5K / 10K / Half / Marathon times from your easy-run "
                 "pace using the McMillan formula and your HR zones.\n\n"
                 "⚠ Only an estimate — actual race performance depends on "
-                "tapering, course, weather, and pacing strategy."
+                "tapering, course, weather, and pacing strategy.\n\n"
+                "Caveat: McMillan's calculator is widely used but not "
+                "peer-reviewed. 5K predictions tend to be tight; "
+                "Marathon predictions can be off by ±10% even when "
+                "your training pace is well-classified."
             ),
         ))
         race_layout.addWidget(self.race_10k_label)

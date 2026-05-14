@@ -31,7 +31,12 @@ class TrainingLoadChart(BaseChart):
                 "(faster pace = higher load). A sustained fitness-driven pace "
                 "improvement can therefore push the score upward even if your "
                 "volume and HR are stable — read elevated values in that "
-                "context, not as automatic overtraining warnings."
+                "context, not as automatic overtraining warnings.\n\n"
+                "Caveat: Gabbett's Sweet-Spot bands (2016) are empirically "
+                "widespread but scientifically contested — Impellizzeri et "
+                "al. 2020 documented mathematical artefacts at small chronic "
+                "values and weak injury correlations in follow-up studies. "
+                "Treat ACWR as an indicator, not a diagnosis."
             ),
         )
         # QAreaSeries + SeriesAnimations races on series-replace and crashes
