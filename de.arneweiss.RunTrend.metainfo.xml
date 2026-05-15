@@ -8,21 +8,28 @@
 
   <description>
     <p>
-      Running Progress Tracker is a desktop application for analyzing your running training from Strava.
-      It synchronizes your activities and provides comprehensive insights into your training development.
+      Running Progress Tracker (RunTrend) is a personal desktop application
+      for analyzing running training from Strava. It synchronizes your
+      activities locally and answers concrete training questions instead
+      of just plotting more diagrams.
     </p>
-    <p>Features:</p>
+    <p>What it shows:</p>
     <ul>
-      <li>Automatic Strava synchronization via OAuth</li>
-      <li>Multiple chart types: Distance, Pace, Speed, Frequency, Training Score</li>
-      <li>Long run tracking and training structure analysis</li>
-      <li>Interactive charts with smoothing (SMA/EMA)</li>
-      <li>Future trend projections and milestone predictions (5K, 10K, Half Marathon, Marathon)</li>
-      <li>Training score based on distance, frequency, and pace</li>
-      <li>Privacy-focused: All data stored locally in SQLite</li>
+      <li>Overview: distance, pace, frequency per week or month, with smoothing</li>
+      <li>Heart Rate: HR range, average HR, Efficiency Factor, zone distribution</li>
+      <li>Endurance: longest run and average distance per run</li>
+      <li>Performance: age-adjusted percentage via WMA-2023 factors plus Aerobic Capacity from Tanaka HRmax</li>
+      <li>Trend (0-100): self-relative composite of volume, frequency, pace and efficiency against your own rolling baseline</li>
+      <li>Training Load (ACWR): daily Gabbett 7:28 ratio, TRIMP-based when HR is configured</li>
+      <li>Training Fitness (CTL) and Form (TSB) in the summary panel as absolute training-load readouts</li>
+      <li>Race predictions: 5K, 10K, Half, Marathon via McMillan + HR-classified easy pace</li>
     </ul>
     <p>
-      Perfect for runners preparing for long-distance events who want to track their progress systematically.
+      Every contested metric carries an in-app tooltip with source and caveat,
+      and the user manual lists which numbers come from peer-reviewed work
+      (Banister 1991, Coggan, Gabbett 2016, Impellizzeri 2020, Tanaka 2001,
+      WMA 2023) vs. RunTrend's own design. Data stays local in SQLite — no
+      server, no tracking, no cloud uploads.
     </p>
   </description>
 
@@ -46,34 +53,18 @@
   </provides>
 
   <releases>
-    <release version="0.1.1" date="2026-03-29">
+    <release version="0.1.0" date="2026-05-15">
       <description>
-        <p>Strava API compliance update</p>
+        <p>First public release.</p>
         <ul>
-          <li>Add proper Strava deauthorization support (calls Strava's deauth endpoint)</li>
-          <li>Add user-initiated data deletion feature in Settings</li>
-          <li>Update website language for Strava API compliance</li>
-          <li>Add Privacy Policy page</li>
-          <li>Add Strava Apps management link in footer</li>
-          <li>Update user manuals with disconnection instructions</li>
-        </ul>
-      </description>
-    </release>
-    <release version="0.1.0" date="2026-03-08">
-      <description>
-        <p>Initial release</p>
-        <ul>
-          <li>Strava OAuth integration with automatic token refresh</li>
-          <li>Activity synchronization (initial + incremental auto-sync)</li>
-          <li>Multiple chart types for comprehensive analysis</li>
-          <li>Heart rate analytics and aerobic fitness tracking (Efficiency Factor)</li>
-          <li>Race time predictions based on heart rate zones</li>
-          <li>Interactive legends and data smoothing</li>
-          <li>Milestone predictions</li>
-          <li>Full internationalization support (German and English)</li>
-          <li>Language auto-detection based on system locale</li>
-          <li>Local SQLite storage for privacy</li>
-          <li>Comprehensive multilingual documentation</li>
+          <li>Strava OAuth integration with automatic token refresh and incremental sync</li>
+          <li>Chart tabs: Overview, Heart Rate, HR Zones, Endurance, Duration, Structure, Performance, Trend, Training Load, Projection, Runs</li>
+          <li>Performance tab with WMA-2023 age-adjusted percentage and Aerobic Capacity from Tanaka HRmax</li>
+          <li>Training Fitness (CTL), Form (TSB) and Training Trend (0-100) in the summary panel</li>
+          <li>Daily Gabbett 7:28 ACWR with TRIMP-based load source (Banister 1991), distance fallback when HR is missing</li>
+          <li>Race time predictions for 5K, 10K, Half Marathon, Marathon via McMillan with HR-classified easy pace</li>
+          <li>Methodological caveats baked into every contested metric tooltip; full caveat table in the user manual</li>
+          <li>Local SQLite storage, no cloud component, bilingual (German and English) with auto-detection</li>
         </ul>
       </description>
     </release>
