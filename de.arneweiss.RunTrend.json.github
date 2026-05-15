@@ -9,9 +9,7 @@
     "--socket=wayland",
     "--socket=fallback-x11",
     "--device=dri",
-    "--share=network",
-    "--filesystem=xdg-data/run_trend:create",
-    "--filesystem=xdg-config/run_trend:create"
+    "--share=network"
   ],
   "cleanup": [
     "/include",
