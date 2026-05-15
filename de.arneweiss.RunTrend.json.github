@@ -9,7 +9,9 @@
     "--socket=wayland",
     "--socket=fallback-x11",
     "--device=dri",
-    "--share=network"
+    "--share=network",
+    "--filesystem=xdg-data/run_trend:create",
+    "--filesystem=xdg-config/run_trend:create"
   ],
   "cleanup": [
     "/include",
@@ -31,7 +33,14 @@
           "type": "git",
           "url": "https://github.com/smarwei/run_trend.git",
           "tag": "v0.1.0",
-          "commit": "0f5e43eea8a8b389ab01df801f5d49f8c58bc01b"
+          "commit": "a50e7c31ca299c3b22c61c174e3c119c97e0a3a0",
+          "x-checker-data": {
+            "type": "json",
+            "url": "https://api.github.com/repos/smarwei/run_trend/releases/latest",
+            "tag-query": ".tag_name",
+            "version-query": ".tag_name | sub(\"^v\"; \"\")",
+            "timestamp-query": ".published_at"
+          }
         }
       ],
       "post-install": [
