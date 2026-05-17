@@ -305,8 +305,34 @@ class SummaryPanel(QWidget):
         projection_layout = QVBoxLayout()
 
         self.milestone_label = QLabel(self.tr("Estimated Date: -"))
+        self.milestone_ci_label = QLabel("")
+        self.milestone_ci_label.setStyleSheet("color: gray; font-size: 10px;")
+        self.milestone_ci_label.setWordWrap(True)
 
-        projection_layout.addWidget(self.milestone_label)
+        projection_layout.addLayout(_row_with_help(
+            self.milestone_label,
+            self.tr(
+                "Marathon Milestone — estimated date you'll first run "
+                "32 km in a single activity.\n\n"
+                "How: Theil-Sen trend on your PR-setting long runs of "
+                "the last 12 weeks (T42). The slope is in km/day, so "
+                "the prediction is the same whether the chart is in "
+                "week or month mode.\n\n"
+                "The ± range is a 95 % bootstrap confidence interval "
+                "over 500 resamples of your PR runs — width tells you "
+                "how much the trend would shift if any one PR had been "
+                "different.\n\n"
+                "Caveat: this is a trend extrapolation, not a training "
+                "plan. Training adaptation is non-linear (early gains "
+                "then plateau), and the model ignores recovery, "
+                "injuries, weather, life. A wide CI means the trend "
+                "is volatile; treat the date as a directional hint, "
+                "not a commitment. No peer-reviewed model exists for "
+                "\"when will a runner first reach X km\" — Garmin and "
+                "TrainingPeaks deliberately don't make this prediction."
+            ),
+        ))
+        projection_layout.addWidget(self.milestone_ci_label)
         projection_group.setLayout(projection_layout)
         layout.addWidget(projection_group)
 
@@ -520,15 +546,51 @@ class SummaryPanel(QWidget):
         if marathon_estimate and marathon_estimate.get('reachable'):
             if marathon_estimate.get('reached'):
                 self.milestone_label.setText(self.tr("Milestone Reached!"))
+                self.milestone_ci_label.setText("")
             else:
                 est_date = marathon_estimate.get('estimated_date')
                 if est_date:
                     date_obj = datetime.fromisoformat(est_date)
-                    self.milestone_label.setText(self.tr("Estimated: {}").format(date_obj.strftime('%Y-%m-%d')))
+                    self.milestone_label.setText(
+                        self.tr("Estimated: {}").format(date_obj.strftime('%Y-%m-%d'))
+                    )
+                    # Confidence interval — shown only when bootstrap
+                    # produced one. T42 Slice 2.
+                    lower = marathon_estimate.get('lower_date')
+                    upper = marathon_estimate.get('upper_date')
+                    if lower and upper:
+                        ci_weeks = marathon_estimate.get('ci_width_weeks', 0)
+                        if ci_weeks > 16:
+                            # > 4 months of CI width = trend too volatile
+                            # to be useful; tell the user honestly.
+                            self.milestone_ci_label.setText(self.tr(
+                                "Low confidence — trend is volatile (±{:.0f} weeks)"
+                            ).format(ci_weeks / 2))
+                        else:
+                            self.milestone_ci_label.setText(self.tr(
+                                "95% CI: ±{:.0f} weeks ({} – {})"
+                            ).format(
+                                ci_weeks / 2,
+                                datetime.fromisoformat(lower).strftime('%Y-%m-%d'),
+                                datetime.fromisoformat(upper).strftime('%Y-%m-%d'),
+                            ))
+                    elif marathon_estimate.get('ci_unstable'):
+                        self.milestone_ci_label.setText(self.tr(
+                            "CI unstable — too few PR-setting long runs"
+                        ))
+                    else:
+                        self.milestone_ci_label.setText("")
                 else:
                     self.milestone_label.setText(self.tr("Calculating..."))
+                    self.milestone_ci_label.setText("")
+        elif marathon_estimate and marathon_estimate.get('message'):
+            # Honest plateau / flat-trend / past-due message from the
+            # T42 forecaster — surface it instead of "Keep training!".
+            self.milestone_label.setText(self.tr("Trend stable"))
+            self.milestone_ci_label.setText(marathon_estimate['message'])
         else:
             self.milestone_label.setText(self.tr("Keep training!"))
+            self.milestone_ci_label.setText("")
 
         # Race predictions
         race_predictions = data.get('race_predictions')

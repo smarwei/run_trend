@@ -2190,6 +2190,22 @@ Caveat: Gabbett's Sweet-Spot-Bänder (2016) sind empirisch verbreitet, aber wiss
       <translation type="finished">Weiter trainieren!</translation>
     </message>
     <message>
+      <source>Trend stable</source>
+      <translation type="finished">Trend stabil</translation>
+    </message>
+    <message>
+      <source>Low confidence — trend is volatile (±{:.0f} weeks)</source>
+      <translation type="finished">Niedriges Vertrauen — Trend volatil (±{:.0f} Wochen)</translation>
+    </message>
+    <message>
+      <source>95% CI: ±{:.0f} weeks ({} – {})</source>
+      <translation type="finished">95%-KI: ±{:.0f} Wochen ({} – {})</translation>
+    </message>
+    <message>
+      <source>CI unstable — too few PR-setting long runs</source>
+      <translation type="finished">KI instabil — zu wenige PR-setzende Long-Runs</translation>
+    </message>
+    <message>
       <location filename="../ui/summary_panel.py" line="220" />
       <source>5K: {} ({}:{:02d}/km)</source>
       <translation type="finished">5K: {} ({}:{:02d}/km)</translation>

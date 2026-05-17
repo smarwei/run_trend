@@ -190,5 +190,70 @@ class TestPlateauHandling(unittest.TestCase):
             self.assertNotIn('estimated_date', result)
 
 
+class TestBootstrapCI(unittest.TestCase):
+    """T42 Slice 2: bootstrap CI around the milestone date."""
+
+    def _ramp_trend(self):
+        # 8 PR-setting long runs growing 8 → 22 km over 16 weeks.
+        anchor = datetime(2026, 1, 5)
+        acts = []
+        for i, km in enumerate([8, 10, 12, 14, 16, 18, 20, 22]):
+            acts.append(_activity(anchor + timedelta(weeks=i * 2), float(km)))
+        return Forecaster.project_long_run_trend(
+            acts, now=anchor + timedelta(weeks=16),
+        ), anchor + timedelta(weeks=16)
+
+    def test_returns_lower_and_upper_dates(self):
+        trend, now = self._ramp_trend()
+        self.assertIsNotNone(trend)
+        result = Forecaster.predict_milestone_date_ci(
+            trend, 30.0, now=now, rng_seed=42,
+        )
+        self.assertTrue(result['reachable'])
+        self.assertFalse(result['reached'])
+        self.assertIn('lower_date', result)
+        self.assertIn('upper_date', result)
+        self.assertIn('ci_width_weeks', result)
+        # CI must enclose the point estimate.
+        point = datetime.fromisoformat(result['estimated_date'])
+        lower = datetime.fromisoformat(result['lower_date'])
+        upper = datetime.fromisoformat(result['upper_date'])
+        self.assertLessEqual(lower, point)
+        self.assertLessEqual(point, upper)
+
+    def test_already_reached_skips_ci(self):
+        # 8-week ramp peaks at 22 km. Asking for 15 km → already done.
+        trend, now = self._ramp_trend()
+        result = Forecaster.predict_milestone_date_ci(
+            trend, 15.0, now=now, rng_seed=42,
+        )
+        self.assertTrue(result['reached'])
+        self.assertNotIn('lower_date', result)
+
+    def test_flat_trend_no_ci(self):
+        # All long runs at 12 km — flat. Bootstrap should not produce
+        # a date or a CI.
+        anchor = datetime(2026, 1, 5)
+        acts = [_activity(anchor + timedelta(weeks=i), 12.0) for i in range(12)]
+        trend = Forecaster.project_long_run_trend(
+            acts, now=anchor + timedelta(weeks=12),
+        )
+        result = Forecaster.predict_milestone_date_ci(
+            trend, 21.1, now=anchor + timedelta(weeks=12), rng_seed=42,
+        )
+        self.assertFalse(result['reachable'])
+        self.assertNotIn('lower_date', result)
+
+    def test_reproducible_with_seed(self):
+        trend, now = self._ramp_trend()
+        a = Forecaster.predict_milestone_date_ci(
+            trend, 30.0, now=now, rng_seed=12345,
+        )
+        b = Forecaster.predict_milestone_date_ci(
+            trend, 30.0, now=now, rng_seed=12345,
+        )
+        self.assertEqual(a, b)
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -2190,6 +2190,22 @@ Caveat: Gabbett's Sweet-Spot bands (2016) are empirically widespread but scienti
       <translation type="finished">Keep training!</translation>
     </message>
     <message>
+      <source>Trend stable</source>
+      <translation type="finished">Trend stable</translation>
+    </message>
+    <message>
+      <source>Low confidence — trend is volatile (±{:.0f} weeks)</source>
+      <translation type="finished">Low confidence — trend is volatile (±{:.0f} weeks)</translation>
+    </message>
+    <message>
+      <source>95% CI: ±{:.0f} weeks ({} – {})</source>
+      <translation type="finished">95% CI: ±{:.0f} weeks ({} – {})</translation>
+    </message>
+    <message>
+      <source>CI unstable — too few PR-setting long runs</source>
+      <translation type="finished">CI unstable — too few PR-setting long runs</translation>
+    </message>
+    <message>
       <location filename="../ui/summary_panel.py" line="220" />
       <source>5K: {} ({}:{:02d}/km)</source>
       <translation type="finished">5K: {} ({}:{:02d}/km)</translation>

@@ -10,6 +10,7 @@ from typing import List, Dict, Any, Optional
 
 from .base_chart import BaseChart
 from ..projection.forecaster import Forecaster
+from ..ui.help_label import make_help_icon
 
 
 class ProjectionChart(BaseChart):
@@ -138,6 +139,31 @@ class ProjectionChart(BaseChart):
         self.mode_combo.addItems([self.tr("Volume (Total Distance)"), self.tr("Long Run")])
         self.mode_combo.currentIndexChanged.connect(self._on_mode_changed)
         mode_layout.addWidget(self.mode_combo)
+
+        # T42 caveat — the projection is a robust trend extrapolation,
+        # NOT a training plan. The help-icon next to the mode selector
+        # is the most discoverable place to surface this without
+        # putting visual weight on the chart itself.
+        mode_layout.addWidget(make_help_icon(self.tr(
+            "Projection / Long-Run forecast — caveat read first.\n\n"
+            "The dashed line and milestone markers are a robust trend "
+            "extrapolation (Theil-Sen on your PR-setting long runs of "
+            "the last 12 weeks; T42), NOT a training plan.\n\n"
+            "Training adaptation is non-linear: early gains, then "
+            "plateaus that linear extrapolation can't see. The model "
+            "ignores recovery, injuries, weather, life context.\n\n"
+            "No peer-reviewed model exists for \"when will a runner "
+            "first reach X km\" — Garmin and TrainingPeaks both "
+            "deliberately don't make this prediction; race-time "
+            "predictions from current fitness (VDOT / McMillan) are "
+            "the closest analogue and are about *current state*, not "
+            "future capability.\n\n"
+            "Read the date as a directional hint. The summary panel's "
+            "Marathon Milestone box shows the same value with a 95 % "
+            "bootstrap confidence interval — use that to gauge how "
+            "much the trend would shift if any single PR had been "
+            "different."
+        )))
 
         mode_layout.addSpacing(20)
         mode_layout.addWidget(QLabel(self.tr("Periods Ahead:")))

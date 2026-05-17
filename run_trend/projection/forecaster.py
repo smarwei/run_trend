@@ -402,6 +402,7 @@ class Forecaster:
             'max_long_run_km': max_km,
             'long_runs_used': len(long_runs),
             'pr_runs_used': len(pr_runs),
+            'pr_runs': pr_runs,  # needed by bootstrap CI (Slice 2)
             'threshold_km': threshold,
         }
 
@@ -473,3 +474,90 @@ class Forecaster:
             'milestone_km': milestone_km,
             'days_until': max(0, int((target_date - now).total_seconds() / 86400.0)),
         }
+
+    @staticmethod
+    def predict_milestone_date_ci(
+        trend: Dict[str, Any],
+        milestone_km: float,
+        *,
+        n_bootstrap: int = 500,
+        ci_lower_pct: float = 2.5,
+        ci_upper_pct: float = 97.5,
+        flat_slope_threshold: float = 1e-4,
+        now: Optional[datetime] = None,
+        rng_seed: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        """Bootstrap a confidence interval around the milestone date.
+
+        Resamples the PR-setting long-runs with replacement, refits
+        Theil-Sen on each resample, and predicts a milestone date.
+        Returns the same shape as ``predict_milestone_date`` plus, on
+        success:
+
+            'lower_date'       : iso string at ``ci_lower_pct``
+            'upper_date'       : iso string at ``ci_upper_pct``
+            'ci_width_weeks'   : convenience, upper − lower in weeks
+
+        When the CI can't be computed reliably (too few PR runs, too
+        many degenerate resamples, or the base prediction itself isn't
+        reachable), falls back to the point estimate from
+        ``predict_milestone_date``.
+        """
+        import random
+
+        base = Forecaster.predict_milestone_date(
+            trend, milestone_km,
+            flat_slope_threshold=flat_slope_threshold,
+            now=now,
+        )
+        if not base.get('reachable') or base.get('reached'):
+            return base
+
+        pr_runs = trend.get('pr_runs') or []
+        if len(pr_runs) < 3:
+            return base  # not enough samples for CI
+
+        first_dt: datetime = trend['first_long_run_date']
+        now = now or datetime.now()
+        rng = random.Random(rng_seed)
+
+        target_offsets: List[float] = []
+        n = len(pr_runs)
+        for _ in range(n_bootstrap):
+            sample = [pr_runs[rng.randrange(n)] for _ in range(n)]
+            xs = np.array([(dt - first_dt).total_seconds() / 86400.0
+                           for dt, _ in sample])
+            ys = np.array([km for _, km in sample])
+            # Skip resamples that collapsed to a single x value
+            # (Theil-Sen needs at least one pair with distinct xs to
+            # produce a non-degenerate slope).
+            if len(np.unique(xs)) < 2:
+                continue
+            slope, intercept = Forecaster._theil_sen(xs, ys)
+            if slope <= flat_slope_threshold:
+                continue
+            x_target = (milestone_km - intercept) / slope
+            target_dt = first_dt + timedelta(days=x_target)
+            if target_dt <= now:
+                continue
+            target_offsets.append(
+                (target_dt - first_dt).total_seconds() / 86400.0
+            )
+
+        # Half of resamples is the lower bound for trustable CI; below
+        # that the trend is too volatile to bracket meaningfully and
+        # we surface the point estimate alone.
+        if len(target_offsets) < n_bootstrap * 0.5:
+            base['ci_unstable'] = True
+            return base
+
+        lower_days = float(np.percentile(target_offsets, ci_lower_pct))
+        upper_days = float(np.percentile(target_offsets, ci_upper_pct))
+        lower_date = first_dt + timedelta(days=lower_days)
+        upper_date = first_dt + timedelta(days=upper_days)
+
+        result = dict(base)
+        result['lower_date'] = lower_date.isoformat()
+        result['upper_date'] = upper_date.isoformat()
+        result['ci_width_weeks'] = (upper_date - lower_date).total_seconds() / (86400.0 * 7)
+        return result

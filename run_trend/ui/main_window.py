@@ -1006,8 +1006,14 @@ class MainWindow(QMainWindow):
         # surfaces consistent.
         self._long_run_trend = long_run_trend
         if long_run_trend is not None:
-            marathon_estimate = Forecaster.predict_milestone_date(
-                long_run_trend, 32.0,
+            # Bootstrap CI so the summary panel can show "± N weeks"
+            # next to the date. Seed is fixed so the displayed band
+            # is stable across refreshes for the same data set
+            # (the trend itself changes when activities change, but
+            # within one data state two refreshes shouldn't show
+            # different CI numbers).
+            marathon_estimate = Forecaster.predict_milestone_date_ci(
+                long_run_trend, 32.0, rng_seed=42,
             )
         else:
             marathon_estimate = None

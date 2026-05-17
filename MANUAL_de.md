@@ -2358,6 +2358,7 @@ als Diagnose-Tool.
 | **Tanaka HRmax** (`208 − 0.7 × Alter`) | Tanaka 2001 (Meta-Analyse n=18.712) | publiziert | Genauer als `220 − Alter` ab Alter ~40, gender-unabhängig |
 | **Banister TRIMP** | Banister 1991 | publiziert, gold-standard | Edwards' Zone-TRIMP wäre einfachere Alternative ohne HR-Reserve-Anforderung |
 | **HR-Zonen (Performance-Tab)** | klassisch 5-Zonen-Modell oder Karvonen | etabliert | Klassisches Modell ignoriert HR-Reserve, Karvonen-Variante korrigiert das (braucht HR-Rest) |
+| **Marathon-Milestone-Datum + Prognose-Tab-Linie** | RunTrend-eigener Theil-Sen-Trend auf PR-setzenden Long-Runs (T42) | selbst zusammen­gestellt, robuste Regression auf echten Daten | Es existiert kein peer-reviewed Modell für „wann erreicht ein Läufer erstmals X km" — Garmin und TrainingPeaks machen diese Vorhersage bewusst nicht. Trainings­adaption ist non-linear (frühe Gewinne, dann Plateau), die lineare Extrapolation kann das nicht sehen. Ignoriert Erholung, Verletzungs-Historie, Wetter, Lebenskontext. Breites Bootstrap-CI = volatiler Trend = Datum als Richtungs-Hinweis lesen, nicht als Versprechen. |
 
 ### Was „Indikator vs. Diagnose" bedeutet
 
