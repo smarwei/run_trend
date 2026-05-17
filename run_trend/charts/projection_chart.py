@@ -274,7 +274,22 @@ class ProjectionChart(BaseChart):
             projection_series.setPen(pen)
             self.chart.addSeries(projection_series)
 
+            # Skip milestones the runner has already achieved. Use ALL
+            # aggregates (including the in-progress current period) so a
+            # PR set today still suppresses the "you'll reach NN km"
+            # marker even though the current period isn't yet in the
+            # complete-only history line. Without this guard, a user
+            # whose past complete weeks max out at e.g. 13 km but who
+            # just ran 17 km today sees a misleading "15K Run" target
+            # hovering on the projection.
+            historical_max = max(
+                (agg.get(metric_key, 0.0) for agg in aggregates),
+                default=0.0,
+            )
+
             for milestone_name, milestone_value in milestones.items():
+                if milestone_value <= historical_max:
+                    continue
                 for proj_point in projection['projected_periods']:
                     if proj_point['period_offset'] <= gap_periods:
                         continue
