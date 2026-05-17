@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QSpin
 from PySide6.QtCharts import QChart, QChartView, QLineSeries, QScatterSeries, QValueAxis
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPainter, QPen, QColor
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from .base_chart import BaseChart
 from ..projection.forecaster import Forecaster
@@ -164,18 +164,43 @@ class ProjectionChart(BaseChart):
         if self.settings_callback:
             self.settings_callback('ui_projection_mode', self.mode_combo.currentText())
         if hasattr(self, '_last_aggregates'):
-            self.update_chart(self._last_aggregates, self._last_period_type)
+            self.update_chart(
+                self._last_aggregates,
+                self._last_period_type,
+                long_run_trend=getattr(self, '_last_long_run_trend', None),
+            )
 
     def _on_periods_changed(self, value):
         self.periods_ahead = value
         if self.settings_callback:
             self.settings_callback('ui_projection_periods', value)
         if hasattr(self, '_last_aggregates'):
-            self.update_chart(self._last_aggregates, self._last_period_type)
+            self.update_chart(
+                self._last_aggregates,
+                self._last_period_type,
+                long_run_trend=getattr(self, '_last_long_run_trend', None),
+            )
 
-    def update_chart(self, aggregates: List[Dict[str, Any]], period_type: str = 'week'):
+    def update_chart(
+        self,
+        aggregates: List[Dict[str, Any]],
+        period_type: str = 'week',
+        *,
+        long_run_trend: Optional[Dict[str, Any]] = None,
+    ):
+        """Render the projection chart.
+
+        ``long_run_trend``: the precomputed Theil-Sen trend dict from
+        ``Forecaster.project_long_run_trend`` (T42). When provided AND
+        the chart is in long_run mode, the projection line + milestone
+        markers are derived from the day-axis trend, giving identical
+        results for the same data regardless of period_type. When None
+        or in volume mode, the chart falls back to the legacy
+        period-aggregate path (Forecaster.project_trend).
+        """
         self._last_aggregates  = aggregates
         self._last_period_type = period_type
+        self._last_long_run_trend = long_run_trend
 
         if period_type == 'week':
             self.periods_spinbox.setMaximum(104)
@@ -232,11 +257,47 @@ class ProjectionChart(BaseChart):
                              + (anchor_date.month - period_dates[-1].month))
 
         total_periods_needed = gap_periods + self.periods_ahead
-        projection = Forecaster.project_trend(
-            aggregates, metric_key,
-            periods_ahead=total_periods_needed,
-            use_recent_periods=min(12, len(aggregates)),
+
+        use_day_axis = (
+            self.projection_mode == 'long_run' and long_run_trend is not None
         )
+
+        if use_day_axis:
+            # T42 day-axis path: Theil-Sen trend gives a slope in
+            # km/day that's independent of how aggregates were
+            # bucketed. We sample it at the future period dates the
+            # chart would otherwise iterate from project_trend output,
+            # so the downstream goals/milestones loops work
+            # uniformly.
+            projected_periods = []
+            for offset in range(1, total_periods_needed + 1):
+                if period_type == 'week':
+                    future_date = period_dates[-1] + timedelta(weeks=offset)
+                else:
+                    future_date = period_dates[-1] + timedelta(days=30 * offset)
+                projected_periods.append({
+                    'period_offset': offset,
+                    'projected_value': max(
+                        0.0,
+                        Forecaster.predict_value_on_date(long_run_trend, future_date),
+                    ),
+                })
+            projection = {
+                'has_projection': True,
+                'slope': long_run_trend['slope_km_per_day']
+                         * (7 if period_type == 'week' else 30),
+                'intercept': long_run_trend['intercept_km'],
+                'projected_periods': projected_periods,
+                'trend': 'increasing'
+                          if long_run_trend['slope_km_per_day'] > 1e-4
+                          else 'stable',
+            }
+        else:
+            projection = Forecaster.project_trend(
+                aggregates, metric_key,
+                periods_ahead=total_periods_needed,
+                use_recent_periods=min(12, len(aggregates)),
+            )
 
         if projection.get('has_projection'):
             projection_series = QLineSeries()
@@ -274,14 +335,11 @@ class ProjectionChart(BaseChart):
             projection_series.setPen(pen)
             self.chart.addSeries(projection_series)
 
-            # Skip milestones the runner has already achieved. Use ALL
-            # aggregates (including the in-progress current period) so a
-            # PR set today still suppresses the "you'll reach NN km"
-            # marker even though the current period isn't yet in the
-            # complete-only history line. Without this guard, a user
-            # whose past complete weeks max out at e.g. 13 km but who
-            # just ran 17 km today sees a misleading "15K Run" target
-            # hovering on the projection.
+            # Milestone markers. In day-axis mode, prefer the trend's
+            # own date prediction (single source of truth for "when
+            # does this trend hit X km") and skip if the user has
+            # already achieved the milestone. In legacy mode, keep
+            # the within-±2-of-projected-value heuristic.
             historical_max = max(
                 (agg.get(metric_key, 0.0) for agg in aggregates),
                 default=0.0,
@@ -290,22 +348,41 @@ class ProjectionChart(BaseChart):
             for milestone_name, milestone_value in milestones.items():
                 if milestone_value <= historical_max:
                     continue
-                for proj_point in projection['projected_periods']:
-                    if proj_point['period_offset'] <= gap_periods:
-                        continue
-                    if abs(proj_point['projected_value'] - milestone_value) < 2.0:
-                        ms = QScatterSeries()
-                        ms.setName(self._tr_milestone(milestone_name))
-                        ms.setMarkerSize(12)
-                        ms.setColor(QColor("#f39c12"))
-                        periods_from_anchor = proj_point['period_offset'] - gap_periods
+                target_date = None
+                if use_day_axis:
+                    prediction = Forecaster.predict_milestone_date(
+                        long_run_trend, milestone_value, now=now,
+                    )
+                    if prediction.get('reachable') and not prediction.get('reached'):
+                        target_date = datetime.fromisoformat(prediction['estimated_date'])
+                        # Cap at the chart's future window.
                         if period_type == 'week':
-                            future_date = anchor_date + timedelta(weeks=periods_from_anchor)
+                            window_end = anchor_date + timedelta(weeks=self.periods_ahead)
                         else:
-                            future_date = anchor_date + timedelta(days=30 * periods_from_anchor)
-                        ms.append(int(future_date.timestamp() * 1000), milestone_value)
-                        self.chart.addSeries(ms)
-                        break
+                            window_end = anchor_date + timedelta(days=30 * self.periods_ahead)
+                        if target_date > window_end:
+                            target_date = None
+                else:
+                    for proj_point in projection['projected_periods']:
+                        if proj_point['period_offset'] <= gap_periods:
+                            continue
+                        if abs(proj_point['projected_value'] - milestone_value) < 2.0:
+                            periods_from_anchor = proj_point['period_offset'] - gap_periods
+                            if period_type == 'week':
+                                target_date = anchor_date + timedelta(weeks=periods_from_anchor)
+                            else:
+                                target_date = anchor_date + timedelta(days=30 * periods_from_anchor)
+                            break
+
+                if target_date is None:
+                    continue
+
+                ms = QScatterSeries()
+                ms.setName(self._tr_milestone(milestone_name))
+                ms.setMarkerSize(12)
+                ms.setColor(QColor("#f39c12"))
+                ms.append(int(target_date.timestamp() * 1000), milestone_value)
+                self.chart.addSeries(ms)
 
         goal_targets = self._render_goals(
             now=now,

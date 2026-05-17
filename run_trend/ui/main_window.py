@@ -991,13 +991,26 @@ class MainWindow(QMainWindow):
         max_hr_values = [a.get('max_heartrate', 0) for a in self.aggregates if a.get('max_heartrate', 0) > 0]
         lifetime_max_hr = max(max_hr_values) if max_hr_values else 0
 
-        # Get milestone estimate (Long Run based, not volume based)
-        milestone_estimates = Forecaster.get_milestone_estimates(
-            self.aggregates,
-            self.current_period,
-            metric_key='longest_run_km'  # Use Long Run progression, not volume
-        )
-        marathon_estimate = milestone_estimates.get('Marathon Ready')
+        # Marathon-milestone estimate via the T42 period-agnostic
+        # Theil-Sen trend over recent long runs. The legacy path
+        # (Forecaster.get_milestone_estimates → estimate_milestone_date →
+        # project_trend on period-aggregated maxes) produced a date
+        # that depended on whether the user was viewing the chart in
+        # week-mode or month-mode, with multi-month gaps between the
+        # two answers. The new path operates on raw activities with a
+        # day-axis, so there's one milestone date regardless of UI
+        # aggregation. See tickets/42-projection-period-agnostic.md.
+        long_run_trend = Forecaster.project_long_run_trend(self.activities)
+        # Stash for _update_charts so the ProjectionChart reuses the
+        # same trend as the marathon-milestone box — keeps both UI
+        # surfaces consistent.
+        self._long_run_trend = long_run_trend
+        if long_run_trend is not None:
+            marathon_estimate = Forecaster.predict_milestone_date(
+                long_run_trend, 32.0,
+            )
+        else:
+            marathon_estimate = None
 
         # Get manual HRmax from settings (if configured)
         manual_hrmax = self.settings.get('manual_hrmax', 0)
@@ -1204,7 +1217,11 @@ class MainWindow(QMainWindow):
             smoothing=smoothing_strength,
         )
         self.projection_chart.set_goals(self.db.get_goals(include_achieved=False))
-        self.projection_chart.update_chart(self.aggregates, self.current_period)
+        self.projection_chart.update_chart(
+            self.aggregates,
+            self.current_period,
+            long_run_trend=getattr(self, '_long_run_trend', None),
+        )
         self.runs_table.update_table(self.activities)
         self.pace_distance_chart.update_chart(self.activities)
         self._update_hr_zone_chart()
